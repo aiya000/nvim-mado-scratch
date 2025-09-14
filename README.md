@@ -2,17 +2,9 @@
 
 :rocket: **No more hassle with file paths!** The fastest way to open an instant scratch buffer.
 
-For Vim/Neovim.
+For both :star:Vim:star: and :star:Neovim:star:.
 
-- - -
-
-![](./readme/logo.jpg)
-
-- - -
-
-This Vim plugin is created by **Cline (Roo Code)** and me!
-
-- - -
+![](./readme/main.gif)
 
 ## Table of Contents
 
@@ -24,6 +16,40 @@ This Vim plugin is created by **Cline (Roo Code)** and me!
     - [:gear: Detailed Usage](#gear-detailed-usage)
   - [:keyboard: Default Keymappings](#keyboard-default-keymappings)
   - [:sparkles: scratch.vim Compatibility](#sparkles-scratchvim-compatibility)
+
+- - - - -
+
+## :star: Features
+
+- Open temporary buffer by **only a keymap** or a command
+- Auto close when you leave the opened buffer
+- Auto save when you leave from insert mode in the opened buffer (for file buffers)
+
+![](./readme/main.gif)
+
+- - -
+
+- Open temporary buffer with specified filetype
+
+![](./readme/filetypes.gif)
+
+- - -
+
+- Open multiple buffers with sequential numbering
+    - Meaning you can:
+        - Write multiple memos with different topics
+        - Create a new buffer when needed without deleting the previous one
+        - Collect your knowledges
+
+![](./readme/sequencial.gif)
+
+Allright, you can clean them up when you want.
+
+![](./readme/clean.gif)
+
+- - -
+
+And more features...
 
 ## :wrench: Quick Start
 
