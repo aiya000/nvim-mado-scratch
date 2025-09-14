@@ -72,7 +72,10 @@ INTERFACE				*scratch-buffer-interface*
 VARIABLES						*scratch-buffer-variables*
 
 *g:scratch_buffer_file_pattern*
-	Type: `{ when_tmp_buffer?: string, when_file_buffer?: string }`
+	Type (Vim): `{ when_tmp_buffer?: string, when_file_buffer?: string }`
+
+	(The type is different if you are using Neovim.
+	 Please see below 'NOTICE for Neovim:' section.)
 
 	A dictionary specifying file patterns for different buffer types.
 	Has two keys:
@@ -119,6 +122,12 @@ VARIABLES						*scratch-buffer-variables*
 <
 	The latter buffer type will overwrite the former as well if the order
 	is reversed.
+
+	NOTICE for Neovim:
+	You must set this properties exactly if you are using Neovim.
+	Meaning:
+	- Type (Neovim): `{ when_tmp_buffer: string, when_file_buffer: string }`
+	This is a limitation of Neovim's Vim script compatibility.
 
 *g:scratch_buffer_default_file_ext*
 	Type: `string`
