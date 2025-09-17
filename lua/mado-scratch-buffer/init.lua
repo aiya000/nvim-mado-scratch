@@ -1,6 +1,15 @@
 local M = {}
 
--- Default configuration
+---@class mado_scratch_buffer.Options
+---@field file_pattern? {when_tmp_buffer?: string, when_file_buffer?: string}
+---@field default_file_ext? string
+---@field default_open_method? 'vsp' | 'sp' | 'tabnew' -- TODO: Add 'float' support. See Issue #1
+---@field default_buffer_size? number
+---@field auto_save_file_buffer? boolean
+---@field use_default_keymappings? boolean
+---@field auto_hide_buffer? {when_tmp_buffer?: boolean, when_file_buffer?: boolean}
+
+---@type mado_scratch_buffer.Options
 local default_config = {
   file_pattern = {
     when_tmp_buffer = '/tmp/mado-scratch-tmp-%d',
@@ -8,7 +17,7 @@ local default_config = {
   },
   default_file_ext = 'md',
   default_open_method = 'sp',
-  default_buffer_size = 15,
+  default_buffer_size = 30,
   auto_save_file_buffer = true,
   use_default_keymappings = false,
   auto_hide_buffer = {
@@ -17,13 +26,12 @@ local default_config = {
   },
 }
 
--- Plugin configuration
 M.config = {}
 
---- Deep merge two tables
---- @param target table Target table to merge into
---- @param source table Source table to merge from
---- @return table merged Merged table
+---Deep merge two tables
+---@param target table Target table to merge into
+---@param source table Source table to merge from
+---@return table merged Merged table
 local function deep_merge(target, source)
   local result = vim.deepcopy(target)
   for k, v in pairs(source) do
@@ -37,7 +45,7 @@ local function deep_merge(target, source)
 end
 
 
---- Setup keymappings
+---Setup keymappings
 local function setup_keymappings()
   if not M.config.use_default_keymappings then
     return
@@ -54,23 +62,17 @@ local function setup_keymappings()
   vim.keymap.set('n', '<leader><leader>B', ':<C-u>MadoScratchBufferOpenFile ', { noremap = true })
 end
 
---- Setup the plugin
---- @param user_config table|nil User configuration
+---Setup the plugin
+---@param user_config? mado_scratch_buffer.Options
 function M.setup(user_config)
-  user_config = user_config or {}
-
-  -- Merge with default config
-  M.config = deep_merge(default_config, user_config)
+  M.config = deep_merge(default_config, user_config or {})
 
   -- Setup keymappings if enabled
   setup_keymappings()
-
-  -- Mark as loaded
-  vim.g.loaded_mado_scratch_buffer = true
 end
 
---- Get current configuration
---- @return table config Current configuration
+---Returns your current configuration
+---@return mado_scratch_buffer.Options
 function M.get_config()
   return M.config
 end

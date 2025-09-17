@@ -1,17 +1,5 @@
--- Plugin guard
-if vim.g.loaded_mado_scratch_buffer then
-  return
-end
+local buffer = require('mado-scratch-buffer.buffer')
 
--- Ensure we have Neovim
-if vim.fn.has('nvim-0.8') == 0 then
-  vim.api.nvim_err_writeln('mado-scratch-buffer.nvim requires Neovim 0.8+')
-  return
-end
-
-local buffer = require('scratch-buffer.buffer')
-
--- Define commands
 vim.api.nvim_create_user_command('MadoScratchBufferOpen', function(opts)
   buffer.open(false, unpack(opts.fargs))
 end, {
@@ -47,9 +35,6 @@ end, {
 })
 
 -- Auto-setup with default configuration if not already configured
-if not require('scratch-buffer').config or vim.tbl_isempty(require('scratch-buffer').config) then
-  require('scratch-buffer').setup()
+if not require('mado-scratch-buffer').config or vim.tbl_isempty(require('mado-scratch-buffer').config) then
+  require('mado-scratch-buffer').setup()
 end
-
--- Mark as loaded
-vim.g.loaded_mado_scratch_buffer = true
