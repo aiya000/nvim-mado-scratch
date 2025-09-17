@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "Lua.runtime.version": "LuaJIT",
+  "Lua.diagnostics.globals": [
+    "vim"
+  ],
+  "Lua.workspace.userThirdParty": [
+    "${workspaceFolder}/types"
+  ],
+  "Lua.workspace.library": [
+    "${workspaceFolder}/types",
+    "${3rd}/luv/library",
+    "/home/linuxbrew/.linuxbrew/share/nvim/runtime"
+  ],
+  "Lua.workspace.checkThirdParty": false,
+  "Lua.completion.callSnippet": "Replace"
+}
