@@ -26,12 +26,13 @@ local default_config = {
   },
 }
 
+---@type mado_scratch_buffer.Options
 M.config = {}
 
----Deep merge two tables
----@param target table Target table to merge into
----@param source table Source table to merge from
----@return table merged Merged table
+---Merges two tables deeply
+---@param target mado_scratch_buffer.Options --The target table to merge into
+---@param source mado_scratch_buffer.Options --The source table to merge from
+---@return mado_scratch_buffer.Options -- Merged table
 local function deep_merge(target, source)
   local result = vim.deepcopy(target)
   for k, v in pairs(source) do
@@ -44,31 +45,22 @@ local function deep_merge(target, source)
   return result
 end
 
-
----Setup keymappings
+---Setups default keymappings
 local function setup_keymappings()
-  if not M.config.use_default_keymappings then
-    return
-  end
-
-  local opts = { silent = true, noremap = true }
-
-  -- Quick open commands (execute immediately)
-  vim.keymap.set('n', '<leader>b', '<Cmd>MadoScratchBufferOpen<CR>', opts)
-  vim.keymap.set('n', '<leader>B', '<Cmd>MadoScratchBufferOpenFile<CR>', opts)
-
-  -- Interactive commands (allows adding arguments)
-  vim.keymap.set('n', '<leader><leader>b', ':<C-u>MadoScratchBufferOpen ', { noremap = true })
-  vim.keymap.set('n', '<leader><leader>B', ':<C-u>MadoScratchBufferOpenFile ', { noremap = true })
+  vim.keymap.set('n', '<leader>b', '<Cmd>MadoScratchBufferOpen<CR>', { silent = true, noremap = true })
+  vim.keymap.set('n', '<leader>B', '<Cmd>MadoScratchBufferOpenFile<CR>', { silent = true, noremap = true })
+  vim.keymap.set('n', '<leader><leader>b', ':<C-u>MadoScratchBufferOpen<Space>', { noremap = true })
+  vim.keymap.set('n', '<leader><leader>B', ':<C-u>MadoScratchBufferOpenFile<Space>', { noremap = true })
 end
 
----Setup the plugin
+---Setups the plugin
 ---@param user_config? mado_scratch_buffer.Options
 function M.setup(user_config)
   M.config = deep_merge(default_config, user_config or {})
 
-  -- Setup keymappings if enabled
-  setup_keymappings()
+  if M.config.use_default_keymappings then
+    setup_keymappings()
+  end
 end
 
 ---Returns your current configuration
