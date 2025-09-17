@@ -1,23 +1,23 @@
-*mado-scratch-buffer.nvim*	The fastest way to open scratch buffers for Neovim
+*mado-scratch-buffer.nvim*    The fastest way to open scratch buffers for Neovim
 
 Author: aiya000
 License: MIT license
 
 ==============================================================================
-CONTENTS					*mado-scratch-buffer-contents*
+CONTENTS                *mado-scratch-buffer-contents*
 
-INTRODUCTION			|mado-scratch-buffer-introduction|
-SETUP				|mado-scratch-buffer-setup|
-USAGE				|mado-scratch-buffer-usage|
-INTERFACE			|mado-scratch-buffer-interface|
-  CONFIGURATION			|mado-scratch-buffer-configuration|
-  COMMANDS			|mado-scratch-buffer-commands|
-  FUNCTIONS			|mado-scratch-buffer-functions|
-CHANGELOG			|mado-scratch-buffer-changelog|
+INTRODUCTION            |mado-scratch-buffer-introduction|
+SETUP                   |mado-scratch-buffer-setup|
+USAGE                   |mado-scratch-buffer-usage|
+INTERFACE               |mado-scratch-buffer-interface|
+  CONFIGURATION         |mado-scratch-buffer-configuration|
+  COMMANDS              |mado-scratch-buffer-commands|
+  FUNCTIONS             |mado-scratch-buffer-functions|
+CHANGELOG               |mado-scratch-buffer-changelog|
 
 
 ==============================================================================
-INTRODUCTION						*mado-scratch-buffer-introduction*
+INTRODUCTION            *mado-scratch-buffer-introduction*
 
 ** No more hassle with file paths! **
 The fastest way to open an instant scratch buffer for Neovim.
@@ -29,14 +29,14 @@ Supercharge with vim-quickrun!
 Combine it with vim-quickrun (https://github.com/thinca/vim-quickrun) to
 execute code instantly!
 >
-	" Open a TypeScript buffer
-	:MadoScratchBufferOpen ts
+  " Open a TypeScript buffer
+  :MadoScratchBufferOpen ts
 
-	" Write TypeScript code
-	" ...
+  " Write TypeScript code
+  " ...
 
-	" ...and run it immediately!
-	:QuickRun
+  " ...and run it immediately!
+  :QuickRun
 <
 Please see the |mado-scratch-buffer-usage| section for usage details.
 
@@ -45,59 +45,67 @@ https://github.com/aiya000/mado-scratch-buffer.nvim
 
 
 ==============================================================================
-SETUP						*mado-scratch-buffer-setup*
+SETUP                   *mado-scratch-buffer-setup*
 
 Install the plugin using your favorite plugin manager:
 
-Using lazy.nvim: >
-	{
-	  'aiya000/mado-scratch-buffer.nvim',
-	  config = function()
-	    require('scratch-buffer').setup({
-	      -- Optional configuration (see |mado-scratch-buffer-configuration|)
-	    })
-	  end,
-	}
+Using lazy.nvim: >lua
+  {
+    'aiya000/mado-scratch-buffer.nvim',
+    config = function()
+      require('mado-scratch-buffer').setup({
+        -- your configuration here
+      })
+    end
+  }
 <
 
-Using packer.nvim: >
-	use {
-	  'aiya000/mado-scratch-buffer.nvim',
-	  config = function()
-	    require('scratch-buffer').setup()
-	  end
-	}
+Using packer.nvim: >lua
+  use {
+    'aiya000/mado-scratch-buffer.nvim',
+    config = function()
+      require('mado-scratch-buffer').setup({
+        -- your configuration here
+      })
+    end
+  }
 <
 
-The plugin will work with default settings without any configuration.
+This plugin will work with default settings without any configuration.
+
+Meaning:
+  - The config (opts) property is optional
+  - You can skip it if you want to use default settings
+  - Or you want to configure your configuration,
+    - See |mado-scratch-buffer-configuration|
 
 
 ==============================================================================
-USAGE						*mado-scratch-buffer-usage*
+USAGE                   *mado-scratch-buffer-usage*
 
 Open a scratch buffer with or without a file extension:
 >
-	" Open a new scratch buffer without file extension and filetype
-	:MadoScratchBufferOpen
+  " Open a new scratch buffer without file extension and filetype
+  :MadoScratchBufferOpen
 
-	" Open a new scratch buffer with markdown filetype
-	:MadoScratchBufferOpen md
+  " Open a new scratch buffer with markdown filetype
+  :MadoScratchBufferOpen md
 
-	" Open a new scratch buffer with TypeScript filetype
-	:MadoScratchBufferOpen ts
+  " Open a new scratch buffer with TypeScript filetype
+  :MadoScratchBufferOpen ts
 
-	" Open a persistent file buffer (auto-saved)
-	:MadoScratchBufferOpenFile js
+  " Open a persistent file buffer (auto-saved)
+  :MadoScratchBufferOpenFile js
 
-	" Open next scratch buffer (force new buffer creation)
-	:MadoScratchBufferOpenNext py
+  " Open next scratch buffer (force new buffer creation)
+  :MadoScratchBufferOpenNext py
 
-	" Open with custom split method and size
-	:MadoScratchBufferOpen md sp 10
-	:MadoScratchBufferOpen ts vsp 80
+  " Open with custom split method and size
+  :MadoScratchBufferOpen md sp 10
+  :MadoScratchBufferOpen ts vsp 80
 
-	" Clean up all scratch buffers and files
-	:MadoScratchBufferClean
+  " Clean up all scratch buffers and files
+  :MadoScratchBufferClean
 <
 
 You can specify:
@@ -107,154 +115,165 @@ You can specify:
 
 
 ==============================================================================
-INTERFACE					*mado-scratch-buffer-interface*
+INTERFACE               *mado-scratch-buffer-interface*
 
 ------------------------------------------------------------------------------
-CONFIGURATION				*mado-scratch-buffer-configuration*
+CONFIGURATION           *mado-scratch-buffer-configuration*
 
 Configure the plugin by calling the setup function:
->
-	require('scratch-buffer').setup({
-	  -- File patterns for temporary and persistent buffers
-	  file_pattern = {
-	    when_tmp_buffer = '/tmp/mado-scratch-tmp-%d',
-	    when_file_buffer = '/tmp/mado-scratch-file-%d',
-	  },
+>lua
+  require('mado-scratch-buffer').setup({
+    -- File patterns for temporary and persistent buffers
+    file_pattern = {
+      when_tmp_buffer = '/tmp/mado-scratch-tmp-%d',
+      when_file_buffer = '/tmp/mado-scratch-file-%d',
+    },
 
-	  -- Default settings
-	  default_file_ext = 'md',           -- Default file extension
-	  default_open_method = 'sp',        -- 'sp' or 'vsp'
-	  default_buffer_size = 15,          -- Default buffer height/width
+    -- Options when you didn't specify to the commands
+    default_file_ext = 'md',           -- Default file extension
+    default_open_method = 'sp',        -- 'sp' or 'vsp'
+    default_buffer_size = 30,          -- Default buffer height/width
 
-	  -- Behavior options
-	  auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged
-	  use_default_keymappings = false,   -- Enable default keymaps
+    -- Behavior options
+    auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged
+    use_default_keymappings = false,   -- Enable default keymaps
 
-	  -- Auto-hide settings (like scratch.vim)
-	  auto_hide_buffer = {
-	    when_tmp_buffer = false,         -- Auto-hide temporary buffers
-	    when_file_buffer = false,        -- Auto-hide persistent buffers
-	  },
-	})
+    -- Auto-hide settings (like scratch.vim)
+    auto_hide_buffer = {
+      when_tmp_buffer = false,         -- Auto-hide temporary buffers
+      when_file_buffer = false,        -- Auto-hide persistent buffers
+    },
+  })
 <
 
-						*g:mado_scratch_buffer_file_pattern*
+The above setup properties are the default value of each configuration option.
+
+NOTE:
+See below file to see what types the each options have :
+  - `../lua/mado-scratch-buffer/init.lua`
+    - and `mado_scratch_buffer.Options` type
+
+
+                        *option.mado_scratch_buffer_file_pattern*
 file_pattern ~
-Default: >
-	{
-	  when_tmp_buffer = '/tmp/mado-scratch-tmp-%d',
-	  when_file_buffer = '/tmp/mado-scratch-file-%d',
-	}
+  Default: >lua
+  {
+    when_tmp_buffer = '/tmp/mado-scratch-tmp-%d',
+    when_file_buffer = '/tmp/mado-scratch-file-%d',
+  }
 <
-File path patterns for temporary and persistent buffers. The `%d` will be
-replaced with an incremental number.
+  File path patterns for temporary and persistent buffers. The `%d` will be
+  replaced with an incremental number.
 
-						*g:mado_scratch_buffer_default_file_ext*
+                        *option.mado_scratch_buffer_default_file_ext*
 default_file_ext ~
-Default: `'md'`
-Default file extension when no extension is specified.
+  Default: `'md'`
+  Default file extension when no extension is specified.
 
-						*g:mado_scratch_buffer_default_open_method*
+                        *option.mado_scratch_buffer_default_open_method*
 default_open_method ~
-Default: `'sp'`
-Default method to open buffers. Either `'sp'` (horizontal split) or `'vsp'`
-(vertical split).
+  Default: `'sp'`
+  Default method to open buffers.
+  e.g., 'sp', 'vsp', and etc.
 
-						*g:mado_scratch_buffer_default_buffer_size*
+                        *option.mado_scratch_buffer_default_buffer_size*
 default_buffer_size ~
-Default: `15`
-Default buffer size (height for sp, width for vsp).
+  Default: `30`
+  Default buffer size (height for sp, width for vsp).
 
-						*g:mado_scratch_buffer_auto_save_file_buffer*
+                        *option.mado_scratch_buffer_auto_save_file_buffer*
 auto_save_file_buffer ~
-Default: `true`
-Automatically save file buffers when text changes.
+  Default: `true`
+  Automatically save file buffers when text changes.
 
-						*g:mado_scratch_buffer_use_default_keymappings*
+                        *option.mado_scratch_buffer_use_default_keymappings*
 use_default_keymappings ~
-Default: `false`
-Enable default keymappings. When enabled:
-- `<leader>b` → `:MadoScratchBufferOpen`
-- `<leader>B` → `:MadoScratchBufferOpenFile`
-- `<leader><leader>b` → `:MadoScratchBufferOpen ` (interactive)
-- `<leader><leader>B` → `:MadoScratchBufferOpenFile ` (interactive)
+  Default: `false`
+  Enable default keymappings. When enabled:
+  - `<leader>b` → `:MadoScratchBufferOpen`
+  - `<leader>B` → `:MadoScratchBufferOpenFile`
+  - `<leader><leader>b` → `:MadoScratchBufferOpen ` (interactive)
+  - `<leader><leader>B` → `:MadoScratchBufferOpenFile ` (interactive)
 
-						*g:mado_scratch_buffer_auto_hide_buffer*
+                        *option.mado_scratch_buffer_auto_hide_buffer*
 auto_hide_buffer ~
-Default: >
-	{
-	  when_tmp_buffer = false,
-	  when_file_buffer = false,
-	}
-<
-Auto-hide buffers when leaving the window (scratch.vim compatibility).
+  Default: >lua
+    {
+      when_tmp_buffer = false,
+      when_file_buffer = false,
+    }
+  <
+  If true, auto-hide buffers when leaving the window, like scratch.vim.
 
 ------------------------------------------------------------------------------
-COMMANDS					*mado-scratch-buffer-commands*
+COMMANDS                *mado-scratch-buffer-commands*
 
-						*:MadoScratchBufferOpen*
+                        *:MadoScratchBufferOpen*
 :MadoScratchBufferOpen [file_ext] [open_method] [buffer_size]
-	Open a temporary scratch buffer.
+  Open a temporary scratch buffer.
 
-	Parameters:
-	- file_ext: File extension (e.g., 'md', 'ts') or '--no-file-ext'
-	- open_method: 'sp' or 'vsp'
-	- buffer_size: Number for height/width
+  Parameters:
+  - file_ext: File extension (e.g., 'md', 'ts') or '--no-file-ext'
+  - open_method: 'sp' or 'vsp'
+  - buffer_size: Number for height/width
 
-	Examples: >
-		:MadoScratchBufferOpen
-		:MadoScratchBufferOpen md
-		:MadoScratchBufferOpen ts sp 10
-		:MadoScratchBufferOpen js vsp 80
+  Examples: >
+    :MadoScratchBufferOpen
+    :MadoScratchBufferOpen md
+    :MadoScratchBufferOpen ts sp 10
+    :MadoScratchBufferOpen js vsp 80
 <
 
-						*:MadoScratchBufferOpenFile*
+                        *:MadoScratchBufferOpenFile*
 :MadoScratchBufferOpenFile [file_ext] [open_method] [buffer_size]
-	Open a persistent file buffer (auto-saved).
-	Same parameters as |:MadoScratchBufferOpen|.
+  Open a persistent file buffer (auto-saved).
+  Same parameters as |:MadoScratchBufferOpen|.
 
-						*:MadoScratchBufferOpenNext*
+                        *:MadoScratchBufferOpenNext*
 :MadoScratchBufferOpenNext [file_ext] [open_method] [buffer_size]
-	Force open a new temporary scratch buffer.
-	Same parameters as |:MadoScratchBufferOpen|.
+  Force open a new temporary scratch buffer.
+  Same parameters as |:MadoScratchBufferOpen|.
 
-						*:MadoScratchBufferOpenFileNext*
+                        *:MadoScratchBufferOpenFileNext*
 :MadoScratchBufferOpenFileNext [file_ext] [open_method] [buffer_size]
-	Force open a new persistent file buffer.
-	Same parameters as |:MadoScratchBufferOpen|.
+  Force open a new persistent file buffer.
+  Same parameters as |:MadoScratchBufferOpen|.
 
-						*:MadoScratchBufferClean*
+                        *:MadoScratchBufferClean*
 :MadoScratchBufferClean
-	Clean up all scratch buffers and files.
+  Clean up all scratch buffers and files.
+
 
 ------------------------------------------------------------------------------
-FUNCTIONS					*mado-scratch-buffer-functions*
+FUNCTIONS               *mado-scratch-buffer-functions*
 
 These functions are available through the Lua API:
 
-require('scratch-buffer').setup({config})		*scratch-buffer.setup()*
-	Setup the plugin with the given configuration.
+                        *mado-scratch-buffer.setup()*
+require('mado-scratch-buffer').setup({config})
+  Setup the plugin with the given configuration.
 
-require('scratch-buffer').get_config()			*scratch-buffer.get_config()*
-	Get the current configuration.
+                        *mado-scratch-buffer.get_config()*
+require('mado-scratch-buffer').get_config()
+  Get the current configuration.
 
-require('scratch-buffer.buffer').open(opening_next, ...)
-	Open a temporary scratch buffer.
+require('mado-scratch-buffer.buffer').open(opening_next, ...)
+  Open a temporary scratch buffer.
 
-require('scratch-buffer.buffer').open_file(opening_next, ...)
-	Open a persistent file buffer.
+require('mado-scratch-buffer.buffer').open_file(opening_next, ...)
+  Open a persistent file buffer.
 
-require('scratch-buffer.buffer').clean()
-	Clean up all scratch buffers and files.
+require('mado-scratch-buffer.buffer').clean()
+  Clean up all scratch buffers and files.
 
 
 ==============================================================================
-CHANGELOG					*mado-scratch-buffer-changelog*
+CHANGELOG                    *mado-scratch-buffer-changelog*
 
-2024
+2025
 - Complete rewrite in Lua for Neovim
-	- The new repository:
-	https://github.com/aiya000/nvim-mado-scratch-buffer
+    - The new repository:
+    https://github.com/aiya000/nvim-mado-scratch-buffer
 - Renamed from vim-scratch-buffer to mado-scratch-buffer.nvim
 - Modern Neovim plugin structure with setup() function
 - Removed backward compatibility with old Vim script version
@@ -265,4 +284,4 @@ CHANGELOG					*mado-scratch-buffer-changelog*
 2024
 - Create original repository: https://github.com/aiya000/vim-scratch-buffer
 
-vim:tw=78:ts=8:ft=help:norl:
+vim:tw=78:ts=2:ft=help:norl:expandtab:
