@@ -1,5 +1,3 @@
-**CURRENTLY WIP**
-
 # :sparkles: mado-scratch-buffer.nvim :sparkles:
 
 :rocket: **No more hassle with file paths!** The fastest way to open an instant scratch buffer.
