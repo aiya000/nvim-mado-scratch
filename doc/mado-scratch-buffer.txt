@@ -180,6 +180,7 @@ default_open_method ~
 default_buffer_size ~
   Default: `30`
   Default buffer size (height for sp, width for vsp).
+  Set to `'no-auto-resize'` to disable auto resizing.
 
                         *option.mado_scratch_buffer_auto_save_file_buffer*
 auto_save_file_buffer ~

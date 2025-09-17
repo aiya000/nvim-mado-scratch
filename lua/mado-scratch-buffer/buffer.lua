@@ -111,7 +111,7 @@ function M.open_buffer(options)
     vim.bo.bufhidden = ''
   end
 
-  if buffer_size ~= nil then
+  if buffer_size ~= 'no-auto-resize' then
     local resize_method = open_method == 'vsp' and 'vertical resize' or 'resize'
     vim.cmd(resize_method .. ' ' .. buffer_size)
   end
