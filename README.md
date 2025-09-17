@@ -71,7 +71,7 @@ And more features...
       },
       default_file_ext = 'md',
       default_open_method = 'sp',
-      default_buffer_size = 15,
+      default_buffer_size = 30,
       auto_save_file_buffer = true,
       use_default_keymappings = false,  -- Set to true to enable default keymaps
       auto_hide_buffer = {
@@ -108,8 +108,8 @@ require('scratch-buffer').setup({
 
   -- Default settings
   default_file_ext = 'md',           -- Default file extension
-  default_open_method = 'sp',        -- 'sp' or 'vsp'
-  default_buffer_size = 15,          -- Default buffer height/width
+  default_open_method = 'sp',        -- 'sp', 'vsp', or etc (See ':help mado-scratch-buffer-configuration')
+  default_buffer_size = 30,          -- Default buffer height/width, or 'no-auto-resize' to disable auto resizing
 
   -- Behavior options
   auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged
