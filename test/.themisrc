@@ -1,1 +1,0 @@
-call themis#option('runtimepath', ['..'])

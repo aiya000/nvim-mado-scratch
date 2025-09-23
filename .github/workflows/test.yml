@@ -2,31 +2,33 @@ name: Test
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main, develop ]
   pull_request:
-    types: [opened, reopened, synchronize, review_requested, ready_for_review]
-    branches: ['main']
+    branches: [ main, develop ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    name: Test
+    strategy:
+      matrix:
+        neovim-version:
+          - 'v0.8.3'
+          - 'v0.9.5'
+          - 'v0.10.2'
+          - 'nightly'
+
     steps:
-      - name: Create vim directory
-        run: mkdir -p $HOME/.vim
+    - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
+    - name: Setup Neovim
+      uses: rhymond/setup-neovim@v1
+      with:
+        neovim-version: ${{ matrix.neovim-version }}
 
-      - name: Copy repository to vim directory
-        run: |
-          cp -r . $HOME/.vim/vim-scratch-buffer/
-          ls -la $HOME/.vim/vim-scratch-buffer/
+    - name: Install plenary.nvim
+      run: |
+        mkdir -p ~/.local/share/nvim/site/pack/vendor/start
+        git clone https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
 
-      - uses: rhysd/action-setup-vim@v1
-
-      - name: Clone themis
-        run: git clone https://github.com/thinca/vim-themis $HOME/.vim/bundle/vim-themis
-
-      - name: Run test
-        run: $HOME/.vim/bundle/vim-themis/bin/themis $HOME/.vim/vim-scratch-buffer/test --reporter spec
+    - name: Run tests
+      run: make test
