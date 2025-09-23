@@ -7,7 +7,7 @@ local M = {}
 ---@param pattern string Pattern with %d placeholder
 ---@return number|nil index Index number or nil if not found
 local function extract_index_from_name(name, pattern)
-  local getting_index_regex = pattern:gsub('%%d', '(%%d+)')
+  local getting_index_regex = pattern:gsub('%%d', '\\([0-9]\\+\\)')
   local matches = vim.fn.matchlist(name, getting_index_regex)
   if #matches > 1 then
     return tonumber(matches[2])
