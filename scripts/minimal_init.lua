@@ -1,6 +1,6 @@
 -- Minimal init.lua for testing - avoid loading user config
-vim.cmd('set rtp&')  -- Reset runtimepath to default
-vim.opt.runtimepath:prepend('.')  -- Add current project
+vim.cmd('set rtp&') -- Reset runtimepath to default
+vim.opt.runtimepath:prepend('.') -- Add current project
 
 -- Try to add plenary.nvim to runtimepath from common locations
 local plenary_paths = {
