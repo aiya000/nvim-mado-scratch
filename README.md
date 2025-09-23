@@ -302,3 +302,37 @@ require('scratch-buffer').setup({
   },
 })
 ```
+
+## :test_tube: Development & Testing
+
+### Running Tests
+
+This plugin uses [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) for testing. To run tests:
+
+1. Install plenary.nvim (required for testing):
+   ```lua
+   -- lazy.nvim
+   { 'nvim-lua/plenary.nvim' }
+
+   -- packer.nvim
+   use 'nvim-lua/plenary.nvim'
+
+   -- vim-plug
+   Plug 'nvim-lua/plenary.nvim'
+   ```
+
+2. Run the tests:
+   ```bash
+   make test
+   ```
+
+### Test Structure
+
+- `tests/` - plenary.nvim-based tests
+
+Tests cover:
+- Buffer creation and management
+- File operations
+- Configuration options
+- Command functionality
+- Index extraction and numbering logic
