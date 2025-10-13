@@ -117,9 +117,40 @@ function M.open_buffer(options)
   local file_name = vim.fn.expand(string.format(file_pattern, index))
 
   local open_method = args[2] or config.default_open_method
-  local buffer_size = args[3] and tonumber(args[3]) or config.default_buffer_size
+  local buffer_size = args[3] or config.default_buffer_size
 
-  vim.cmd(('silent %s %s'):format(open_method, vim.fn.fnameescape(file_name)))
+  if open_method == 'float' then
+    -- Create buffer first
+    local bufnr = vim.fn.bufnr(file_name, true)
+    vim.fn.bufload(bufnr)
+    
+    -- Calculate float window dimensions
+    local width = (buffer_size ~= 'no-auto-resize' and tonumber(buffer_size)) or 80
+    local height = math.floor(width / 2)
+    
+    -- Get UI dimensions (with fallback for headless mode)
+    local ui = vim.api.nvim_list_uis()[1]
+    local win_width = ui and ui.width or 120
+    local win_height = ui and ui.height or 40
+    
+    local row = math.floor((win_height - height) / 2)
+    local col = math.floor((win_width - width) / 2)
+    
+    -- Create floating window
+    local win_opts = {
+      relative = 'editor',
+      width = width,
+      height = height,
+      row = row,
+      col = col,
+      style = 'minimal',
+      border = 'rounded',
+    }
+    
+    vim.api.nvim_open_win(bufnr, true, win_opts)
+  else
+    vim.cmd(('silent %s %s'):format(open_method, vim.fn.fnameescape(file_name)))
+  end
 
   -- Set buffer options
   if opening_as_tmp_buffer then
@@ -130,9 +161,9 @@ function M.open_buffer(options)
     vim.bo.bufhidden = ''
   end
 
-  if buffer_size ~= 'no-auto-resize' then
+  if buffer_size ~= 'no-auto-resize' and open_method ~= 'float' then
     local resize_method = open_method == 'vsp' and 'vertical resize' or 'resize'
-    vim.cmd(resize_method .. ' ' .. buffer_size)
+    vim.cmd(resize_method .. ' ' .. tonumber(buffer_size))
   end
 end
 

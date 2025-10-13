@@ -3,7 +3,7 @@ local M = {}
 ---@class mado_scratch_buffer.Options
 ---@field file_pattern? {when_tmp_buffer?: string, when_file_buffer?: string}
 ---@field default_file_ext? string
----@field default_open_method? 'vsp' | 'sp' | 'tabnew' -- TODO: Add 'float' support. See Issue #1
+---@field default_open_method? 'vsp' | 'sp' | 'tabnew' | 'float'
 ---@field default_buffer_size? number | 'no-auto-resize'
 ---@field auto_save_file_buffer? boolean
 ---@field use_default_keymappings? boolean

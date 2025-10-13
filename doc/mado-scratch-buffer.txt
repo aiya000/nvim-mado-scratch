@@ -110,8 +110,8 @@ Open a scratch buffer with or without a file extension:
 
 You can specify:
 1. File extension (optional): md, ts, js, py, etc. or `--no-file-ext`
-2. Open method (optional): sp (horizontal split) or vsp (vertical split)
-3. Buffer size (optional): number for height (sp) or width (vsp)
+2. Open method (optional): sp (horizontal split), vsp (vertical split), or float (floating window)
+3. Buffer size (optional): number for height (sp), width (vsp/float), or 'no-auto-resize'
 
 
 ==============================================================================
@@ -131,7 +131,7 @@ Configure the plugin by calling the setup function:
 
     -- Options when you didn't specify to the commands
     default_file_ext = 'md',           -- Default file extension
-    default_open_method = 'sp',        -- 'sp' or 'vsp'
+    default_open_method = 'sp',        -- 'sp', 'vsp', 'tabnew', or 'float'
     default_buffer_size = 30,          -- Default buffer height/width
 
     -- Behavior options
@@ -174,13 +174,13 @@ default_file_ext ~
 default_open_method ~
   Default: `'sp'`
   Default method to open buffers.
-  e.g., 'sp', 'vsp', and etc.
+  Options: 'sp' (horizontal split), 'vsp' (vertical split), 'tabnew' (new tab), or 'float' (floating window)
 
                         *option.mado_scratch_buffer_default_buffer_size*
 default_buffer_size ~
   Default: `30`
-  Default buffer size (height for sp, width for vsp).
-  Set to `'no-auto-resize'` to disable auto resizing.
+  Default buffer size (height for sp, width for vsp/float).
+  Set to `'no-auto-resize'` to disable auto resizing (float will default to 80 width).
 
                         *option.mado_scratch_buffer_auto_save_file_buffer*
 auto_save_file_buffer ~
@@ -215,7 +215,7 @@ COMMANDS                *mado-scratch-buffer-commands*
 
   Parameters:
   - file_ext: File extension (e.g., 'md', 'ts') or '--no-file-ext'
-  - open_method: 'sp' or 'vsp'
+  - open_method: 'sp', 'vsp', 'tabnew', or 'float'
   - buffer_size: Number for height/width
 
   Examples: >
@@ -223,6 +223,7 @@ COMMANDS                *mado-scratch-buffer-commands*
     :MadoScratchBufferOpen md
     :MadoScratchBufferOpen ts sp 10
     :MadoScratchBufferOpen js vsp 80
+    :MadoScratchBufferOpen py float 60
 <
 
                         *:MadoScratchBufferOpenFile*

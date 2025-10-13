@@ -106,7 +106,7 @@ require('scratch-buffer').setup({
 
   -- Default settings
   default_file_ext = 'md',           -- Default file extension
-  default_open_method = 'sp',        -- 'sp', 'vsp', or etc (See ':help mado-scratch-buffer-configuration')
+  default_open_method = 'sp',        -- 'sp', 'vsp', 'tabnew', or 'float' (See ':help mado-scratch-buffer-configuration')
   default_buffer_size = 30,          -- Default buffer height/width, or 'no-auto-resize' to disable auto resizing
 
   -- Behavior options
@@ -127,6 +127,7 @@ require('scratch-buffer').setup({
 :MadoScratchBufferOpen  " Open a temporary buffer using default options
 :MadoScratchBufferOpen md sp 5  " Open a temporary Markdown buffer with :sp and height 5
 :MadoScratchBufferOpenFile ts vsp 100  " Open a persistent TypeScript buffer with :vsp and width 100
+:MadoScratchBufferOpen py float 80  " Open a Python buffer in a floating window with width 80
 :MadoScratchBufferOpenNext  " Open next temporary buffer
 :MadoScratchBufferOpenFileNext  " Open next persistent buffer
 ```
@@ -172,7 +173,7 @@ Compared to scratch.vim, vim-scratch-buffer provides these additional features:
 
 - Customization options
     - Specify filetype for syntax highlighting, for `:QuickRun`, and for etc
-    - Choose opening method (`:split` or `:vsplit`)
+    - Choose opening method (`:split`, `:vsplit`, `:tabnew`, or floating window)
     - Control buffer height/width
     - Configurable auto-hiding behavior: [scratch.vim compatibility](#sparkles-scratchvim-compatibility)
     - Customize buffer file locations:
@@ -225,6 +226,10 @@ Please also see [doc/mado-scratch-buffer.txt](./doc/mado-scratch-buffer.txt) for
 " Open a small buffer at the top for quick notes
 :MadoScratchBufferOpen md sp 5
 :MadoScratchBufferOpen --no-file-ext sp 5
+
+" Open a floating window for focused work
+:MadoScratchBufferOpen md float 80
+:MadoScratchBufferOpen js float 60
 ```
 
 ```vim
