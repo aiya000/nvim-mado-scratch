@@ -7,7 +7,24 @@ local M = {}
 ---@param pattern string Pattern with %d placeholder
 ---@return number|nil index Index number or nil if not found
 local function extract_index_from_name(name, pattern)
-  local getting_index_regex = pattern:gsub('%%d', '\\([0-9]\\+\\)')
+  -- Replace %d with a unique placeholder that won't appear in paths
+  local temp_placeholder = '__INDEX__'
+  local protected_pattern = pattern:gsub('%%d', temp_placeholder)
+  
+  -- Escape special regex characters for Vim regex
+  -- Characters that are special in Vim regex: . * [ ] ^ $ \ (special handling for \)
+  local escaped_pattern = protected_pattern
+    :gsub('%.', '\\.')  -- Escape dots
+    :gsub('%*', '\\*')  -- Escape asterisks  
+    :gsub('%-', '\\-')  -- Escape hyphens
+    :gsub('%^', '\\^')  -- Escape carets
+    :gsub('%$', '\\$')  -- Escape dollar signs
+    :gsub('%[', '\\[')  -- Escape open brackets
+    :gsub('%]', '\\]')  -- Escape close brackets
+  
+  -- Replace placeholder with capture group for digits
+  local getting_index_regex = escaped_pattern:gsub(temp_placeholder, '\\([0-9]\\+\\)')
+  
   local matches = vim.fn.matchlist(name, getting_index_regex)
   if #matches > 1 then
     return tonumber(matches[2])
