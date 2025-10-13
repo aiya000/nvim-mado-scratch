@@ -13,8 +13,7 @@ $ git clone --depth 1 https://github.com/nvim-lua/plenary.nvim \
 
 # Run tests
 $ cd /path/to/nvim-mado-scratch-buffer
-$ nvim --headless --noplugin -u tests/minimal_init.lua \
-    -c "PlenaryBustedDirectory tests/ { minimal_init = 'tests/minimal_init.lua' }"
+$ nvim --headless -c "lua require('plenary.test_harness').test_directory('tests/', {minimal_init='tests/minimal_init.lua'})"
 ```
 
 または、提供されているスクリプトを使用することもできます:
