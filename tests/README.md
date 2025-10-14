@@ -4,6 +4,21 @@ This directory contains tests for mado-scratch-buffer.nvim using [plenary.nvim](
 
 ## Running Tests
 
+### Quick Start (Using Makefile)
+
+The easiest way to run tests:
+
+```bash
+# Install plenary.nvim
+make install-plenary
+
+# Run tests
+make test
+
+# See all available targets
+make help
+```
+
 ### Prerequisites
 
 Install plenary.nvim:
@@ -24,6 +39,11 @@ Using the test script:
 Or manually:
 ```bash
 nvim --headless -c "lua require('plenary.test_harness').test_directory('tests/', {minimal_init='tests/minimal_init.lua'})"
+```
+
+Or using Make:
+```bash
+make test
 ```
 
 ## Test Structure
