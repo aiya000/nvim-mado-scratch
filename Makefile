@@ -10,9 +10,7 @@ help:
 
 # Run tests
 test:
-	@echo 'Running plenary tests...'
-	@nvim --headless -c 'lua require("plenary.test_harness").test_directory("tests/", { minimal_init="tests/minimal_init.lua" })'
-	@echo 'Tests completed successfully!'
+	./tests/run_tests.sh
 
 # Install plenary.nvim for testing
 install-plenary:
