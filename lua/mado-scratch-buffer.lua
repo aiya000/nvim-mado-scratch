@@ -1,2 +1,2 @@
--- Main module entry point for scratch-buffer
-return require('scratch-buffer.init')
+-- Main module entry point for mado-scratch-buffer
+return require('mado-scratch-buffer.init')

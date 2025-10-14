@@ -9,24 +9,24 @@ on:
     branches: ['main']
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     name: Test
     steps:
-      - name: Create vim directory
-        run: mkdir -p $HOME/.vim
-
       - uses: actions/checkout@v4
 
-      - name: Copy repository to vim directory
+      - name: Install Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: stable
+
+      - name: Clone plenary.nvim
         run: |
-          cp -r . $HOME/.vim/vim-scratch-buffer/
-          ls -la $HOME/.vim/vim-scratch-buffer/
+          mkdir -p ~/.local/share/nvim/site/pack/vendor/start
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim \
+            ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
 
-      - uses: rhysd/action-setup-vim@v1
-
-      - name: Clone themis
-        run: git clone https://github.com/thinca/vim-themis $HOME/.vim/bundle/vim-themis
-
-      - name: Run test
-        run: $HOME/.vim/bundle/vim-themis/bin/themis $HOME/.vim/vim-scratch-buffer/test --reporter spec
+      - name: Run tests
+        run: |
+          nvim --headless -c "lua require('plenary.test_harness').test_directory('tests/', {minimal_init='tests/minimal_init.lua'})"

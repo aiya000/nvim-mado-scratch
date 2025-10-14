@@ -82,11 +82,13 @@ end
 ---Wipes buffers matching pattern
 ---@param file_pattern string Pattern to match buffers
 local function wipe_buffers(file_pattern)
-  local scratch_prefix = '^' .. file_pattern:gsub('%%d', '')
+  -- Create a prefix by removing the %d placeholder and any extension
+  local base_pattern = file_pattern:gsub('%%d.*$', '')
   local buffer_names = helper.get_all_buffer_names()
 
   for _, buffer_name in ipairs(buffer_names) do
-    if buffer_name:match(scratch_prefix) then
+    -- Check if buffer name starts with the base pattern (using plain text match)
+    if buffer_name ~= '' and buffer_name:sub(1, #base_pattern) == base_pattern then
       local bufnr = vim.fn.bufnr(buffer_name)
       if bufnr ~= -1 then
         vim.cmd('bwipe! ' .. bufnr)

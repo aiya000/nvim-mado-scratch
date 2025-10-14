@@ -1,13 +1,38 @@
 # How to run test
 
-`.github/workflows/test.yml`は実際に動いているので、これを見るのが一番わかりやすいですが、一応記しておきます。
+The `.github/workflows/test.yml` is actually working, so it is best to look at it.
 
-1. [vim-themis](https://github.com/thinca/vim-themis)をcloneする
-1. `themis`を`$PATH`に通す（以下の例では、`~/bin`が`$PATH`に含まれているとします）
-1. テストを実行する
-    - `--reporter`は自由に指定できます
+## The easy way (Using Makefile)
 
 ```shell-session
-$ git clone https://github.com/thinca/vim-themis ~/bin/vim-themis
-$ themis test --reporter spec
+# Install plenary.nvim
+$ make install-plenary
+
+# run tests
+$ make test
+
+# display help
+$ make help
+````
+
+## Manual setup
+
+1. Install [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
+1. run the test
+
+```shell-session
+# Install plenary.nvim (if not already installed)
+$ mkdir -p ~/.local/share/nvim/site/pack/vendor/start
+$ git clone --depth 1 https://github.com/nvim-lua/plenary.nvim \
+    ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
+
+# Run tests
+$ cd /path/to/nvim-mado-scratch-buffer
+$ nvim --headless -c "lua require('plenary.test_harness').test_directory('tests/', {minimal_init='tests/minimal_init.lua'})"
+```
+
+Alternatively, you can use the script provided:
+
+````shell-session
+$ ./tests/run_tests.sh
 ```
