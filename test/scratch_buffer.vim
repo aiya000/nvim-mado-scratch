@@ -73,8 +73,8 @@ function! s:suite.ScratchBufferOpen_should_open_recent_buffer_after_ScratchBuffe
   call s:expect(second_file).to_equal(first_file)
 endfunction
 
+" Test for issue #5: Cannot create 3rd buffer
 function! s:suite.MadoScratchBufferOpenNext_should_create_third_buffer() abort
-  " Test for issue #5: Cannot create 3rd buffer
   MadoScratchBufferOpen
   const file1 = expand('%:p')
   const expected1 = printf(g:scratch_buffer_file_pattern.when_tmp_buffer, 0) .. '.md'
