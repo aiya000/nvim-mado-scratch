@@ -1,24 +1,24 @@
 # How to run test
 
-`.github/workflows/test.yml` は実際に動いているので、これを見るのが一番わかりやすいですが、一応記しておきます。
+The `.github/workflows/test.yml` is actually working, so it is best to look at it.
 
-## 簡単な方法 (Makefile を使用)
+## The easy way (Using Makefile)
 
 ```shell-session
-# plenary.nvimのインストール
+# Install plenary.nvim
 $ make install-plenary
 
-# テストの実行
+# run tests
 $ make test
 
-# ヘルプの表示
+# display help
 $ make help
-```
+````
 
-## 手動でのセットアップ
+## Manual setup
 
-1. [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)をインストールする
-1. テストを実行する
+1. Install [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
+1. run the test
 
 ```shell-session
 # Install plenary.nvim (if not already installed)
@@ -31,9 +31,8 @@ $ cd /path/to/nvim-mado-scratch-buffer
 $ nvim --headless -c "lua require('plenary.test_harness').test_directory('tests/', {minimal_init='tests/minimal_init.lua'})"
 ```
 
-または、提供されているスクリプトを使用することもできます:
+Alternatively, you can use the script provided:
 
-```shell-session
+````shell-session
 $ ./tests/run_tests.sh
 ```
-
