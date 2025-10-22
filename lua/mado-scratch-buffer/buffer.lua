@@ -3,9 +3,9 @@ local helper = require('mado-scratch-buffer.helper')
 local M = {}
 
 ---Extracts index from name using pattern
----@param name string Buffer or file name
----@param pattern string Pattern with %d placeholder
----@return number|nil index Index number or nil if not found
+---@param name string # Buffer or file name
+---@param pattern string # Pattern with %d placeholder
+---@return number|nil index # Index number or nil if not found
 local function extract_index_from_name(name, pattern)
   -- Replace %d with a unique placeholder that won't appear in paths
   local temp_placeholder = '__INDEX__'
@@ -33,8 +33,8 @@ local function extract_index_from_name(name, pattern)
 end
 
 ---Finds current max index for pattern
----@param pattern string File pattern with %d placeholder
----@return number max_index Maximum index found (0 if none)
+---@param pattern string # File pattern with %d placeholder
+---@return number max_index # Maximum index found (0 if none)
 local function find_current_index(pattern)
   local buffer_names = helper.get_all_buffer_names()
   local max_buffer_index = 0
@@ -97,6 +97,83 @@ local function wipe_buffers(file_pattern)
   end
 end
 
+---@param opening_as_tmp_buffer boolean
+local function set_buffer_type(opening_as_tmp_buffer)
+  if opening_as_tmp_buffer then
+    vim.bo.buftype = 'nofile'
+    vim.bo.bufhidden = 'hide'
+  else
+    vim.bo.buftype = ''
+    vim.bo.bufhidden = ''
+  end
+end
+
+local function get_winsize()
+  local ui = vim.api.nvim_list_uis()[1]
+  if ui ~= nil then
+    return ui.width, ui.height
+  else
+    return 120, 40 -- Default size
+  end
+end
+
+---Edits file in a new floating window
+---@param file_name string
+---@param geometry { width: integer, height: integer, row: integer, col: integer }
+local function open_in_new_float_window(file_name, geometry)
+  local bufnr = vim.api.nvim_create_buf(false, false)
+
+  local is_file_not_opened_by_another_neovim = pcall(vim.api.nvim_buf_set_name, bufnr, file_name)
+  if not is_file_not_opened_by_another_neovim then
+    vim.notify(
+      'Warning: Another Neovim instance may be editing this file: ' .. file_name,
+      vim.log.levels.WARN
+    )
+    local lines = vim.fn.readfile(file_name)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  end
+
+  vim.api.nvim_open_win(bufnr, true, {
+    relative = 'editor',
+    width = geometry.width,
+    height = geometry.height,
+    row = geometry.row,
+    col = geometry.col,
+    style = 'minimal',
+    border = 'rounded',
+  })
+end
+
+---Opens a floating window with a buffer displaying the specified file
+---@param buffer_size number | 'no-auto-resize'
+---@param file_name string
+local function open_float_buffer(buffer_size, file_name)
+  local width = tonumber(buffer_size) or 80 -- 80: A default width
+  local height = math.floor(width / 2)
+  local win_width, win_height = get_winsize()
+  local row = math.floor((win_height - height) / 2)
+  local col = math.floor((win_width - width) / 2)
+
+  open_in_new_float_window(file_name, {
+    width = width,
+    height = height,
+    row = row,
+    col = col,
+  })
+end
+
+---Opens a window by specified method
+---@param open_method 'sp' | 'vsp' | 'tabnew'
+---@param buffer_size number | 'no-auto-resize'
+---@param file_name string
+local function open_buffer_by_method(open_method, buffer_size, file_name)
+  vim.cmd(('silent %s %s'):format(open_method, vim.fn.fnameescape(file_name)))
+  if buffer_size ~= 'no-auto-resize' then
+    local resize_method = open_method == 'vsp' and 'vertical resize' or 'resize'
+    vim.cmd(resize_method .. ' ' .. tonumber(buffer_size))
+  end
+end
+
 ---Opens a scratch buffer
 ---@param options table Options for opening buffer
 ---@return nil
@@ -108,8 +185,6 @@ function M.open_buffer(options)
   local opening_as_tmp_buffer = options.opening_as_tmp_buffer
   local opening_next_fresh_buffer = options.opening_next_fresh_buffer
 
-  autocmd.setup_autocmds()
-
   local file_ext = args[1] or config.default_file_ext
   local file_pattern = get_file_pattern(opening_as_tmp_buffer, file_ext)
 
@@ -120,51 +195,13 @@ function M.open_buffer(options)
   local buffer_size = args[3] or config.default_buffer_size
 
   if open_method == 'float' then
-    -- Create buffer first
-    local bufnr = vim.fn.bufnr(file_name, true)
-    vim.fn.bufload(bufnr)
-    
-    -- Calculate float window dimensions
-    local width = (buffer_size ~= 'no-auto-resize' and tonumber(buffer_size)) or 80
-    local height = math.floor(width / 2)
-    
-    -- Get UI dimensions (with fallback for headless mode)
-    local ui = vim.api.nvim_list_uis()[1]
-    local win_width = ui and ui.width or 120
-    local win_height = ui and ui.height or 40
-    
-    local row = math.floor((win_height - height) / 2)
-    local col = math.floor((win_width - width) / 2)
-    
-    -- Create floating window
-    local win_opts = {
-      relative = 'editor',
-      width = width,
-      height = height,
-      row = row,
-      col = col,
-      style = 'minimal',
-      border = 'rounded',
-    }
-    
-    vim.api.nvim_open_win(bufnr, true, win_opts)
+    open_float_buffer(buffer_size, file_name)
   else
-    vim.cmd(('silent %s %s'):format(open_method, vim.fn.fnameescape(file_name)))
+    open_buffer_by_method(open_method, buffer_size, file_name)
   end
+  set_buffer_type(opening_as_tmp_buffer)
 
-  -- Set buffer options
-  if opening_as_tmp_buffer then
-    vim.bo.buftype = 'nofile'
-    vim.bo.bufhidden = 'hide'
-  else
-    vim.bo.buftype = ''
-    vim.bo.bufhidden = ''
-  end
-
-  if buffer_size ~= 'no-auto-resize' and open_method ~= 'float' then
-    local resize_method = open_method == 'vsp' and 'vertical resize' or 'resize'
-    vim.cmd(resize_method .. ' ' .. tonumber(buffer_size))
-  end
+  autocmd.setup_autocmds()
 end
 
 ---Opens scratch buffer (tmp buffer)
