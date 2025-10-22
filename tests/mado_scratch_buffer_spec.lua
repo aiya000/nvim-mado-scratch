@@ -1,15 +1,10 @@
 local helper = require('mado-scratch-buffer.helper')
 
 describe('mado-scratch-buffer', function()
-  local config_backup = {}
-
   -- Setup before all tests
   before_each(function()
-    -- Backup configuration
-    local mado = require('mado-scratch-buffer')
-    config_backup = vim.deepcopy(mado.config)
-
     -- Setup test configuration
+    local mado = require('mado-scratch-buffer')
     mado.setup({
       file_pattern = {
         when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -36,8 +31,9 @@ describe('mado-scratch-buffer', function()
 
   after_each(function()
     local mado = require('mado-scratch-buffer')
-    local file_pattern_tmp = mado.config.file_pattern.when_tmp_buffer
-    local file_pattern_file = mado.config.file_pattern.when_file_buffer
+    local config = mado.get_config()
+    local file_pattern_tmp = config.file_pattern.when_tmp_buffer
+    local file_pattern_file = config.file_pattern.when_file_buffer
 
     -- Clean all created files
     local tmp_files = vim.fn.glob(file_pattern_tmp:gsub('%%d', '*'), false, true)
@@ -49,9 +45,6 @@ describe('mado-scratch-buffer', function()
     for _, file in ipairs(file_files) do
       vim.fn.delete(file)
     end
-
-    -- Restore configuration
-    mado.config = config_backup
   end)
 
   describe('MadoScratchBufferOpen', function()
@@ -59,7 +52,8 @@ describe('mado-scratch-buffer', function()
       vim.cmd('MadoScratchBufferOpen')
       local file_name = vim.fn.expand('%:p')
       local mado = require('mado-scratch-buffer')
-      local expected = string.format(mado.config.file_pattern.when_tmp_buffer, 0) .. '.md'
+      local config = mado.get_config()
+      local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.md'
       assert.equals(expected, file_name)
     end)
 
@@ -113,7 +107,8 @@ describe('mado-scratch-buffer', function()
       vim.cmd('MadoScratchBufferOpen')
 
       local file_name = vim.fn.expand('%:p')
-      local expected = string.format(mado.config.file_pattern.when_tmp_buffer, 0) .. '.ts'
+      local config = mado.get_config()
+      local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.ts'
       assert.equals(expected, file_name)
       assert.equals(20, vim.fn.winwidth(0))
     end)
@@ -129,7 +124,8 @@ describe('mado-scratch-buffer', function()
 
       vim.cmd('MadoScratchBufferOpen')
       local file_name = vim.fn.expand('%:p')
-      local expected = string.format(mado.config.file_pattern.when_tmp_buffer, 0) .. '.md'
+      local config = mado.get_config()
+      local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.md'
       assert.equals(expected, file_name)
     end)
 
@@ -196,7 +192,8 @@ describe('mado-scratch-buffer', function()
 
       vim.cmd('MadoScratchBufferOpenFile')
       local file_name = vim.fn.expand('%:p')
-      local expected = string.format(mado.config.file_pattern.when_file_buffer, 0) .. '.md'
+      local config = mado.get_config()
+      local expected = string.format(config.file_pattern.when_file_buffer, 0) .. '.md'
       assert.equals(expected, file_name)
     end)
 
@@ -304,8 +301,8 @@ describe('mado-scratch-buffer', function()
       -- Check the created files exist
       local all_buffer_names = helper.get_all_buffer_names()
       assert.equals(1, vim.fn.filereadable(first_file))
-      assert.is_true(helper.contains(all_buffer_names, first_file))
-      assert.is_true(helper.contains(all_buffer_names, second_file))
+      assert.is_true(vim.list_contains(all_buffer_names, first_file))
+      assert.is_true(vim.list_contains(all_buffer_names, second_file))
 
       -- Wipe all scratch buffers and files
       vim.cmd('MadoScratchBufferClean')
@@ -313,8 +310,8 @@ describe('mado-scratch-buffer', function()
       -- Check the created files are removed
       local new_all_buffer_names = helper.get_all_buffer_names()
       assert.equals(0, vim.fn.filereadable(first_file))
-      assert.is_false(helper.contains(new_all_buffer_names, first_file))
-      assert.is_false(helper.contains(new_all_buffer_names, second_file))
+      assert.is_false(vim.list_contains(new_all_buffer_names, first_file))
+      assert.is_false(vim.list_contains(new_all_buffer_names, second_file))
     end)
   end)
 end)

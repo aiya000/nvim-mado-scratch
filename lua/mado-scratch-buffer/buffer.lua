@@ -2,10 +2,17 @@ local helper = require('mado-scratch-buffer.helper')
 
 local M = {}
 
+---@class OpenBufferOptions
+---@field opening_as_tmp_buffer boolean # Whether opening as tmp buffer
+---@field opening_next_fresh_buffer boolean # Whether to open next fresh buffer
+---@field file_ext string | nil
+---@field open_method string | nil
+---@field buffer_size integer | 'no-auto-resize' | nil
+
 ---Extracts index from name using pattern
 ---@param name string # Buffer or file name
 ---@param pattern string # Pattern with %d placeholder
----@return number|nil index # Index number or nil if not found
+---@return integer | nil # Index number, or nil if not found
 local function extract_index_from_name(name, pattern)
   -- Replace %d with a unique placeholder that won't appear in paths
   local temp_placeholder = '__INDEX__'
@@ -34,7 +41,7 @@ end
 
 ---Finds current max index for pattern
 ---@param pattern string # File pattern with %d placeholder
----@return number max_index # Maximum index found (0 if none)
+---@return integer # Maximum index found (0 if none)
 local function find_current_index(pattern)
   local buffer_names = helper.get_all_buffer_names()
   local max_buffer_index = 0
@@ -63,11 +70,11 @@ local function find_current_index(pattern)
 end
 
 ---Returns file pattern with extension
----@param opening_as_tmp_buffer boolean Whether opening as tmp buffer
----@param file_ext string File extension or special value
----@return string pattern File pattern with extension
+---@param opening_as_tmp_buffer boolean # Whether opening as tmp buffer
+---@param file_ext string # File extension or special value
+---@return string # File pattern with extension
 local function get_file_pattern(opening_as_tmp_buffer, file_ext)
-  local config = require('mado-scratch-buffer').config
+  local config = require('mado-scratch-buffer').get_config()
   local base_pattern = opening_as_tmp_buffer
     and config.file_pattern.when_tmp_buffer
     or config.file_pattern.when_file_buffer
@@ -80,7 +87,7 @@ local function get_file_pattern(opening_as_tmp_buffer, file_ext)
 end
 
 ---Wipes buffers matching pattern
----@param file_pattern string Pattern to match buffers
+---@param file_pattern string # Pattern to match buffers
 local function wipe_buffers(file_pattern)
   -- Create a prefix by removing the %d placeholder and any extension
   local base_pattern = file_pattern:gsub('%%d.*$', '')
@@ -145,7 +152,7 @@ local function open_in_new_float_window(file_name, geometry)
 end
 
 ---Opens a floating window with a buffer displaying the specified file
----@param buffer_size number | 'no-auto-resize'
+---@param buffer_size integer | 'no-auto-resize'
 ---@param file_name string
 local function open_float_buffer(buffer_size, file_name)
   local width = tonumber(buffer_size) or 80 -- 80: A default width
@@ -164,7 +171,7 @@ end
 
 ---Opens a window by specified method
 ---@param open_method 'sp' | 'vsp' | 'tabnew'
----@param buffer_size number | 'no-auto-resize'
+---@param buffer_size integer | 'no-auto-resize'
 ---@param file_name string
 local function open_buffer_by_method(open_method, buffer_size, file_name)
   vim.cmd(('silent %s %s'):format(open_method, vim.fn.fnameescape(file_name)))
@@ -174,61 +181,61 @@ local function open_buffer_by_method(open_method, buffer_size, file_name)
   end
 end
 
----Opens a scratch buffer
----@param options table Options for opening buffer
----@return nil
+---Opens a scratch buffer (either a tmp buffer or a file buffer)
+---@param options OpenBufferOptions
 function M.open_buffer(options)
-  local config = require('mado-scratch-buffer').config
-  local autocmd = require('mado-scratch-buffer.autocmd')
+  local config = require('mado-scratch-buffer').get_config()
 
-  local args = options.args or {}
-  local opening_as_tmp_buffer = options.opening_as_tmp_buffer
-  local opening_next_fresh_buffer = options.opening_next_fresh_buffer
+  local file_ext = options.file_ext or config.default_file_ext
+  local file_pattern = get_file_pattern(options.opening_as_tmp_buffer, file_ext)
 
-  local file_ext = args[1] or config.default_file_ext
-  local file_pattern = get_file_pattern(opening_as_tmp_buffer, file_ext)
-
-  local index = find_current_index(file_pattern) + (opening_next_fresh_buffer and 1 or 0)
+  local index = find_current_index(file_pattern) + (options.opening_next_fresh_buffer and 1 or 0)
   local file_name = vim.fn.expand(string.format(file_pattern, index))
 
-  local open_method = args[2] or config.default_open_method
-  local buffer_size = args[3] or config.default_buffer_size
+  local open_method = options.open_method or config.default_open_method
+  local buffer_size = options.buffer_size or config.default_buffer_size
 
   if open_method == 'float' then
     open_float_buffer(buffer_size, file_name)
   else
-    open_buffer_by_method(open_method, buffer_size, file_name)
+    open_buffer_by_method(
+      open_method --[[@as 'sp' | 'vsp' | 'tabnew']],
+      buffer_size,
+      file_name
+    )
   end
-  set_buffer_type(opening_as_tmp_buffer)
-
-  autocmd.setup_autocmds()
+  set_buffer_type(options.opening_as_tmp_buffer)
 end
 
 ---Opens scratch buffer (tmp buffer)
 ---@param opening_next_fresh_buffer boolean Whether to force new buffer
----@param ... unknown Arguments (file_ext, open_method, buffer_size)
+---@param ... string # Expected: { file_ext?, open_method?, buffer_size? }
 function M.open(opening_next_fresh_buffer, ...)
   return M.open_buffer({
     opening_as_tmp_buffer = true,
     opening_next_fresh_buffer = opening_next_fresh_buffer,
-    args = { ... }
+    file_ext = select(1, ...),
+    open_method = select(2, ...),
+    buffer_size = select(3, ...),
   })
 end
 
 ---Opens a file buffer (persistent buffer)
 ---@param opening_next_fresh_buffer boolean --Whether to force new buffer
----@param ... unknown --Optionmal arguments: file_ext, open_method, buffer_size
+---@param ... string # Expected: { file_ext?, open_method?, buffer_size? }
 function M.open_file(opening_next_fresh_buffer, ...)
   return M.open_buffer({
     opening_as_tmp_buffer = false,
     opening_next_fresh_buffer = opening_next_fresh_buffer,
-    args = { ... }
+    file_ext = select(1, ...),
+    open_method = select(2, ...),
+    buffer_size = select(3, ...),
   })
 end
 
 ---Cleans up all scratch buffers and files
 function M.clean()
-  local config = require('mado-scratch-buffer').config
+  local config = require('mado-scratch-buffer').get_config()
 
   local file_glob_pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*')
   local persistent_files = vim.fn.glob(file_glob_pattern, false, true)
