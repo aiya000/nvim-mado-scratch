@@ -136,6 +136,9 @@ local function open_in_new_float_window(file_name, geometry)
       'Warning: Another Neovim instance may be editing this file: ' .. file_name,
       vim.log.levels.WARN
     )
+  end
+
+  if vim.fn.filereadable(file_name) == 1 then
     local lines = vim.fn.readfile(file_name)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   end
