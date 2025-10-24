@@ -41,7 +41,7 @@ execute code instantly!
 Please see the |mado-scratch-buffer-usage| section for usage details.
 
 Repository:
-https://github.com/aiya000/mado-scratch-buffer.nvim
+https://github.com/aiya000/nvim-mado-scratch-buffer
 
 
 ==============================================================================
@@ -51,7 +51,7 @@ Install the plugin using your favorite plugin manager:
 
 Using lazy.nvim: >lua
   {
-    'aiya000/mado-scratch-buffer.nvim',
+    'aiya000/nvim-mado-scratch-buffer',
     config = function()
       require('mado-scratch-buffer').setup({
         -- your configuration here
@@ -62,7 +62,7 @@ Using lazy.nvim: >lua
 
 Using packer.nvim: >lua
   use {
-    'aiya000/mado-scratch-buffer.nvim',
+    'aiya000/nvim-mado-scratch-buffer',
     config = function()
       require('mado-scratch-buffer').setup({
         -- your configuration here
@@ -272,16 +272,16 @@ require('mado-scratch-buffer.buffer').clean()
 ==============================================================================
 CHANGELOG                    *mado-scratch-buffer-changelog*
 
-2025
-- Complete rewrite in Lua for Neovim
-    - The new repository:
-    https://github.com/aiya000/nvim-mado-scratch-buffer
-- Renamed from vim-scratch-buffer to mado-scratch-buffer.nvim
-- Modern Neovim plugin structure with setup() function
-- Removed backward compatibility with old Vim script version
-- Updated command names to Mado* prefix
-- Improved configuration system
-- Added comprehensive Lua API documentation
+- See https://github.com/aiya000/nvim-mado-scratch-buffer/commits/main
+  - We use Conventional Commits for the changelog
+  - In Conventional Commits, a bang (!) indicates breaking changes
+    - Please update your config if you encounter these commits
+    - Example: `change!: Change argument types of 'create_foo()' in 'mado-scratch-buffer.foo' module`
+
+- - -
+
+2025~
+- Create the new repository: https://github.com/aiya000/vim-scratch-buffer
 
 2024
 - Create original repository: https://github.com/aiya000/vim-scratch-buffer

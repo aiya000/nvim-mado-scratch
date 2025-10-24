@@ -1,4 +1,4 @@
-# :sparkles: mado-scratch-buffer.nvim :sparkles:
+# :sparkles: nvim-mado-scratch-buffer :sparkles:
 
 :rocket: **No more hassle with file paths!** The fastest way to open an instant scratch buffer.
 
@@ -8,11 +8,11 @@ For :star:Neovim:star: (lua-based modern implementation).
 
 ## Table of Contents
 
-- [:sparkles: mado-scratch-buffer.nvim :sparkles:](#sparkles-mado-scratch-buffernvim-sparkles)
+- [:sparkles: nvim-mado-scratch-buffer :sparkles:](#sparkles-mado-scratch-buffernvim-sparkles)
   - [:gear: Installation](#gear-installation)
   - [:wrench: Configuration](#wrench-configuration)
   - [:wrench: Quick Start](#wrench-quick-start)
-  - [:fire: Why mado-scratch-buffer.nvim?](#fire-why-mado-scratch-buffernvim)
+  - [:fire: Why nvim-mado-scratch-buffer?](#fire-why-mado-scratch-buffernvim)
   - [:zap: Supercharge with vim-quickrun!](#zap-supercharge-with-vim-quickrun)
   - [:balance_scale: Comparison with scratch.vim](#balance_scale-comparison-with-scratchvim)
     - [:gear: Detailed Usage](#gear-detailed-usage)
@@ -59,7 +59,7 @@ And more features...
 
 ```lua
 {
-  'aiya000/mado-scratch-buffer.nvim',
+  'aiya000/nvim-mado-scratch-buffer',
   config = function()
     require('scratch-buffer').setup({
       -- Optional configuration (these are defaults)
@@ -85,7 +85,7 @@ And more features...
 
 ```lua
 use {
-  'aiya000/mado-scratch-buffer.nvim',
+  'aiya000/nvim-mado-scratch-buffer',
   config = function()
     require('scratch-buffer').setup()
   end
@@ -134,7 +134,7 @@ require('scratch-buffer').setup({
 
 Please see '[Detailed Usage](#gear-detailed-usage)' section for more information.
 
-## :fire: Why mado-scratch-buffer.nvim?
+## :fire: Why nvim-mado-scratch-buffer?
 
 - **Open instantly!** Just run `:MadoScratchBufferOpen`!
 - **No file management!** Perfect for quick notes and testing code snippets.
