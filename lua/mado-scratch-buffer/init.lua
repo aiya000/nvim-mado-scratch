@@ -1,11 +1,25 @@
 local M = {}
 
+---@class VerticalSplitMethod
+---@field method 'vsp'
+---@field width? integer
+
+---@class HorizontalSplitMethod
+---@field method 'sp'
+---@field height? integer
+
+---@class TabNewMethod
+---@field method 'tabnew'
+
+---@class FloatWindowMethod
+---@field method 'float'
+---@field size? { width: integer, height: integer }
+
 ---A type for user to set nvim-mado-scratch-buffer
 ---@class mado_scratch_buffer.UserConfig
 ---@field file_pattern? { when_tmp_buffer?: string, when_file_buffer?: string }
 ---@field default_file_ext? string
----@field default_open_method? 'vsp' | 'sp' | 'tabnew' | 'float'
----@field default_buffer_size? integer | 'no-auto-resize'
+---@field default_open_method? VerticalSplitMethod | HorizontalSplitMethod | TabNewMethod | FloatWindowMethod
 ---@field auto_save_file_buffer? boolean
 ---@field use_default_keymappings? boolean
 ---@field auto_hide_buffer? { when_tmp_buffer?: boolean, when_file_buffer?: boolean }
@@ -15,8 +29,7 @@ local M = {}
 ---@class mado_scratch_buffer.Config
 ---@field file_pattern { when_tmp_buffer: string, when_file_buffer: string }
 ---@field default_file_ext string
----@field default_open_method 'vsp' | 'sp' | 'tabnew' | 'float'
----@field default_buffer_size integer | 'no-auto-resize'
+---@field default_open_method VerticalSplitMethod | HorizontalSplitMethod | TabNewMethod | FloatWindowMethod
 ---@field auto_save_file_buffer boolean
 ---@field use_default_keymappings boolean
 ---@field auto_hide_buffer { when_tmp_buffer: boolean, when_file_buffer: boolean }
@@ -41,8 +54,7 @@ function M.setup(user_config)
       when_file_buffer = '/tmp/mado-scratch-file-%d',
     },
     default_file_ext = 'md',
-    default_open_method = 'sp',
-    default_buffer_size = 30,
+    default_open_method = { method = 'sp', height = 15 },
     auto_save_file_buffer = true,
     use_default_keymappings = false,
     auto_hide_buffer = {
@@ -50,7 +62,24 @@ function M.setup(user_config)
       when_file_buffer = false,
     },
   }
+
+  -- デフォルトサイズの定義
+  local default_sizes = {
+    sp = { height = 15 },
+    vsp = { width = 30 },
+    float = { width = 80, height = 24 },
+  }
+
   config = vim.tbl_deep_extend('force', default_config, user_config or {})
+
+  -- default_open_methodのサイズがnilの場合、デフォルト値を設定
+  if config.default_open_method.method == 'sp' and config.default_open_method.height == nil then
+    config.default_open_method.height = default_sizes.sp.height
+  elseif config.default_open_method.method == 'vsp' and config.default_open_method.width == nil then
+    config.default_open_method.width = default_sizes.vsp.width
+  elseif config.default_open_method.method == 'float' and config.default_open_method.size == nil then
+    config.default_open_method.size = { width = default_sizes.float.width, height = default_sizes.float.height }
+  end
 
   if config.use_default_keymappings then
     define_default_keymaps()

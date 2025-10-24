@@ -155,11 +155,11 @@ local function open_in_new_float_window(file_name, geometry)
 end
 
 ---Opens a floating window with a buffer displaying the specified file
----@param buffer_size integer | 'no-auto-resize'
+---@param size { width: integer, height: integer }
 ---@param file_name string
-local function open_float_buffer(buffer_size, file_name)
-  local width = tonumber(buffer_size) or 80 -- 80: A default width
-  local height = math.floor(width / 2)
+local function open_float_buffer(size, file_name)
+  local width = size.width
+  local height = size.height
   local win_width, win_height = get_winsize()
   local row = math.floor((win_height - height) / 2)
   local col = math.floor((win_width - width) / 2)
@@ -170,6 +170,22 @@ local function open_float_buffer(buffer_size, file_name)
     row = row,
     col = col,
   })
+end
+
+---Parses float window size from string
+---@param size_str string | nil
+---@return { width: integer, height: integer } | nil
+local function parse_float_size(size_str)
+  if size_str == nil then
+    return nil
+  end
+
+  local width, height = size_str:match('^(%d+)x(%d+)$')
+  if width and height then
+    return { width = tonumber(width), height = tonumber(height) }
+  end
+
+  return nil
 end
 
 ---Opens a window by specified method
@@ -195,12 +211,32 @@ function M.open_buffer(options)
   local index = find_current_index(file_pattern) + (options.opening_next_fresh_buffer and 1 or 0)
   local file_name = vim.fn.expand(string.format(file_pattern, index))
 
-  local open_method = options.open_method or config.default_open_method
-  local buffer_size = options.buffer_size or config.default_buffer_size
+  local open_method = options.open_method or config.default_open_method.method
+  local buffer_size = options.buffer_size
 
   if open_method == 'float' then
-    open_float_buffer(buffer_size, file_name)
+    -- float windowのサイズ解決
+    local float_size = parse_float_size(buffer_size)
+    if float_size == nil then
+      -- コマンドでサイズが指定されていない場合、設定から取得
+      float_size = config.default_open_method.method == 'float' and config.default_open_method.size or nil
+      -- それもnilなら、デフォルト値を使用
+      if float_size == nil then
+        float_size = { width = 80, height = 24 }
+      end
+    end
+    open_float_buffer(float_size, file_name)
   else
+    -- sp/vspのサイズ解決
+    if buffer_size == nil then
+      if open_method == 'sp' and config.default_open_method.method == 'sp' then
+        buffer_size = config.default_open_method.height
+      elseif open_method == 'vsp' and config.default_open_method.method == 'vsp' then
+        buffer_size = config.default_open_method.width
+      else
+        buffer_size = 'no-auto-resize'
+      end
+    end
     open_buffer_by_method(
       open_method --[[@as 'sp' | 'vsp' | 'tabnew']],
       buffer_size,
@@ -211,7 +247,7 @@ function M.open_buffer(options)
 end
 
 ---Opens scratch buffer (tmp buffer)
----@param opening_next_fresh_buffer boolean Whether to force new buffer
+---@param opening_next_fresh_buffer boolean # Whether to force new buffer
 ---@param ... string # Expected: { file_ext?, open_method?, buffer_size? }
 function M.open(opening_next_fresh_buffer, ...)
   return M.open_buffer({
@@ -224,7 +260,7 @@ function M.open(opening_next_fresh_buffer, ...)
 end
 
 ---Opens a file buffer (persistent buffer)
----@param opening_next_fresh_buffer boolean --Whether to force new buffer
+---@param opening_next_fresh_buffer boolean # Whether to force new buffer
 ---@param ... string # Expected: { file_ext?, open_method?, buffer_size? }
 function M.open_file(opening_next_fresh_buffer, ...)
   return M.open_buffer({
