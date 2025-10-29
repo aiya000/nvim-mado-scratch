@@ -302,3 +302,10 @@ require('scratch-buffer').setup({
   },
 })
 ```
+
+- - - - -
+
+💙 **Enjoying nvim-mado-scratch-buffer?**  
+Show your support with a ⭐ on GitHub!
+
+**Happy coding with Vim/Neovim!** ⚡✨
