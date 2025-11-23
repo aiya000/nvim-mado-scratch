@@ -1,4 +1,4 @@
-local helper = require('mado-scratch-buffer.helper')
+local fn = require('mado-scratch-buffer.functions')
 
 local M = {}
 
@@ -43,7 +43,7 @@ end
 ---@param pattern string # File pattern with %d placeholder
 ---@return integer # Maximum index found (0 if none)
 local function find_current_index(pattern)
-  local buffer_names = helper.get_all_buffer_names()
+  local buffer_names = fn.get_all_buffer_names()
   local max_buffer_index = 0
 
   -- Find max index from buffer names
@@ -91,7 +91,7 @@ end
 local function wipe_buffers(file_pattern)
   -- Create a prefix by removing the %d placeholder and any extension
   local base_pattern = file_pattern:gsub('%%d.*$', '')
-  local buffer_names = helper.get_all_buffer_names()
+  local buffer_names = fn.get_all_buffer_names()
 
   for _, buffer_name in ipairs(buffer_names) do
     -- Check if buffer name starts with the base pattern (using plain text match)
@@ -128,29 +128,41 @@ end
 ---@param file_name string
 ---@param geometry { width: integer, height: integer, row: integer, col: integer }
 local function open_in_new_float_window(file_name, geometry)
-  local bufnr = vim.api.nvim_create_buf(false, false)
-
-  local is_file_not_opened_by_another_neovim = pcall(vim.api.nvim_buf_set_name, bufnr, file_name)
-  if not is_file_not_opened_by_another_neovim then
-    vim.notify(
-      'Warning: Another Neovim instance may be editing this file: ' .. file_name,
-      vim.log.levels.WARN
-    )
+  -- Check if buffer with this name already exists and wipe it
+  local existing_bufnr = vim.fn.bufnr(file_name)
+  if existing_bufnr ~= -1 then
+    vim.api.nvim_buf_delete(existing_bufnr, { force = true })
   end
+
+  local Popup = require('nui.popup')
+  local popup = Popup({
+    enter = true,
+    focusable = true,
+    border = { style = 'rounded' },
+    relative = 'editor',
+    position = { row = geometry.row, col = geometry.col },
+    size = { width = geometry.width, height = geometry.height },
+  })
+  popup:mount()
+  local bufnr = popup.bufnr
+
+  vim.api.nvim_buf_set_name(bufnr, file_name)
 
   if vim.fn.filereadable(file_name) == 1 then
     local lines = vim.fn.readfile(file_name)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   end
 
-  vim.api.nvim_open_win(bufnr, true, {
-    relative = 'editor',
-    width = geometry.width,
-    height = geometry.height,
-    row = geometry.row,
-    col = geometry.col,
-    style = 'minimal',
-    border = 'rounded',
+  local group = vim.api.nvim_create_augroup('MadoScratchBufSync', { clear = false })
+  vim.api.nvim_create_autocmd('BufWriteCmd', {
+    group = group,
+    buffer = bufnr,
+    callback = function()
+      if vim.bo[bufnr].buftype == 'nofile' then return end
+      local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+      vim.fn.writefile(lines, file_name)
+      vim.api.nvim_buf_set_option(bufnr, 'modified', false)
+    end,
   })
 end
 

@@ -35,10 +35,10 @@ clean:
 update-chotto:
 	@echo 'Updating chotto.lua from upstream...'
 	@git subtree pull --prefix=subtree/chotto.lua https://github.com/aiya000/chotto.lua main --squash
-	@echo 'Copying src files to lua/chotto/...'
-	@rm -rf lua/chotto
-	@cp -r subtree/chotto.lua/src lua/chotto
-	@git add lua/chotto
+	@echo 'Copying src files to lua/mado-scratch-buffer/chotto/...'
+	@rm -rf lua/mado-scratch-buffer/chotto
+	@cp -r subtree/chotto.lua/src lua/mado-scratch-buffer/chotto
+	@git add lua/mado-scratch-buffer/chotto
 	@if git diff --cached --quiet; then \
 		echo 'No changes to commit.'; \
 	else \

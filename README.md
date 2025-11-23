@@ -68,8 +68,7 @@ And more features...
         when_file_buffer = '/tmp/mado-scratch-file-%d',
       },
       default_file_ext = 'md',
-      default_open_method = 'sp',
-      default_buffer_size = 30,
+      default_open_method = { method = 'sp', height = 15 },
       auto_save_file_buffer = true,
       use_default_keymappings = false,  -- Set to true to enable default keymaps
       auto_hide_buffer = {
@@ -91,6 +90,29 @@ use {
   end
 }
 ```
+
+### Optional Dependency
+
+- [nui.nvim](https://github.com/MunifTanjim/nui.nvim) for floating window support ↓
+
+To use floating windows, configure `default_open_method` like this:
+
+```lua
+{
+  'aiya000/nvim-mado-scratch-buffer',
+  config = function()
+    require('scratch-buffer').setup({
+      default_open_method = { method = 'float', size = { width = 80, height = 24 } },
+      -- other options...
+    })
+  end,
+}
+```
+
+You can also use other open methods (below are not needing nui.nvim):
+- `{ method = 'sp', height = 15 }` - horizontal split
+- `{ method = 'vsp', width = 30 }` - vertical split
+- `{ method = 'tabnew' }` - new tab
 
 ## :wrench: Configuration
 

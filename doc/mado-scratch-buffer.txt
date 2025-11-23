@@ -103,6 +103,7 @@ Open a scratch buffer with or without a file extension:
   " Open with custom split method and size
   :MadoScratchBufferOpen md sp 10
   :MadoScratchBufferOpen ts vsp 80
+  :MadoScratchBufferOpen hs float 60
 
   " Clean up all scratch buffers and files
   :MadoScratchBufferClean
@@ -130,9 +131,8 @@ Configure the plugin by calling the setup function:
     },
 
     -- Options when you didn't specify to the commands
-    default_file_ext = 'md',           -- Default file extension
-    default_open_method = 'sp',        -- 'sp', 'vsp', 'tabnew', or 'float'
-    default_buffer_size = 30,          -- Default buffer height/width
+    default_file_ext = 'md',                                -- Default file extension
+    default_open_method = { method = 'sp', height = 15 },   -- Default open method and size
 
     -- Behavior options
     auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged
@@ -172,15 +172,14 @@ default_file_ext ~
 
                         *option.mado_scratch_buffer_default_open_method*
 default_open_method ~
-  Default: `'sp'`
-  Default method to open buffers.
-  Options: 'sp' (horizontal split), 'vsp' (vertical split), 'tabnew' (new tab), or 'float' (floating window)
+  Default: `{ method = 'sp', height = 15 }`
+  Default method to open buffers with size configuration.
 
-                        *option.mado_scratch_buffer_default_buffer_size*
-default_buffer_size ~
-  Default: `30`
-  Default buffer size (height for sp, width for vsp/float).
-  Set to `'no-auto-resize'` to disable auto resizing (float will default to 80 width).
+  Examples:
+  - `{ method = 'sp', height = 15 }` - horizontal split with height
+  - `{ method = 'vsp', width = 30 }` - vertical split with width
+  - `{ method = 'float', size = { width = 80, height = 24 } }` - floating window
+  - `{ method = 'tabnew' }` - new tab (no size needed)
 
                         *option.mado_scratch_buffer_auto_save_file_buffer*
 auto_save_file_buffer ~

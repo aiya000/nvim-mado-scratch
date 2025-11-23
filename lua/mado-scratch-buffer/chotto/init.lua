@@ -192,9 +192,16 @@ function M.object(raw_schema)
     for key, schema in pairs(raw_schema) do
       local field_value = obj[key]
       if field_value == nil then
-        error('Missing required field: ' .. tostring(key))
+        -- Try to parse nil to check if this field is optional
+        local ok, result = pcall(schema.parse_raw, nil)
+        if ok then
+          validated[key] = result
+        else
+          error('Missing required field: ' .. tostring(key))
+        end
+      else
+        validated[key] = schema.parse_raw(field_value)
       end
-      validated[key] = schema.parse_raw(field_value)
     end
 
     -- Copy over any extra fields (zod-like behavior: allow unknown properties)
