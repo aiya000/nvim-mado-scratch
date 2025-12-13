@@ -153,12 +153,13 @@ local function open_in_new_float_window(file_name, geometry)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   end
 
-  local group = vim.api.nvim_create_augroup('MadoScratchBufSync', { clear = false })
   vim.api.nvim_create_autocmd('BufWriteCmd', {
-    group = group,
+    group = vim.api.nvim_create_augroup('MadoScratchBufSync', { clear = false }),
     buffer = bufnr,
     callback = function()
-      if vim.bo[bufnr].buftype == 'nofile' then return end
+      if vim.bo[bufnr].buftype == 'nofile' then
+        return
+      end
       local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
       vim.fn.writefile(lines, file_name)
       vim.api.nvim_buf_set_option(bufnr, 'modified', false)
@@ -226,17 +227,43 @@ function M.open_buffer(options)
   local open_method = options.open_method or config.default_open_method.method
   local buffer_size = options.buffer_size
 
-  if open_method == 'float' then
-    -- float windowのサイズ解決
-    local float_size = parse_float_size(buffer_size)
-    if float_size == nil then
-      -- コマンドでサイズが指定されていない場合、設定から取得
-      float_size = config.default_open_method.method == 'float' and config.default_open_method.size or nil
-      -- それもnilなら、デフォルト値を使用
+  if open_method == 'float-fixed' or open_method == 'float' or open_method == 'float-aspect' then
+    local float_size
+
+    if open_method == 'float-fixed' or open_method == 'float' then
+      -- 固定サイズの場合（'float'は後方互換性のために'float-fixed'として扱う）
+      float_size = parse_float_size(buffer_size)
       if float_size == nil then
-        float_size = { width = 80, height = 24 }
+        -- コマンドでサイズが指定されていない場合、設定から取得
+        if config.default_open_method.method == 'float-fixed' or config.default_open_method.method == 'float' then
+          float_size = config.default_open_method.size
+        end
+        -- それもnilなら、デフォルト値を使用
+        if float_size == nil then
+          float_size = { width = 80, height = 24 }
+        end
       end
+    elseif open_method == 'float-aspect' then
+      -- 画面比率の場合
+      local scale
+      -- まずは設定から取得（コマンドからの指定は将来的にサポート）
+      if config.default_open_method.method == 'float-aspect' then
+        scale = config.default_open_method.scale
+      end
+
+      -- デフォルトスケールを設定
+      if scale == nil then
+        scale = { width = 0.8, height = 0.8 }
+      end
+
+      -- 画面サイズを取得してスケールを適用
+      local win_width, win_height = get_winsize()
+      float_size = {
+        width = math.floor(win_width * scale.width),
+        height = math.floor(win_height * scale.height),
+      }
     end
+
     open_float_buffer(float_size, file_name)
   else
     -- sp/vspのサイズ解決

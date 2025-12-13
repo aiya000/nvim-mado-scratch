@@ -10,17 +10,6 @@ function M.ensure(schema, validatee)
   end)
 end
 
----Creates a readonly table that denies `rawset()` and `rawget()`
----@param x table
----@return userdata
----@see readonly
-function M.readonly(x)
-  local proxy = newproxy(true)
-  local metatable = getmetatable(proxy)
-  metatable.__index = x
-  return proxy
-end
-
 ---Gets all buffer names
 ---@return string[]
 function M.get_all_buffer_names()
