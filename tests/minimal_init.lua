@@ -12,4 +12,4 @@ local project_path = vim.fn.getcwd()
 vim.opt.runtimepath = nvim_runtime .. ',' .. plenary_path .. ',' .. project_path
 
 -- Source the plugin commands
-vim.cmd('source ' .. project_path .. '/plugin/mado-scratch-buffer.lua')
+vim.cmd('source ' .. project_path .. '/plugin/mado-scratch.lua')

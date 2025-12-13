@@ -2,7 +2,7 @@ local M = {}
 
 ---Saves file buffer if enabled
 function M.save_file_buffer_if_enabled()
-  local config = require('mado-scratch-buffer').config
+  local config = require('mado-scratch').config
   local buftype = vim.bo.buftype
 
   if config.auto_save_file_buffer and buftype ~= 'nofile' then
@@ -12,7 +12,7 @@ end
 
 ---Hides buffer if enabled
 function M.hide_buffer_if_enabled()
-  local config = require('mado-scratch-buffer').config
+  local config = require('mado-scratch').config
   local buftype = vim.bo.buftype
 
   if buftype == 'nofile' and config.auto_hide_buffer.when_tmp_buffer then
@@ -28,9 +28,9 @@ end
 
 ---Setups autocmds for scratch buffer
 function M.setup_autocmds()
-  local config = require('mado-scratch-buffer').config
+  local config = require('mado-scratch').config
 
-  local augroup = vim.api.nvim_create_augroup('MadoScratchBuffer', { clear = true })
+  local augroup = vim.api.nvim_create_augroup('MadoScratch', { clear = true })
   vim.api.nvim_create_autocmd('TextChanged', {
     group = augroup,
     pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*'),

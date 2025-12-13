@@ -1,6 +1,6 @@
 local M = {}
 
----@class mado_scratch_buffer.Options
+---@class mado_scratch.Options
 ---@field file_pattern? {when_tmp_buffer?: string, when_file_buffer?: string}
 ---@field default_file_ext? string
 ---@field default_open_method? 'vsp' | 'sp' | 'tabnew' -- TODO: Add 'float' support. See Issue #1
@@ -9,7 +9,7 @@ local M = {}
 ---@field use_default_keymappings? boolean
 ---@field auto_hide_buffer? {when_tmp_buffer?: boolean, when_file_buffer?: boolean}
 
----@type mado_scratch_buffer.Options
+---@type mado_scratch.Options
 local default_config = {
   file_pattern = {
     when_tmp_buffer = '/tmp/mado-scratch-tmp-%d',
@@ -26,13 +26,13 @@ local default_config = {
   },
 }
 
----@type mado_scratch_buffer.Options
+---@type mado_scratch.Options
 M.config = {}
 
 ---Merges two tables deeply
----@param target mado_scratch_buffer.Options --The target table to merge into
----@param source mado_scratch_buffer.Options --The source table to merge from
----@return mado_scratch_buffer.Options -- Merged table
+---@param target mado_scratch.Options --The target table to merge into
+---@param source mado_scratch.Options --The source table to merge from
+---@return mado_scratch.Options -- Merged table
 local function deep_merge(target, source)
   local result = vim.deepcopy(target)
   for k, v in pairs(source) do
@@ -47,14 +47,14 @@ end
 
 ---Setups default keymappings
 local function setup_keymappings()
-  vim.keymap.set('n', '<leader>b', '<Cmd>MadoScratchBufferOpen<CR>', { silent = true, noremap = true })
-  vim.keymap.set('n', '<leader>B', '<Cmd>MadoScratchBufferOpenFile<CR>', { silent = true, noremap = true })
-  vim.keymap.set('n', '<leader><leader>b', ':<C-u>MadoScratchBufferOpen<Space>', { noremap = true })
-  vim.keymap.set('n', '<leader><leader>B', ':<C-u>MadoScratchBufferOpenFile<Space>', { noremap = true })
+  vim.keymap.set('n', '<leader>b', '<Cmd>MadoScratchOpen<CR>', { silent = true, noremap = true })
+  vim.keymap.set('n', '<leader>B', '<Cmd>MadoScratchOpenFile<CR>', { silent = true, noremap = true })
+  vim.keymap.set('n', '<leader><leader>b', ':<C-u>MadoScratchOpen<Space>', { noremap = true })
+  vim.keymap.set('n', '<leader><leader>B', ':<C-u>MadoScratchOpenFile<Space>', { noremap = true })
 end
 
 ---Setups the plugin
----@param user_config? mado_scratch_buffer.Options
+---@param user_config? mado_scratch.Options
 function M.setup(user_config)
   M.config = deep_merge(default_config, user_config or {})
 
@@ -64,7 +64,7 @@ function M.setup(user_config)
 end
 
 ---Returns your current configuration
----@return mado_scratch_buffer.Options
+---@return mado_scratch.Options
 function M.get_config()
   return M.config
 end

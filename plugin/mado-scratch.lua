@@ -1,40 +1,40 @@
-local buffer = require('mado-scratch-buffer.buffer')
+local buffer = require('mado-scratch.buffer')
 
-vim.api.nvim_create_user_command('MadoScratchBufferOpen', function(opts)
+vim.api.nvim_create_user_command('MadoScratchOpen', function(opts)
   buffer.open(false, unpack(opts.fargs))
 end, {
   nargs = '*',
   desc = 'Open a temporary mado scratch buffer'
 })
 
-vim.api.nvim_create_user_command('MadoScratchBufferOpenFile', function(opts)
+vim.api.nvim_create_user_command('MadoScratchOpenFile', function(opts)
   buffer.open_file(false, unpack(opts.fargs))
 end, {
   nargs = '*',
   desc = 'Open a persistent mado scratch buffer'
 })
 
-vim.api.nvim_create_user_command('MadoScratchBufferOpenNext', function(opts)
+vim.api.nvim_create_user_command('MadoScratchOpenNext', function(opts)
   buffer.open(true, unpack(opts.fargs))
 end, {
   nargs = '*',
   desc = 'Open a new temporary mado scratch buffer'
 })
 
-vim.api.nvim_create_user_command('MadoScratchBufferOpenFileNext', function(opts)
+vim.api.nvim_create_user_command('MadoScratchOpenFileNext', function(opts)
   buffer.open_file(true, unpack(opts.fargs))
 end, {
   nargs = '*',
   desc = 'Open a new persistent mado scratch buffer'
 })
 
-vim.api.nvim_create_user_command('MadoScratchBufferClean', function()
+vim.api.nvim_create_user_command('MadoScratchClean', function()
   buffer.clean()
 end, {
   desc = 'Clean up all mado scratch buffers and files'
 })
 
 -- Auto-setup with default configuration if not already configured
-if not require('mado-scratch-buffer').config or vim.tbl_isempty(require('mado-scratch-buffer').config) then
-  require('mado-scratch-buffer').setup()
+if not require('mado-scratch').config or vim.tbl_isempty(require('mado-scratch').config) then
+  require('mado-scratch').setup()
 end

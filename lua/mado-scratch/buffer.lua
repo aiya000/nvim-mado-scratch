@@ -1,4 +1,4 @@
-local helper = require('mado-scratch-buffer.helper')
+local helper = require('mado-scratch.helper')
 
 local M = {}
 
@@ -67,7 +67,7 @@ end
 ---@param file_ext string File extension or special value
 ---@return string pattern File pattern with extension
 local function get_file_pattern(opening_as_tmp_buffer, file_ext)
-  local config = require('mado-scratch-buffer').config
+  local config = require('mado-scratch').config
   local base_pattern = opening_as_tmp_buffer
     and config.file_pattern.when_tmp_buffer
     or config.file_pattern.when_file_buffer
@@ -101,8 +101,8 @@ end
 ---@param options table Options for opening buffer
 ---@return nil
 function M.open_buffer(options)
-  local config = require('mado-scratch-buffer').config
-  local autocmd = require('mado-scratch-buffer.autocmd')
+  local config = require('mado-scratch').config
+  local autocmd = require('mado-scratch.autocmd')
 
   local args = options.args or {}
   local opening_as_tmp_buffer = options.opening_as_tmp_buffer
@@ -160,7 +160,7 @@ end
 
 ---Cleans up all scratch buffers and files
 function M.clean()
-  local config = require('mado-scratch-buffer').config
+  local config = require('mado-scratch').config
 
   local file_glob_pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*')
   local persistent_files = vim.fn.glob(file_glob_pattern, false, true)
