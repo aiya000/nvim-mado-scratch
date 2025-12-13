@@ -11,8 +11,7 @@ describe('mado-scratch-buffer', function()
         when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
       },
       default_file_ext = 'md',
-      default_open_method = 'sp',
-      default_buffer_size = 30,
+      default_open_method = { method = 'sp', height = 15 },
       auto_save_file_buffer = false,
       use_default_keymappings = false,
       auto_hide_buffer = {
@@ -99,8 +98,7 @@ describe('mado-scratch-buffer', function()
           when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
         },
         default_file_ext = 'ts',
-        default_open_method = 'vsp',
-        default_buffer_size = 20,
+        default_open_method = { method = 'vsp', width = 20 },
       })
 
       vim.cmd('new')
@@ -316,8 +314,21 @@ describe('mado-scratch-buffer', function()
   end)
 
   describe('float window support', function()
-    it('should open a new file in float window', function()
+    it('should open a new file in float window (legacy float)', function()
       vim.cmd('MadoScratchBufferOpen md float')
+      local file_name = vim.fn.expand('%:p')
+      local mado = require('mado-scratch-buffer')
+      local config = mado.get_config()
+      local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.md'
+      assert.equals(expected, file_name)
+
+      -- Check if window is floating
+      local win_config = vim.api.nvim_win_get_config(0)
+      assert.equals('editor', win_config.relative)
+    end)
+
+    it('should open a new file in float-fixed window', function()
+      vim.cmd('MadoScratchBufferOpen md float-fixed')
       local file_name = vim.fn.expand('%:p')
       local mado = require('mado-scratch-buffer')
       local config = mado.get_config()
@@ -393,6 +404,80 @@ describe('mado-scratch-buffer', function()
       -- Check window size (should use config default: 120x40)
       assert.equals(120, win_config.width)
       assert.equals(40, win_config.height)
+    end)
+
+    it('should support float-fixed with default_open_method config', function()
+      local mado = require('mado-scratch-buffer')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_open_method = { method = 'float-fixed', size = { width = 100, height = 30 } },
+      })
+
+      vim.cmd('MadoScratchBufferOpen md')
+
+      -- Check if window is floating
+      local win_config = vim.api.nvim_win_get_config(0)
+      assert.equals('editor', win_config.relative)
+
+      -- Check window size (should use config default: 100x30)
+      assert.equals(100, win_config.width)
+      assert.equals(30, win_config.height)
+    end)
+
+    it('should support float-aspect with scale ratio', function()
+      local mado = require('mado-scratch-buffer')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_open_method = { method = 'float-aspect', scale = { width = 0.5, height = 0.5 } },
+      })
+
+      vim.cmd('MadoScratchBufferOpen md')
+
+      -- Check if window is floating
+      local win_config = vim.api.nvim_win_get_config(0)
+      assert.equals('editor', win_config.relative)
+
+      -- Get UI size (with fallback for headless mode)
+      local ui = vim.api.nvim_list_uis()[1]
+      local ui_width, ui_height
+      if ui ~= nil then
+        ui_width = ui.width
+        ui_height = ui.height
+      else
+        -- Default size for headless mode (same as buffer.lua)
+        ui_width = 120
+        ui_height = 40
+      end
+
+      local expected_width = math.floor(ui_width * 0.5)
+      local expected_height = math.floor(ui_height * 0.5)
+
+      -- Check window size (should be 50% of screen size)
+      assert.equals(expected_width, win_config.width)
+      assert.equals(expected_height, win_config.height)
+    end)
+
+    it('should normalize legacy float to float-fixed', function()
+      local mado = require('mado-scratch-buffer')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_open_method = { method = 'float', size = { width = 90, height = 35 } },
+      })
+
+      -- After setup, the method should be normalized to 'float-fixed'
+      local config = mado.get_config()
+      assert.equals('float-fixed', config.default_open_method.method)
+      assert.equals(90, config.default_open_method.size.width)
+      assert.equals(35, config.default_open_method.size.height)
     end)
   end)
 end)
