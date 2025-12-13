@@ -8,11 +8,11 @@ For :star:Neovim:star: (lua-based modern implementation).
 
 ## Table of Contents
 
-- [:sparkles: nvim-mado-scratch :sparkles:](#sparkles-mado-scratch-buffernvim-sparkles)
+- [:sparkles: nvim-mado-scratch :sparkles:](#sparkles-nvim-mado-scratch-sparkles)
   - [:gear: Installation](#gear-installation)
   - [:wrench: Configuration](#wrench-configuration)
   - [:wrench: Quick Start](#wrench-quick-start)
-  - [:fire: Why nvim-mado-scratch?](#fire-why-mado-scratch-buffernvim)
+  - [:fire: Why nvim-mado-scratch?](#fire-why-nvim-mado-scratch)
   - [:zap: Supercharge with vim-quickrun!](#zap-supercharge-with-vim-quickrun)
   - [:balance_scale: Comparison with scratch.vim](#balance_scale-comparison-with-scratchvim)
     - [:gear: Detailed Usage](#gear-detailed-usage)
@@ -305,7 +305,7 @@ require('mado-scratch').setup({
 
 - - - - -
 
-💙 **Enjoying nvim-mado-scratch-buffer?**  
+💙 **Enjoying nvim-mado-scratch?**  
 Show your support with a ⭐ on GitHub!
 
 **Happy coding with Vim/Neovim!** ⚡✨
