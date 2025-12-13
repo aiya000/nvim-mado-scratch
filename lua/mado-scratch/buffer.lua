@@ -149,7 +149,7 @@ end
 
 ---Opens a file buffer (persistent buffer)
 ---@param opening_next_fresh_buffer boolean --Whether to force new buffer
----@param ... unknown --Optionmal arguments: file_ext, open_method, buffer_size
+---@param ... unknown --Optional arguments: file_ext, open_method, buffer_size
 function M.open_file(opening_next_fresh_buffer, ...)
   return M.open_buffer({
     opening_as_tmp_buffer = false,
