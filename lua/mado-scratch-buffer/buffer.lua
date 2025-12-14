@@ -1,6 +1,4 @@
-local arrow = require('mado-scratch-buffer.luarrow.arrow').arrow
 local c = require('mado-scratch-buffer.chotto')
-local config_types = require('mado-scratch-buffer.types.config')
 local fn = require('mado-scratch-buffer.functions')
 
 local M = {}
@@ -198,7 +196,7 @@ local function open_in_new_float_window(file_name, geometry)
 end
 
 ---Opens a floating window with a buffer displaying the specified file
----@param size { width: integer, height: integer }
+---@param size { width: integer, height: integer } | { width: number, height: number } -- size or scale
 ---@param file_name string
 local function open_floating_window(size, file_name)
   local width = size.width
@@ -218,7 +216,7 @@ end
 ---Parses float window size from string
 ---@param size_str string | nil
 ---@return { width: integer, height: integer } | nil
-local function parse_fixed_float_size(size_str)
+local function parse_float_fixed_size(size_str)
   if size_str == nil then
     return nil
   end
@@ -235,66 +233,23 @@ end
 ---@param scale_str string | nil
 ---@return { width: number, height: number } | nil
 local function parse_float_aspect_scale(scale_str)
-  if scale_str == nil then
+  local function preparse(str)
+    if str == nil then
+      return nil
+    end
+
+    local width, height = str:match('^([%d%.]+)x([%d%.]+)$')
+    if width ~= nil and height ~= nil then
+      return { width = tonumber(width), height = tonumber(height) }
+    end
+
     return nil
   end
 
-  local width, height = scale_str:match('^([%d%.]+)x([%d%.]+)$')
-  if width ~= nil and height ~= nil then
-    return { width = tonumber(width), height = tonumber(height) }
+  local float_scale = preparse(scale_str)
+  if float_scale == nil then
+    return nil
   end
-
-  return nil
-end
-
----Opens a window for 'float-fixed' or 'float' method
----@param buffer_size string | nil
----@return { width: integer, height: integer }
-local function get_fixed_float_size(buffer_size)
-  local config = require('mado-scratch-buffer').get_config()
-  fn.ensure(
-    config_types.float_window_fixed_size_method_schema,
-    config.default_open_method
-  )
-
-  local float_size = parse_fixed_float_size(buffer_size)
-  if float_size ~= nil then
-    return float_size
-  end
-
-  local default_size =
-    config.default_open_method.size
-    or fn.fallback(
-      "No size for 'float-fixed' specified, and config.default_open_method.size is nil. Fallback",
-      { width = 80, height = 24 }
-    )
-  return default_size
-end
-
----Opens a window for 'float-aspect' method
----@param buffer_size string | nil
----@return { width: number, height: number }
-local function get_aspect_float_scale(buffer_size)
-  local config = require('mado-scratch-buffer').get_config()
-  fn.ensure(
-    config_types.float_window_aspect_ratio_method_schema,
-    config.default_open_method
-  )
-
-  local float_scale = parse_float_aspect_scale(buffer_size)
-    % arrow(function(float_scale)
-      return float_scale ~= nil
-        and float_scale
-        or config.default_open_method.scale
-    end)
-    ^ arrow(function(float_scale)
-      return float_scale ~= nil
-        and float_scale
-        or fn.fallback(
-          "No scale for 'float-fixed' specified, and config.default_open_method.scale is nil. Fallback",
-          { width = 0.8, height = 0.8 }
-        )
-    end)
 
   local win_width, win_height = get_neovim_winsize()
   return {
@@ -303,18 +258,59 @@ local function get_aspect_float_scale(buffer_size)
   }
 end
 
+---@param open_method 'float-fixed' | 'float' | 'float-aspect'
+---@param buffer_size string | nil
+---@return { width: integer, height: integer } | { width: number, height: number } -- size or scale
+local function get_actual_floating_buffer_size(open_method, buffer_size)
+  fn.ensure(
+    c.union({
+      c.literal('float-fixed'),
+      c.literal('float'),
+      c.literal('float-aspect'),
+    }),
+    open_method
+  )
+  fn.ensure(
+    c.union({ c.string(), c.null() }),
+    buffer_size
+  )
+  local config = require('mado-scratch-buffer').get_config()
+
+  if buffer_size == nil and (open_method == 'float-fixed' or open_method == 'float') then
+    return config.default_open_method.size
+      or fn.fallback(
+        "No size for 'float-fixed' specified, and config.default_open_method.size is nil. Fallback",
+        { width = 80, height = 24 }
+      )
+  end
+  if buffer_size == nil and open_method == 'float-aspect' then
+    return config.default_open_method.scale
+      or fn.fallback(
+        "No scale for 'float-aspect' specified, and config.default_open_method.scale is nil. Fallback",
+        { width = 0.8, height = 0.8 }
+      )
+  end
+  buffer_size = buffer_size --[[@as string]]
+
+  if open_method == 'float-fixed' or open_method == 'float' then
+    return parse_float_fixed_size(buffer_size) or error('Invalid buffer_size for float-fixed method: ' .. tostring(buffer_size))
+  end
+  if open_method == 'float-aspect' then
+    return parse_float_aspect_scale(buffer_size) or error('Invalid buffer_size for float-aspect method: ' .. tostring(buffer_size))
+  end
+
+  error('Unreachable code reached in open_floating_buffer. "Invalid open_method". Please report this.')
+end
+
 ---Opens a window for 'float-fixed', 'float', or 'float-aspect' method
----@param open_method mado_scratch_buffer.FloatWindowMethod
+---@param open_method 'float-fixed' | 'float' | 'float-aspect'
 ---@param buffer_size string | nil
 ---@param file_name string
 local function open_floating_buffer(open_method, buffer_size, file_name)
-  local float_size =
-    (open_method == 'float-fixed' or open_method == 'float')
-      and get_fixed_float_size(buffer_size)
-      or open_method == 'float-aspect'
-        and get_aspect_float_scale(buffer_size)
-        or error('Unreachable code reached in open_floating_buffer. Please report this.')
-  open_floating_window(float_size, file_name)
+  open_floating_window(
+    get_actual_floating_buffer_size(open_method, buffer_size),
+    file_name
+  )
 end
 
 ---@param open_method 'sp' | 'vsp' | 'tabnew'
@@ -378,7 +374,7 @@ function M.open_buffer(options)
 
   if open_method == 'float-fixed' or open_method == 'float' or open_method == 'float-aspect' then
     open_floating_buffer(
-      open_method --[[@as mado_scratch_buffer.FloatWindowMethod]],
+      open_method --[[@as 'float-fixed' | 'float' | 'float-aspect']],
       buffer_size,
       file_name
     )
