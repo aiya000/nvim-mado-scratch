@@ -15,19 +15,6 @@ local function define_default_keymaps()
   vim.keymap.set('n', '<leader><leader>B', ':<C-u>MadoScratchBufferOpenFile<Space>', { noremap = true })
 end
 
----@param open_method OpenMethod
-local function get_default_open_method(open_method)
-  fn.ensure(config_types.open_method_schema, open_method)
-
-  local default_sizes = {
-    sp = { height = 15 },
-    vsp = { width = 30 },
-    ['float-fixed'] = { width = 80, height = 24 },
-    ['float-aspect'] = { width = 0.8, height = 0.8 },
-  }
-  return default_sizes[open_method.method]
-end
-
 ---@param user_config? mado_scratch_buffer.UserConfig
 local function define_config_detail(user_config)
   ---@type mado_scratch_buffer.Config

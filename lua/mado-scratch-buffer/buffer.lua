@@ -201,6 +201,22 @@ local function parse_float_size(size_str)
   return nil
 end
 
+---Parses float window aspect ratio scale from string
+---@param scale_str string | nil
+---@return { width: number, height: number } | nil
+local function parse_float_aspect_scale(scale_str)
+  if scale_str == nil then
+    return nil
+  end
+
+  local width, height = scale_str:match('^([%d%.]+)x([%d%.]+)$')
+  if width and height then
+    return { width = tonumber(width), height = tonumber(height) }
+  end
+
+  return nil
+end
+
 ---Opens a window by specified method
 ---@param open_method 'sp' | 'vsp' | 'tabnew'
 ---@param buffer_size integer | 'no-auto-resize'
@@ -246,12 +262,15 @@ function M.open_buffer(options)
     elseif open_method == 'float-aspect' then
       -- 画面比率の場合
       local scale
-      -- まずは設定から取得（コマンドからの指定は将来的にサポート）
-      if config.default_open_method.method == 'float-aspect' then
+      -- まずはコマンドからスケールをパース
+      scale = parse_float_aspect_scale(buffer_size)
+
+      -- コマンドでスケールが指定されていない場合、設定から取得
+      if scale == nil and config.default_open_method.method == 'float-aspect' then
         scale = config.default_open_method.scale
       end
 
-      -- デフォルトスケールを設定
+      -- それもnilなら、デフォルトスケールを設定
       if scale == nil then
         scale = { width = 0.8, height = 0.8 }
       end

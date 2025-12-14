@@ -103,7 +103,7 @@ Open a scratch buffer with or without a file extension:
   " Open with custom split method and size
   :MadoScratchBufferOpen md sp 10
   :MadoScratchBufferOpen ts vsp 80
-  :MadoScratchBufferOpen hs float 60
+  :MadoScratchBufferOpen hs float-fixed 80x40
 
   " Clean up all scratch buffers and files
   :MadoScratchBufferClean
@@ -111,8 +111,18 @@ Open a scratch buffer with or without a file extension:
 
 You can specify:
 1. File extension (optional): md, ts, js, py, etc. or `--no-file-ext`
-2. Open method (optional): sp (horizontal split), vsp (vertical split), or float (floating window)
-3. Buffer size (optional): number for height (sp), width (vsp/float), or 'no-auto-resize'
+2. Open method (optional):
+   - sp (horizontal split)
+   - vsp (vertical split)
+   - tabnew (new tab)
+   - float-fixed (floating window with fixed size)
+   - float-aspect (floating window with aspect ratio)
+3. Buffer size (optional):
+   - For sp: number for height
+   - For vsp: number for width
+   - For float-fixed: WIDTHxHEIGHT (e.g., 80x40)
+   - For float-aspect: not supported via command (use configuration)
+   - For tabnew: not applicable
 
 
 ==============================================================================
@@ -178,8 +188,12 @@ default_open_method ~
   Examples:
   - `{ method = 'sp', height = 15 }` - horizontal split with height
   - `{ method = 'vsp', width = 30 }` - vertical split with width
-  - `{ method = 'float', size = { width = 80, height = 24 } }` - floating window
+  - `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size (requires nui.nvim)
+  - `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio (requires nui.nvim)
   - `{ method = 'tabnew' }` - new tab (no size needed)
+
+  Note: `{ method = 'float', ... }` is supported for backward compatibility
+  and is treated as `float-fixed`.
 
                         *option.mado_scratch_buffer_auto_save_file_buffer*
 auto_save_file_buffer ~
@@ -214,17 +228,17 @@ COMMANDS                *mado-scratch-buffer-commands*
 
   Parameters:
   - file_ext: File extension (e.g., 'md', 'ts') or '--no-file-ext'
-  - open_method: 'sp', 'vsp', 'tabnew', or 'float'
-  - buffer_size: Number for height/width
+  - open_method: 'sp', 'vsp', 'tabnew', 'float-fixed', or 'float-aspect'
+  - buffer_size: Number for height/width, or WIDTHxHEIGHT for float-fixed
 
   Examples: >
     :MadoScratchBufferOpen
     :MadoScratchBufferOpen md
     :MadoScratchBufferOpen ts sp 10
-    :MadoScratchBufferOpen js vsp 80
-    :MadoScratchBufferOpen py float 60
+    :MadoScratchBufferOpen hs vsp 80
+    :MadoScratchBufferOpen py float-fixed 80x40
+    :MadoScratchBufferOpen lua float-aspect 0.9x0.8
 <
-
                         *:MadoScratchBufferOpenFile*
 :MadoScratchBufferOpenFile [file_ext] [open_method] [buffer_size]
   Open a persistent file buffer (auto-saved).

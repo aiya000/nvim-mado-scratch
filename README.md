@@ -109,10 +109,14 @@ To use floating windows, configure `default_open_method` like this:
 }
 ```
 
-You can also use other open methods (below are not needing nui.nvim):
-- `{ method = 'sp', height = 15 }` - horizontal split
-- `{ method = 'vsp', width = 30 }` - vertical split
-- `{ method = 'tabnew' }` - new tab
+You can also use other open methods:
+- `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size (requires nui.nvim)
+- `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio (requires nui.nvim)
+- `{ method = 'sp', height = 15 }` - horizontal split (no nui.nvim required)
+- `{ method = 'vsp', width = 30 }` - vertical split (no nui.nvim required)
+- `{ method = 'tabnew' }` - new tab (no nui.nvim required)
+
+Note: `{ method = 'float', ... }` is supported for backward compatibility and treated as `float-fixed`.
 
 ## :wrench: Configuration
 
@@ -128,8 +132,7 @@ require('scratch-buffer').setup({
 
   -- Default settings
   default_file_ext = 'md',           -- Default file extension
-  default_open_method = 'sp',        -- 'sp', 'vsp', 'tabnew', or 'float' (See ':help mado-scratch-buffer-configuration')
-  default_buffer_size = 30,          -- Default buffer height/width, or 'no-auto-resize' to disable auto resizing
+  default_open_method = { method = 'sp', height = 15 }, -- Default open method (See ':help mado-scratch-buffer-configuration')
 
   -- Behavior options
   auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged
@@ -149,7 +152,11 @@ require('scratch-buffer').setup({
 :MadoScratchBufferOpen  " Open a temporary buffer using default options
 :MadoScratchBufferOpen md sp 5  " Open a temporary Markdown buffer with :sp and height 5
 :MadoScratchBufferOpenFile ts vsp 100  " Open a persistent TypeScript buffer with :vsp and width 100
-:MadoScratchBufferOpen py float 80  " Open a Python buffer in a floating window with width 80
+:MadoScratchBufferOpen py float-fixed 80x40  " Open a Python buffer in a floating window with size 80x40
+:MadoScratchBufferOpen hs float-aspect 0.9x0.8  " Open a Haskell buffer in a floating window with 90% width and 80% height of the screen
+```
+
+```vim
 :MadoScratchBufferOpenNext  " Open next temporary buffer
 :MadoScratchBufferOpenFileNext  " Open next persistent buffer
 ```

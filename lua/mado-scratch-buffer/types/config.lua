@@ -92,7 +92,7 @@ M.config_schema = c.object({
 ---@class mado_scratch_buffer.Config
 ---@field file_pattern { when_tmp_buffer: string, when_file_buffer: string }
 ---@field default_file_ext string
----@field default_open_method mado_scratch_buffer.VerticalSplitMethod | mado_scratch_buffer.HorizontalSplitMethod | mado_scratch_buffer.TabNewMethod | mado_scratch_buffer.FloatWindowMethod
+---@field default_open_method mado_scratch_buffer.OpenMethod
 ---@field auto_save_file_buffer boolean
 ---@field use_default_keymappings boolean
 ---@field auto_hide_buffer { when_tmp_buffer: boolean, when_file_buffer: boolean }
