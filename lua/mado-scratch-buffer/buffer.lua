@@ -1,18 +1,47 @@
+local arrow = require('mado-scratch-buffer.luarrow.arrow').arrow
+local c = require('mado-scratch-buffer.chotto')
+local config_types = require('mado-scratch-buffer.types.config')
 local fn = require('mado-scratch-buffer.functions')
 
 local M = {}
 
 ---@class OpenBufferOptions
----@field opening_as_tmp_buffer boolean # Whether opening as tmp buffer
----@field opening_next_fresh_buffer boolean # Whether to open next fresh buffer
+---@field opening_as_tmp_buffer boolean -- Whether opening as tmp buffer
+---@field opening_next_fresh_buffer boolean -- Whether to open next fresh buffer
 ---@field file_ext string | nil
 ---@field open_method string | nil
----@field buffer_size integer | 'no-auto-resize' | nil
+---@field buffer_size string | nil
+
+---Opens scratch buffer (tmp buffer)
+---@param opening_next_fresh_buffer boolean -- Whether to force new buffer
+---@param ... string -- Expected: { file_ext?, open_method?, buffer_size? }
+function M.open(opening_next_fresh_buffer, ...)
+  return M.open_buffer({
+    opening_as_tmp_buffer = true,
+    opening_next_fresh_buffer = opening_next_fresh_buffer,
+    file_ext = select(1, ...),
+    open_method = select(2, ...),
+    buffer_size = select(3, ...),
+  })
+end
+
+---Opens a file buffer (persistent buffer)
+---@param opening_next_fresh_buffer boolean -- Whether to force new buffer
+---@param ... string -- Expected: { file_ext?, open_method?, buffer_size? }
+function M.open_file(opening_next_fresh_buffer, ...)
+  return M.open_buffer({
+    opening_as_tmp_buffer = false,
+    opening_next_fresh_buffer = opening_next_fresh_buffer,
+    file_ext = select(1, ...),
+    open_method = select(2, ...),
+    buffer_size = select(3, ...),
+  })
+end
 
 ---Extracts index from name using pattern
----@param name string # Buffer or file name
----@param pattern string # Pattern with %d placeholder
----@return integer | nil # Index number, or nil if not found
+---@param name string -- Buffer or file name
+---@param pattern string -- Pattern with %d placeholder
+---@return integer | nil -- Index number, or nil if not found
 local function extract_index_from_name(name, pattern)
   -- Replace %d with a unique placeholder that won't appear in paths
   local temp_placeholder = '__INDEX__'
@@ -40,8 +69,8 @@ local function extract_index_from_name(name, pattern)
 end
 
 ---Finds current max index for pattern
----@param pattern string # File pattern with %d placeholder
----@return integer # Maximum index found (0 if none)
+---@param pattern string -- File pattern with %d placeholder
+---@return integer -- Maximum index found (0 if none)
 local function find_current_index(pattern)
   local buffer_names = fn.get_all_buffer_names()
   local max_buffer_index = 0
@@ -70,9 +99,9 @@ local function find_current_index(pattern)
 end
 
 ---Returns file pattern with extension
----@param opening_as_tmp_buffer boolean # Whether opening as tmp buffer
----@param file_ext string # File extension or special value
----@return string # File pattern with extension
+---@param opening_as_tmp_buffer boolean -- Whether opening as tmp buffer
+---@param file_ext string -- File extension or special value
+---@return string -- File pattern with extension
 local function get_file_pattern(opening_as_tmp_buffer, file_ext)
   local config = require('mado-scratch-buffer').get_config()
   local base_pattern = opening_as_tmp_buffer
@@ -87,7 +116,7 @@ local function get_file_pattern(opening_as_tmp_buffer, file_ext)
 end
 
 ---Wipes buffers matching pattern
----@param file_pattern string # Pattern to match buffers
+---@param file_pattern string -- Pattern to match buffers
 local function wipe_buffers(file_pattern)
   -- Create a prefix by removing the %d placeholder and any extension
   local base_pattern = file_pattern:gsub('%%d.*$', '')
@@ -115,7 +144,8 @@ local function set_buffer_type(opening_as_tmp_buffer)
   end
 end
 
-local function get_winsize()
+---Gets opening Neovim's window size
+local function get_neovim_winsize()
   local ui = vim.api.nvim_list_uis()[1]
   if ui ~= nil then
     return ui.width, ui.height
@@ -170,10 +200,10 @@ end
 ---Opens a floating window with a buffer displaying the specified file
 ---@param size { width: integer, height: integer }
 ---@param file_name string
-local function open_float_buffer(size, file_name)
+local function open_floating_window(size, file_name)
   local width = size.width
   local height = size.height
-  local win_width, win_height = get_winsize()
+  local win_width, win_height = get_neovim_winsize()
   local row = math.floor((win_height - height) / 2)
   local col = math.floor((win_width - width) / 2)
 
@@ -188,13 +218,13 @@ end
 ---Parses float window size from string
 ---@param size_str string | nil
 ---@return { width: integer, height: integer } | nil
-local function parse_float_size(size_str)
+local function parse_fixed_float_size(size_str)
   if size_str == nil then
     return nil
   end
 
   local width, height = size_str:match('^(%d+)x(%d+)$')
-  if width and height then
+  if width ~= nil and height ~= nil then
     return { width = tonumber(width), height = tonumber(height) }
   end
 
@@ -210,22 +240,125 @@ local function parse_float_aspect_scale(scale_str)
   end
 
   local width, height = scale_str:match('^([%d%.]+)x([%d%.]+)$')
-  if width and height then
+  if width ~= nil and height ~= nil then
     return { width = tonumber(width), height = tonumber(height) }
   end
 
   return nil
 end
 
----Opens a window by specified method
----@param open_method 'sp' | 'vsp' | 'tabnew'
----@param buffer_size integer | 'no-auto-resize'
+---Opens a window for 'float-fixed' or 'float' method
+---@param buffer_size string | nil
+---@return { width: integer, height: integer }
+local function get_fixed_float_size(buffer_size)
+  local config = require('mado-scratch-buffer').get_config()
+  fn.ensure(
+    config_types.float_window_fixed_size_method_schema,
+    config.default_open_method
+  )
+
+  local float_size = parse_fixed_float_size(buffer_size)
+  if float_size ~= nil then
+    return float_size
+  end
+
+  local default_size =
+    config.default_open_method.size
+    or fn.fallback(
+      "No size for 'float-fixed' specified, and config.default_open_method.size is nil. Fallback",
+      { width = 80, height = 24 }
+    )
+  return default_size
+end
+
+---Opens a window for 'float-aspect' method
+---@param buffer_size string | nil
+---@return { width: number, height: number }
+local function get_aspect_float_scale(buffer_size)
+  local config = require('mado-scratch-buffer').get_config()
+  fn.ensure(
+    config_types.float_window_aspect_ratio_method_schema,
+    config.default_open_method
+  )
+
+  local float_scale = parse_float_aspect_scale(buffer_size)
+    % arrow(function(float_scale)
+      return float_scale ~= nil
+        and float_scale
+        or config.default_open_method.scale
+    end)
+    ^ arrow(function(float_scale)
+      return float_scale ~= nil
+        and float_scale
+        or fn.fallback(
+          "No scale for 'float-fixed' specified, and config.default_open_method.scale is nil. Fallback",
+          { width = 0.8, height = 0.8 }
+        )
+    end)
+
+  local win_width, win_height = get_neovim_winsize()
+  return {
+    width = math.floor(win_width * float_scale.width),
+    height = math.floor(win_height * float_scale.height),
+  }
+end
+
+---Opens a window for 'float-fixed', 'float', or 'float-aspect' method
+---@param open_method mado_scratch_buffer.FloatWindowMethod
+---@param buffer_size string | nil
 ---@param file_name string
-local function open_buffer_by_method(open_method, buffer_size, file_name)
+local function open_floating_buffer(open_method, buffer_size, file_name)
+  local float_size =
+    (open_method == 'float-fixed' or open_method == 'float')
+      and get_fixed_float_size(buffer_size)
+      or open_method == 'float-aspect'
+        and get_aspect_float_scale(buffer_size)
+        or error('Unreachable code reached in open_floating_buffer. Please report this.')
+  open_floating_window(float_size, file_name)
+end
+
+---@param open_method 'sp' | 'vsp' | 'tabnew'
+---@param buffer_size string | nil
+---@return integer | 'no-auto-resize'
+local function get_actual_non_floating_buffer_size(open_method, buffer_size)
+  if buffer_size == 'no-auto-resize' then
+    return 'no-auto-resize'
+  end
+
+  if buffer_size ~= nil then
+    return tonumber(buffer_size) or fn.fallback(
+      ("Unknown buffer_size (%s). Fallback to 'no-auto-resize'"):format(tostring(buffer_size)),
+      'no-auto-resize'
+    )
+  end
+
+  -- Use default size if not specified
+  local config = require('mado-scratch-buffer').get_config()
+  return open_method == 'sp'
+    and config.default_open_method.height
+    or open_method == 'vsp'
+      and config.default_open_method.width
+      or open_method == 'tabnew'
+        and 'no-auto-resize'
+        or error('Unreachable code reached in open_no_floating_buffer. Please report this.')
+end
+
+---Opens a window for 'sp', 'vsp', or 'tabnew' method
+---@param open_method 'sp' | 'vsp' | 'tabnew'
+---@param buffer_size string | nil
+---@param file_name string
+local function open_no_floating_buffer(open_method, buffer_size, file_name)
+  fn.ensure(
+    c.union({ c.literal('sp'), c.literal('vsp'), c.literal('tabnew') }),
+    open_method
+  )
+
   vim.cmd(('silent %s %s'):format(open_method, vim.fn.fnameescape(file_name)))
-  if buffer_size ~= 'no-auto-resize' then
+
+  local actual_buffer_size = get_actual_non_floating_buffer_size(open_method, buffer_size)
+  if actual_buffer_size ~= 'no-auto-resize' then
     local resize_method = open_method == 'vsp' and 'vertical resize' or 'resize'
-    vim.cmd(resize_method .. ' ' .. tonumber(buffer_size))
+    vim.cmd(resize_method .. ' ' .. actual_buffer_size)
   end
 end
 
@@ -238,96 +371,32 @@ function M.open_buffer(options)
   local file_pattern = get_file_pattern(options.opening_as_tmp_buffer, file_ext)
 
   local index = find_current_index(file_pattern) + (options.opening_next_fresh_buffer and 1 or 0)
-  local file_name = vim.fn.expand(string.format(file_pattern, index))
+  local file_name = vim.fn.expand(file_pattern:format(index))
 
   local open_method = options.open_method or config.default_open_method.method
   local buffer_size = options.buffer_size
 
   if open_method == 'float-fixed' or open_method == 'float' or open_method == 'float-aspect' then
-    local float_size
-
-    if open_method == 'float-fixed' or open_method == 'float' then
-      -- 固定サイズの場合（'float'は後方互換性のために'float-fixed'として扱う）
-      float_size = parse_float_size(buffer_size)
-      if float_size == nil then
-        -- コマンドでサイズが指定されていない場合、設定から取得
-        if config.default_open_method.method == 'float-fixed' or config.default_open_method.method == 'float' then
-          float_size = config.default_open_method.size
-        end
-        -- それもnilなら、デフォルト値を使用
-        if float_size == nil then
-          float_size = { width = 80, height = 24 }
-        end
-      end
-    elseif open_method == 'float-aspect' then
-      -- 画面比率の場合
-      local scale
-      -- まずはコマンドからスケールをパース
-      scale = parse_float_aspect_scale(buffer_size)
-
-      -- コマンドでスケールが指定されていない場合、設定から取得
-      if scale == nil and config.default_open_method.method == 'float-aspect' then
-        scale = config.default_open_method.scale
-      end
-
-      -- それもnilなら、デフォルトスケールを設定
-      if scale == nil then
-        scale = { width = 0.8, height = 0.8 }
-      end
-
-      -- 画面サイズを取得してスケールを適用
-      local win_width, win_height = get_winsize()
-      float_size = {
-        width = math.floor(win_width * scale.width),
-        height = math.floor(win_height * scale.height),
-      }
-    end
-
-    open_float_buffer(float_size, file_name)
-  else
-    -- sp/vspのサイズ解決
-    if buffer_size == nil then
-      if open_method == 'sp' and config.default_open_method.method == 'sp' then
-        buffer_size = config.default_open_method.height
-      elseif open_method == 'vsp' and config.default_open_method.method == 'vsp' then
-        buffer_size = config.default_open_method.width
-      else
-        buffer_size = 'no-auto-resize'
-      end
-    end
-    open_buffer_by_method(
+    open_floating_buffer(
+      open_method --[[@as mado_scratch_buffer.FloatWindowMethod]],
+      buffer_size,
+      file_name
+    )
+  elseif open_method == 'sp' or open_method == 'vsp' or open_method == 'tabnew' then
+    open_no_floating_buffer(
       open_method --[[@as 'sp' | 'vsp' | 'tabnew']],
       buffer_size,
       file_name
     )
+  else
+    vim.notify(
+      ("Unknown open method ('%s'). Fallback to 'sp'"):format(tostring(open_method)),
+      vim.log.levels.WARN
+    )
+    open_no_floating_buffer('sp', buffer_size, file_name)
   end
+
   set_buffer_type(options.opening_as_tmp_buffer)
-end
-
----Opens scratch buffer (tmp buffer)
----@param opening_next_fresh_buffer boolean # Whether to force new buffer
----@param ... string # Expected: { file_ext?, open_method?, buffer_size? }
-function M.open(opening_next_fresh_buffer, ...)
-  return M.open_buffer({
-    opening_as_tmp_buffer = true,
-    opening_next_fresh_buffer = opening_next_fresh_buffer,
-    file_ext = select(1, ...),
-    open_method = select(2, ...),
-    buffer_size = select(3, ...),
-  })
-end
-
----Opens a file buffer (persistent buffer)
----@param opening_next_fresh_buffer boolean # Whether to force new buffer
----@param ... string # Expected: { file_ext?, open_method?, buffer_size? }
-function M.open_file(opening_next_fresh_buffer, ...)
-  return M.open_buffer({
-    opening_as_tmp_buffer = false,
-    opening_next_fresh_buffer = opening_next_fresh_buffer,
-    file_ext = select(1, ...),
-    open_method = select(2, ...),
-    buffer_size = select(3, ...),
-  })
 end
 
 ---Cleans up all scratch buffers and files

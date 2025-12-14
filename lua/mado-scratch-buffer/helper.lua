@@ -1,4 +1,4 @@
----TODO: Rename to functions.lua
+---TODO: Unify to functions.lua
 
 local M = {}
 

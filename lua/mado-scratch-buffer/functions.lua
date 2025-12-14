@@ -4,10 +4,25 @@ local M = {}
 ---Thrown error handled by `vim.notify()` if thrown.
 ---@generic T
 ---@param schema chotto.Schema<T>
-function M.ensure(schema, validatee)
+---@param validatee unknown
+---@param create_message? fun(error_message: string): string
+function M.ensure(schema, validatee, create_message)
+  create_message = create_message ~= nil
+    and create_message
+    or function(e) return e end
+
   schema:ensure(validatee, function(e)
-    vim.notify(e, vim.log.levels.ERROR)
+    vim.notify(create_message(e), vim.log.levels.ERROR)
   end)
+end
+
+---@generic T
+---@param message string
+---@param fallback_value T
+---@return T
+function M.fallback(message, fallback_value)
+  vim.notify(message, vim.log.levels.WARN)
+  return fallback_value
 end
 
 ---Gets all buffer names

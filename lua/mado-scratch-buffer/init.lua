@@ -70,11 +70,19 @@ end
 ---Setups the plugin
 ---@param user_config? mado_scratch_buffer.UserConfig
 function M.setup(user_config)
-  fn.ensure(c.optional(user_config_types.user_config_schema), user_config)
+  fn.ensure(
+    c.optional(user_config_types.user_config_schema),
+    user_config,
+    function(e)
+      return "mado-scratch-buffer setup opts structure mismatched: " .. e
+    end
+  )
 
   define_config_detail(user_config)
+  fn.ensure(config_types.config_schema, config)
+  local config_ = config --[[@as mado_scratch_buffer.Config]]
 
-  if config.use_default_keymappings then
+  if config_.use_default_keymappings then
     define_default_keymaps()
   end
 
