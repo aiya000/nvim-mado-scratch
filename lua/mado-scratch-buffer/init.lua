@@ -33,10 +33,12 @@ local function define_config_detail(user_config)
     },
   })
 
+  -- TODO: Notify warn for user instead of `error()`
   config = config_types.config_schema:parse(
     vim.tbl_deep_extend('force', default_config, user_config or {})
   )
 
+  -- TODO: Remove 'float' from 'various places' as this absorbs the difference, although 'float' type is now considered in various places
   -- Normalize 'float' to 'float-fixed' for backward compatibility
   if config.default_open_method.method == 'float' then
     config.default_open_method.method = 'float-fixed'
