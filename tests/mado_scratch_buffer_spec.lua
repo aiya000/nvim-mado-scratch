@@ -479,5 +479,56 @@ describe('mado-scratch-buffer', function()
       assert.equals(90, config.default_open_method.size.width)
       assert.equals(35, config.default_open_method.size.height)
     end)
+
+    it('should support float-fixed with command-line size argument', function()
+      vim.cmd('MadoScratchBufferOpen md float-fixed 30x20')
+
+      -- Check if window is floating
+      local win_config = vim.api.nvim_win_get_config(0)
+      assert.equals('editor', win_config.relative)
+
+      -- Check window size (should be 30x20)
+      assert.equals(30, win_config.width)
+      assert.equals(20, win_config.height)
+    end)
+
+    it('should support float (legacy) with command-line size argument', function()
+      vim.cmd('MadoScratchBufferOpen md float 40x25')
+
+      -- Check if window is floating
+      local win_config = vim.api.nvim_win_get_config(0)
+      assert.equals('editor', win_config.relative)
+
+      -- Check window size (should be 40x25)
+      assert.equals(40, win_config.width)
+      assert.equals(25, win_config.height)
+    end)
+
+    it('should support float-aspect with command-line scale argument', function()
+      vim.cmd('MadoScratchBufferOpen md float-aspect 0.9x0.9')
+
+      -- Check if window is floating
+      local win_config = vim.api.nvim_win_get_config(0)
+      assert.equals('editor', win_config.relative)
+
+      -- Get UI size (with fallback for headless mode)
+      local ui = vim.api.nvim_list_uis()[1]
+      local ui_width, ui_height
+      if ui ~= nil then
+        ui_width = ui.width
+        ui_height = ui.height
+      else
+        -- Default size for headless mode
+        ui_width = 120
+        ui_height = 40
+      end
+
+      local expected_width = math.floor(ui_width * 0.9)
+      local expected_height = math.floor(ui_height * 0.9)
+
+      -- Check window size (should be 90% of screen size)
+      assert.equals(expected_width, win_config.width)
+      assert.equals(expected_height, win_config.height)
+    end)
   end)
 end)
