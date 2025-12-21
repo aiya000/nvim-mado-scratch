@@ -167,20 +167,21 @@ local function open_in_new_float_window(file_name, geometry)
   local preserved_content = nil
   
   if existing_bufnr ~= -1 then
-    -- If the buffer has unsaved changes, preserve the content
-    local is_modified = vim.bo[existing_bufnr].modified
     local buftype = vim.bo[existing_bufnr].buftype
-    
-    if is_modified then
+    local is_modified = vim.bo[existing_bufnr].modified
+
+    -- For tmp buffers (nofile), always preserve content
+    -- For file buffers, preserve only if modified
+    if buftype == 'nofile' or is_modified then
       -- Get the buffer contents before deletion
       preserved_content = vim.api.nvim_buf_get_lines(existing_bufnr, 0, -1, false)
-      
+
       -- For file buffers, write to disk so the content persists
       if buftype ~= 'nofile' then
         vim.fn.writefile(preserved_content, file_name)
       end
     end
-    
+
     -- Now it's safe to delete the buffer
     vim.api.nvim_buf_delete(existing_bufnr, { force = true })
   end

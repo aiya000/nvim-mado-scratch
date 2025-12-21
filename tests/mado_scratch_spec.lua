@@ -643,5 +643,58 @@ describe('mado-scratch', function()
       -- Verify it's still a nofile buffer
       assert.equals(vim.bo.buftype, 'nofile')
     end)
+
+    it('should not error when reopening file buffer in float window after closing', function()
+      -- Issue 1: Opening MadoScratchOpenFile in float, closing, and reopening should not cause E32 error
+
+      -- Open a file buffer in float window
+      vim.cmd('MadoScratchOpenFile md float')
+      local file_name = vim.fn.expand('%:p')
+
+      -- Close the float window
+      vim.cmd('close')
+
+      -- Reopen the same file buffer in float window - should not error
+      local success, err = pcall(function()
+        vim.cmd('MadoScratchOpenFile md float')
+      end)
+
+      assert.is_true(success, 'Should not error when reopening file buffer in float window: ' .. tostring(err))
+
+      -- Verify the buffer was opened successfully
+      local reopened_file = vim.fn.expand('%:p')
+      assert.equals(file_name, reopened_file)
+    end)
+
+    it('should preserve tmp buffer content after closing and reopening float window', function()
+      -- Issue 2: Writing content to tmp buffer, closing float window, and reopening should preserve content
+
+      -- Open a tmp buffer in float window
+      vim.cmd('MadoScratchOpen md float')
+      local buffer_name = vim.fn.expand('%:p')
+
+      -- Write some content
+      vim.fn.setline(1, { 'persistent line 1', 'persistent line 2' })
+
+      -- Verify buffer is a nofile buffer
+      assert.equals(vim.bo.buftype, 'nofile')
+
+      -- Close the float window
+      vim.cmd('close')
+
+      -- Reopen the same tmp buffer in float window
+      vim.cmd('MadoScratchOpen md float')
+      local reopened_buffer = vim.fn.expand('%:p')
+      assert.equals(buffer_name, reopened_buffer)
+
+      -- Check if the content is preserved
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      assert.equals(#lines, 2)
+      assert.equals(lines[1], 'persistent line 1')
+      assert.equals(lines[2], 'persistent line 2')
+
+      -- Verify it's still a nofile buffer
+      assert.equals(vim.bo.buftype, 'nofile')
+    end)
   end)
 end)
