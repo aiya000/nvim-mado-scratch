@@ -205,6 +205,7 @@ auto_save_file_buffer ~
   lost when closing the window without explicitly saving (`:w`). This is because
   floating windows may close without triggering the buffer destruction events.
   It's recommended to keep this option `true` if you use floating windows.
+  (Fix in progress: https://github.com/aiya000/nvim-mado-scratch/issues/19)
 
                         *option.mado_scratch_buffer_use_default_keymappings*
 use_default_keymappings ~
