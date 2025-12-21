@@ -199,7 +199,8 @@ local function open_in_new_float_window(file_name, geometry)
 
   vim.api.nvim_buf_set_name(bufnr, file_name)
 
-  -- Restore preserved content if available, otherwise read from file
+  -- Restore preserved content if available (only set when existing buffer was modified),
+  -- otherwise read from file
   if preserved_content then
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, preserved_content)
   elseif vim.fn.filereadable(file_name) == 1 then

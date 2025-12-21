@@ -624,10 +624,11 @@ describe('mado-scratch', function()
       -- Verify buffer is a nofile buffer
       assert.equals('nofile', vim.bo.buftype)
       
-      -- Close the window (but buffer still exists)
+      -- Close the window (buffer remains in memory with content)
       vim.cmd('close')
       
-      -- Reopen the same tmp buffer in float window - content should be preserved
+      -- Reopen the same tmp buffer in float window
+      -- The existing buffer will be detected, content preserved, then buffer deleted and recreated
       vim.cmd('MadoScratchBufferOpen md float')
       local reopened_buffer = vim.fn.expand('%:p')
       assert.equals(buffer_name, reopened_buffer)
