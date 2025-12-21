@@ -1,5 +1,19 @@
 local helper = require('mado-scratch-buffer.helper')
 
+---Checks if a table contains a value
+---@generic T
+---@param tbl T[]
+---@param value T
+---@return boolean
+local function contains(tbl, value)
+  for _, v in ipairs(tbl) do
+    if v == value then
+      return true
+    end
+  end
+  return false
+end
+
 describe('mado-scratch-buffer', function()
   -- Setup before all tests
   before_each(function()
@@ -51,7 +65,7 @@ describe('mado-scratch-buffer', function()
       vim.cmd('MadoScratchBufferOpen')
       local file_name = vim.fn.expand('%:p')
       local mado = require('mado-scratch-buffer')
-      local expected = string.format(mado.config.file_pattern.when_tmp_buffer, 0) .. '.md'
+      local expected = string.format(mado.get_config().file_pattern.when_tmp_buffer, 0) .. '.md'
       assert.equals(file_name, expected)
     end)
 
@@ -104,7 +118,7 @@ describe('mado-scratch-buffer', function()
       vim.cmd('MadoScratchBufferOpen')
 
       local file_name = vim.fn.expand('%:p')
-      local expected = string.format(mado.config.file_pattern.when_tmp_buffer, 0) .. '.ts'
+      local expected = string.format(mado.get_config().file_pattern.when_tmp_buffer, 0) .. '.ts'
       assert.equals(file_name, expected)
       assert.equals(vim.fn.winwidth(0), 20)
     end)
@@ -120,7 +134,7 @@ describe('mado-scratch-buffer', function()
 
       vim.cmd('MadoScratchBufferOpen')
       local file_name = vim.fn.expand('%:p')
-      local expected = string.format(mado.config.file_pattern.when_tmp_buffer, 0) .. '.md'
+      local expected = string.format(mado.get_config().file_pattern.when_tmp_buffer, 0) .. '.md'
       assert.equals(file_name, expected)
     end)
 
@@ -187,7 +201,7 @@ describe('mado-scratch-buffer', function()
 
       vim.cmd('MadoScratchBufferOpenFile')
       local file_name = vim.fn.expand('%:p')
-      local expected = string.format(mado.config.file_pattern.when_file_buffer, 0) .. '.md'
+      local expected = string.format(mado.get_config().file_pattern.when_file_buffer, 0) .. '.md'
       assert.equals(file_name, expected)
     end)
 
@@ -334,8 +348,8 @@ describe('mado-scratch-buffer', function()
       -- Check the created files exist
       local all_buffer_names = helper.get_all_buffer_names()
       assert.equals(vim.fn.filereadable(first_file), 1)
-      assert.is_true(helper.contains(all_buffer_names, first_file))
-      assert.is_true(helper.contains(all_buffer_names, second_file))
+      assert.is_true(contains(all_buffer_names, first_file))
+      assert.is_true(contains(all_buffer_names, second_file))
 
       -- Wipe all scratch buffers and files
       vim.cmd('MadoScratchBufferClean')
@@ -343,8 +357,8 @@ describe('mado-scratch-buffer', function()
       -- Check the created files are removed
       local new_all_buffer_names = helper.get_all_buffer_names()
       assert.equals(vim.fn.filereadable(first_file), 0)
-      assert.is_false(helper.contains(new_all_buffer_names, first_file))
-      assert.is_false(helper.contains(new_all_buffer_names, second_file))
+      assert.is_false(contains(new_all_buffer_names, first_file))
+      assert.is_false(contains(new_all_buffer_names, second_file))
     end)
   end)
 
