@@ -164,16 +164,21 @@ end
 local function open_in_new_float_window(file_name, geometry)
   -- Check if buffer with this name already exists
   local existing_bufnr = vim.fn.bufnr(file_name)
+  local preserved_content = nil
   
   if existing_bufnr ~= -1 then
-    -- If the buffer has unsaved changes and is a file buffer, save the content
+    -- If the buffer has unsaved changes, preserve the content
     local is_modified = vim.api.nvim_buf_get_option(existing_bufnr, 'modified')
     local buftype = vim.api.nvim_buf_get_option(existing_bufnr, 'buftype')
     
-    if is_modified and buftype ~= 'nofile' then
-      -- Get the buffer contents and write to file to preserve changes
-      local buffer_lines = vim.api.nvim_buf_get_lines(existing_bufnr, 0, -1, false)
-      vim.fn.writefile(buffer_lines, file_name)
+    if is_modified then
+      -- Get the buffer contents before deletion
+      preserved_content = vim.api.nvim_buf_get_lines(existing_bufnr, 0, -1, false)
+      
+      -- For file buffers, write to disk so the content persists
+      if buftype ~= 'nofile' then
+        vim.fn.writefile(preserved_content, file_name)
+      end
     end
     
     -- Now it's safe to delete the buffer
@@ -194,7 +199,10 @@ local function open_in_new_float_window(file_name, geometry)
 
   vim.api.nvim_buf_set_name(bufnr, file_name)
 
-  if vim.fn.filereadable(file_name) == 1 then
+  -- Restore preserved content if available, otherwise read from file
+  if preserved_content then
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, preserved_content)
+  elseif vim.fn.filereadable(file_name) == 1 then
     local lines = vim.fn.readfile(file_name)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   end
