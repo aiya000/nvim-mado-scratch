@@ -186,21 +186,21 @@ Please see '[Detailed Usage](#gear-detailed-usage)' section for more information
 ## :balance_scale: Comparison with scratch.vim
 
 [scratch.vim](https://github.com/mtth/scratch.vim) is a great plugin.
-However, vim-scratch-buffer adds more features.
+However, nvim-mado-scratch adds more features.
 
-Compared to scratch.vim, vim-scratch-buffer provides these additional features:
+Compared to scratch.vim, nvim-mado-scratch provides these additional features:
 
 - Flexible buffer management
-    - Open multiple buffers with sequential numbering (`:ScratchBufferOpenNext`)
-    - Quick access to recently used buffers (`:ScratchBufferOpen`)
+    - Open multiple buffers with sequential numbering (`:MadoScratchOpenNext`)
+    - Quick access to recently used buffers (`:MadoScratchOpen`)
     - When you want to take notes on different topics, scratch.vim only allows one buffer
-    - See `:help :ScratchBufferOpen` and `:help :ScratchBufferOpenNext`
+    - See `:help :MadoScratchOpen` and `:help :MadoScratchOpenNext`
 
 - Buffer type options
     - Choose between writeable buffers or temporary buffers
     - Automatic saving for file buffers when enabled
     - Convert temporary buffers to persistent ones when needed
-    - See `:help :ScratchBufferOpen` and `:help :ScratchBufferOpenFile`
+    - See `:help :MadoScratchOpen` and `:help :MadoScratchOpenFile`
 
 - Customization options
     - Specify filetype for syntax highlighting, for `:QuickRun`, and for etc

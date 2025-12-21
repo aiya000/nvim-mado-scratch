@@ -161,7 +161,7 @@ The above setup properties are the default value of each configuration option.
 NOTE:
 See below file to see what types the each options have :
   - `../lua/mado-scratch/init.lua`
-    - and `mado_scratch_buffer.Options` type
+    - and `mado_scratch.Options` type
 
 
                         *option.mado_scratch_file_pattern*
