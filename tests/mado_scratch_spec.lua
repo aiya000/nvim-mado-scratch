@@ -580,5 +580,121 @@ describe('mado-scratch', function()
       assert.equals(expected_height, win_config.height)
     end)
 
+    it('should preserve unsaved content when switching to float window with auto_save_file_buffer = false', function()
+      -- Create a file buffer with content
+      vim.cmd('MadoScratchOpenFile md sp')
+      local file_name = vim.fn.expand('%:p')
+      vim.fn.setline(1, { 'initial line 1', 'initial line 2' })
+      vim.cmd('write')
+
+      -- Modify the buffer without saving (auto_save_file_buffer is false in test setup)
+      vim.fn.setline(1, { 'modified line 1', 'modified line 2', 'new line 3' })
+
+      -- Verify buffer is modified
+      assert.is_true(vim.bo.modified)
+
+      -- Switch to float window - this should preserve the unsaved changes
+      vim.cmd('MadoScratchOpenFile md float')
+      local reopened_file = vim.fn.expand('%:p')
+      assert.equals(file_name, reopened_file)
+
+      -- Check if the modified content is preserved (not the original file content)
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      assert.equals(#lines, 3)
+      assert.equals(lines[1], 'modified line 1')
+      assert.equals(lines[2], 'modified line 2')
+      assert.equals(lines[3], 'new line 3')
+
+      -- Verify the file on disk was also updated
+      local file_lines = vim.fn.readfile(file_name)
+      assert.equals(#file_lines, 3)
+      assert.equals(file_lines[1], 'modified line 1')
+      assert.equals(file_lines[2], 'modified line 2')
+      assert.equals(file_lines[3], 'new line 3')
+    end)
+
+    it('should preserve tmp buffer content when switching to float window', function()
+      -- Create a tmp buffer (nofile) with content
+      vim.cmd('MadoScratchOpen md sp')
+      local buffer_name = vim.fn.expand('%:p')
+
+      -- Add some content to the tmp buffer
+      vim.fn.setline(1, { 'tmp line 1', 'tmp line 2', 'tmp line 3' })
+
+      -- Verify buffer is a nofile buffer
+      assert.equals(vim.bo.buftype, 'nofile')
+
+      -- Close the window (buffer remains in memory with content)
+      vim.cmd('close')
+
+      -- Reopen the same tmp buffer in float window
+      -- The existing buffer will be detected, content preserved, then buffer deleted and recreated
+      vim.cmd('MadoScratchOpen md float')
+      local reopened_buffer = vim.fn.expand('%:p')
+      assert.equals(buffer_name, reopened_buffer)
+
+      -- Check if the tmp buffer content is preserved
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      assert.equals(#lines, 3)
+      assert.equals(lines[1], 'tmp line 1')
+      assert.equals(lines[2], 'tmp line 2')
+      assert.equals(lines[3], 'tmp line 3')
+
+      -- Verify it's still a nofile buffer
+      assert.equals(vim.bo.buftype, 'nofile')
+    end)
+
+    it('should not error when reopening file buffer in float window after closing', function()
+      -- Issue 1: Opening MadoScratchOpenFile in float, closing, and reopening should not cause E32 error
+
+      -- Open a file buffer in float window
+      vim.cmd('MadoScratchOpenFile md float')
+      local file_name = vim.fn.expand('%:p')
+
+      -- Close the float window
+      vim.cmd('close')
+
+      -- Reopen the same file buffer in float window - should not error
+      local success, err = pcall(function()
+        vim.cmd('MadoScratchOpenFile md float')
+      end)
+
+      assert.is_true(success, 'Should not error when reopening file buffer in float window: ' .. tostring(err))
+
+      -- Verify the buffer was opened successfully
+      local reopened_file = vim.fn.expand('%:p')
+      assert.equals(file_name, reopened_file)
+    end)
+
+    it('should preserve tmp buffer content after closing and reopening float window', function()
+      -- Issue 2: Writing content to tmp buffer, closing float window, and reopening should preserve content
+
+      -- Open a tmp buffer in float window
+      vim.cmd('MadoScratchOpen md float')
+      local buffer_name = vim.fn.expand('%:p')
+
+      -- Write some content
+      vim.fn.setline(1, { 'persistent line 1', 'persistent line 2' })
+
+      -- Verify buffer is a nofile buffer
+      assert.equals(vim.bo.buftype, 'nofile')
+
+      -- Close the float window
+      vim.cmd('close')
+
+      -- Reopen the same tmp buffer in float window
+      vim.cmd('MadoScratchOpen md float')
+      local reopened_buffer = vim.fn.expand('%:p')
+      assert.equals(buffer_name, reopened_buffer)
+
+      -- Check if the content is preserved
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      assert.equals(#lines, 2)
+      assert.equals(lines[1], 'persistent line 1')
+      assert.equals(lines[2], 'persistent line 2')
+
+      -- Verify it's still a nofile buffer
+      assert.equals(vim.bo.buftype, 'nofile')
+    end)
   end)
 end)

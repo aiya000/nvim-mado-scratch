@@ -2,7 +2,8 @@ local M = {}
 
 function M.save_file_buffer_if_enabled()
   local config = require('mado-scratch').get_config()
-  if config.auto_save_file_buffer and vim.bo.buftype ~= 'nofile' then
+  local bufname = vim.api.nvim_buf_get_name(0)
+  if config.auto_save_file_buffer and vim.bo.buftype ~= 'nofile' and bufname ~= '' then
     vim.cmd.write({
       mods = { silent = true },
       bang = true,
