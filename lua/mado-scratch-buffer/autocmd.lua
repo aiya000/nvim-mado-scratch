@@ -25,7 +25,7 @@ function M.hide_buffer_if_enabled()
 end
 
 function M.setup_autocmds()
-  local config = require('mado-scratch-buffer').config
+  local config = require('mado-scratch-buffer').get_config()
   local augroup = vim.api.nvim_create_augroup('MadoScratchBuffer', { clear = true })
 
   local file_buffer_pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*')
