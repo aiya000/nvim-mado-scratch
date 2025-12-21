@@ -27,7 +27,7 @@ $ git clone --depth 1 https://github.com/nvim-lua/plenary.nvim \
     ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
 
 # Run tests
-$ cd /path/to/nvim-mado-scratch-buffer
+$ cd /path/to/nvim-mado-scratch
 $ nvim --headless -c "lua require('plenary.test_harness').test_directory('tests/', {minimal_init='tests/minimal_init.lua'})"
 ```
 

@@ -1,6 +1,6 @@
-local arrow = require('mado-scratch-buffer.luarrow.arrow').arrow
-local c = require('mado-scratch-buffer.chotto')
-local fn = require('mado-scratch-buffer.functions')
+local arrow = require('mado-scratch.luarrow.arrow').arrow
+local c = require('mado-scratch.chotto')
+local fn = require('mado-scratch.functions')
 
 local M = {}
 
@@ -107,7 +107,7 @@ end
 ---@param file_ext string -- File extension or special value
 ---@return string -- File pattern with extension
 local function get_file_pattern(opening_as_tmp_buffer, file_ext)
-  local config = require('mado-scratch-buffer').get_config()
+  local config = require('mado-scratch').get_config()
   local base_pattern = opening_as_tmp_buffer
     and config.file_pattern.when_tmp_buffer
     or config.file_pattern.when_file_buffer
@@ -277,7 +277,7 @@ local function get_actual_floating_buffer_size(open_method, buffer_size)
     c.union({ c.string(), c.null() }),
     buffer_size
   )
-  local config = require('mado-scratch-buffer').get_config()
+  local config = require('mado-scratch').get_config()
 
   if buffer_size == nil and (open_method == 'float-fixed' or open_method == 'float') then
     return config.default_open_method.size
@@ -339,7 +339,7 @@ local function get_actual_non_floating_buffer_size(open_method, buffer_size)
   end
 
   -- Use default size if not specified
-  local config = require('mado-scratch-buffer').get_config()
+  local config = require('mado-scratch').get_config()
   return open_method == 'sp'
     and (config.default_open_method.height or default_sp_height)
     or open_method == 'vsp'
@@ -371,7 +371,7 @@ end
 ---Opens a scratch buffer (either a tmp buffer or a file buffer)
 ---@param options OpenBufferOptions
 function M.open_buffer(options)
-  local config = require('mado-scratch-buffer').get_config()
+  local config = require('mado-scratch').get_config()
 
   local file_ext = options.file_ext or config.default_file_ext
   local file_pattern = get_file_pattern(options.opening_as_tmp_buffer, file_ext)
@@ -407,7 +407,7 @@ end
 
 ---Cleans up all scratch buffers and files
 function M.clean()
-  local config = require('mado-scratch-buffer').get_config()
+  local config = require('mado-scratch').get_config()
 
   local file_glob_pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*')
   local persistent_files = vim.fn.glob(file_glob_pattern, false, true)

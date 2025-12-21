@@ -1,7 +1,7 @@
 local M = {}
 
 function M.save_file_buffer_if_enabled()
-  local config = require('mado-scratch-buffer').get_config()
+  local config = require('mado-scratch').get_config()
   if config.auto_save_file_buffer and vim.bo.buftype ~= 'nofile' then
     vim.cmd.write({
       mods = { silent = true },
@@ -11,7 +11,7 @@ function M.save_file_buffer_if_enabled()
 end
 
 function M.hide_buffer_if_enabled()
-  local config = require('mado-scratch-buffer').get_config()
+  local config = require('mado-scratch').get_config()
 
   if vim.bo.buftype == 'nofile' and config.auto_hide_buffer.when_tmp_buffer then
     vim.cmd.quit()
@@ -25,8 +25,8 @@ function M.hide_buffer_if_enabled()
 end
 
 function M.setup_autocmds()
-  local config = require('mado-scratch-buffer').get_config()
-  local augroup = vim.api.nvim_create_augroup('MadoScratchBuffer', { clear = true })
+  local config = require('mado-scratch').get_config()
+  local augroup = vim.api.nvim_create_augroup('MadoScratch', { clear = true })
 
   local file_buffer_pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*')
   local tmp_buffer_pattern = config.file_pattern.when_tmp_buffer:gsub('%%d', '*')
