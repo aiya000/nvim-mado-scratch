@@ -1,6 +1,6 @@
 # Tests
 
-This directory contains tests for mado-scratch-buffer.nvim using [plenary.nvim](https://github.com/nvim-lua/plenary.nvim).
+This directory contains tests for mado-scratch.nvim using [plenary.nvim](https://github.com/nvim-lua/plenary.nvim).
 
 ## Running Tests
 
@@ -48,7 +48,7 @@ make test
 
 ## Test Structure
 
-- `mado_scratch_buffer_spec.lua` - Main test suite covering all plugin functionality
+- `mado_scratch_spec.lua` - Main test suite covering all plugin functionality
 - `minimal_init.lua` - Minimal Neovim configuration for running tests
 - `tmp/` - Temporary directory for test files (auto-generated, gitignored)
 

@@ -1,7 +1,7 @@
-local c = require('mado-scratch-buffer.chotto')
-local config_types = require('mado-scratch-buffer.types.config')
-local fn = require('mado-scratch-buffer.functions')
-local user_config_types = require('mado-scratch-buffer.types.user-config')
+local c = require('mado-scratch.chotto')
+local config_types = require('mado-scratch.types.config')
+local fn = require('mado-scratch.functions')
+local user_config_types = require('mado-scratch.types.user-config')
 
 local M = {}
 
@@ -9,10 +9,10 @@ local M = {}
 local config = nil
 
 local function define_default_keymaps()
-  vim.keymap.set('n', '<leader>b', '<Cmd>MadoScratchBufferOpen<CR>', { silent = true, noremap = true })
-  vim.keymap.set('n', '<leader>B', '<Cmd>MadoScratchBufferOpenFile<CR>', { silent = true, noremap = true })
-  vim.keymap.set('n', '<leader><leader>b', ':<C-u>MadoScratchBufferOpen<Space>', { noremap = true })
-  vim.keymap.set('n', '<leader><leader>B', ':<C-u>MadoScratchBufferOpenFile<Space>', { noremap = true })
+  vim.keymap.set('n', '<leader>b', '<Cmd>MadoScratchOpen<CR>', { silent = true, noremap = true })
+  vim.keymap.set('n', '<leader>B', '<Cmd>MadoScratchOpenFile<CR>', { silent = true, noremap = true })
+  vim.keymap.set('n', '<leader><leader>b', ':<C-u>MadoScratchOpen<Space>', { noremap = true })
+  vim.keymap.set('n', '<leader><leader>B', ':<C-u>MadoScratchOpenFile<Space>', { noremap = true })
 end
 
 ---@param user_config? mado_scratch_buffer.UserConfig
@@ -76,7 +76,7 @@ function M.setup(user_config)
     c.optional(user_config_types.user_config_schema),
     user_config,
     function(e)
-      return "mado-scratch-buffer setup opts structure mismatched: " .. e
+      return "mado-scratch setup opts structure mismatched: " .. e
     end
   )
 
@@ -88,7 +88,7 @@ function M.setup(user_config)
     define_default_keymaps()
   end
 
-  require('mado-scratch-buffer.autocmd').setup_autocmds()
+  require('mado-scratch.autocmd').setup_autocmds()
 end
 
 ---Returns your current configuration.
@@ -96,7 +96,7 @@ end
 ---@return mado_scratch_buffer.Config
 function M.get_config()
   if config == nil then
-    error("mado-scratch-buffer is not setup yet. Please call require('mado-scratch-buffer').setup() first.")
+    error("mado-scratch is not setup yet. Please call require('mado-scratch').setup() first.")
   end
   return config
 end

@@ -1,4 +1,4 @@
-local helper = require('mado-scratch-buffer.helper')
+local helper = require('mado-scratch.helper')
 
 ---Checks if a table contains a value
 ---@generic T
@@ -14,11 +14,11 @@ local function contains(tbl, value)
   return false
 end
 
-describe('mado-scratch-buffer', function()
+describe('mado-scratch', function()
   -- Setup before all tests
   before_each(function()
     -- Setup test configuration
-    local mado = require('mado-scratch-buffer')
+    local mado = require('mado-scratch')
     mado.setup({
       file_pattern = {
         when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -35,7 +35,7 @@ describe('mado-scratch-buffer', function()
     })
 
     -- Clean all created scratch files and buffers
-    vim.cmd('MadoScratchBufferClean')
+    vim.cmd('MadoScratchClean')
 
     -- Close all windows except current
     vim.cmd('new')
@@ -43,7 +43,7 @@ describe('mado-scratch-buffer', function()
   end)
 
   after_each(function()
-    local mado = require('mado-scratch-buffer')
+    local mado = require('mado-scratch')
     local config = mado.get_config()
     local file_pattern_tmp = config.file_pattern.when_tmp_buffer
     local file_pattern_file = config.file_pattern.when_file_buffer
@@ -60,9 +60,9 @@ describe('mado-scratch-buffer', function()
     end
   end)
 
-  describe('MadoScratchBufferOpen', function()
+  describe('MadoScratchOpen', function()
     it('should create a buffer', function()
-      vim.cmd('MadoScratchBufferOpen')
+      vim.cmd('MadoScratchOpen')
       local file_name = vim.fn.expand('%:p')
       local mado = require('mado-scratch-buffer')
       local expected = string.format(mado.get_config().file_pattern.when_tmp_buffer, 0) .. '.md'
@@ -70,7 +70,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should open readonly file (nofile buftype)', function()
-      vim.cmd('MadoScratchBufferOpen')
+      vim.cmd('MadoScratchOpen')
       local success, _ = pcall(function()
         vim.cmd('write')
       end)
@@ -78,33 +78,33 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should accept file extension', function()
-      vim.cmd('MadoScratchBufferOpen md')
+      vim.cmd('MadoScratchOpen md')
       local file_name = vim.fn.expand('%:p')
       assert.is_true(file_name:match('%.md$') ~= nil)
     end)
 
     it('should accept open method', function()
-      vim.cmd('MadoScratchBufferOpen md sp')
+      vim.cmd('MadoScratchOpen md sp')
       local file_name1 = vim.fn.expand('%:p')
       assert.is_not_nil(file_name1)
 
-      vim.cmd('MadoScratchBufferOpen md vsp')
+      vim.cmd('MadoScratchOpen md vsp')
       local file_name2 = vim.fn.expand('%:p')
       assert.is_not_nil(file_name2)
     end)
 
     it('should accept buffer size', function()
-      vim.cmd('MadoScratchBufferOpen md sp 5')
+      vim.cmd('MadoScratchOpen md sp 5')
       local file_name1 = vim.fn.expand('%:p')
       assert.is_not_nil(file_name1)
 
-      vim.cmd('MadoScratchBufferOpen md vsp 50')
+      vim.cmd('MadoScratchOpen md vsp 50')
       local file_name2 = vim.fn.expand('%:p')
       assert.is_not_nil(file_name2)
     end)
 
     it('should use default values', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -115,7 +115,7 @@ describe('mado-scratch-buffer', function()
       })
 
       vim.cmd('new')
-      vim.cmd('MadoScratchBufferOpen')
+      vim.cmd('MadoScratchOpen')
 
       local file_name = vim.fn.expand('%:p')
       local expected = string.format(mado.get_config().file_pattern.when_tmp_buffer, 0) .. '.ts'
@@ -124,7 +124,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should use when_tmp_buffer pattern', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -132,14 +132,14 @@ describe('mado-scratch-buffer', function()
         },
       })
 
-      vim.cmd('MadoScratchBufferOpen')
+      vim.cmd('MadoScratchOpen')
       local file_name = vim.fn.expand('%:p')
       local expected = string.format(mado.get_config().file_pattern.when_tmp_buffer, 0) .. '.md'
       assert.equals(file_name, expected)
     end)
 
     it('should support auto hiding tmp buffer', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -151,39 +151,39 @@ describe('mado-scratch-buffer', function()
         },
       })
 
-      vim.cmd('MadoScratchBufferOpen md')
+      vim.cmd('MadoScratchOpen md')
       vim.cmd('wincmd p')  -- Trigger WinLeave
       assert.equals(vim.fn.winnr('$'), 1)
     end)
   end)
 
-  describe('MadoScratchBufferOpenNext', function()
+  describe('MadoScratchOpenNext', function()
     it('can make multiple buffers', function()
-      vim.cmd('MadoScratchBufferOpen')
+      vim.cmd('MadoScratchOpen')
       local main_file = vim.fn.expand('%:p')
 
-      vim.cmd('MadoScratchBufferOpenNext')
+      vim.cmd('MadoScratchOpenNext')
       local next_file = vim.fn.expand('%:p')
 
       assert.is_not.equals(main_file, next_file)
     end)
 
     it('should open recent buffer after OpenNext', function()
-      vim.cmd('MadoScratchBufferOpenNext')
+      vim.cmd('MadoScratchOpenNext')
       local first_file = vim.fn.expand('%:p')
 
       vim.cmd('new')
 
-      vim.cmd('MadoScratchBufferOpen')
+      vim.cmd('MadoScratchOpen')
       local second_file = vim.fn.expand('%:p')
 
       assert.equals(second_file, first_file)
     end)
   end)
 
-  describe('MadoScratchBufferOpenFile', function()
+  describe('MadoScratchOpenFile', function()
     it('should open writable file', function()
-      vim.cmd('MadoScratchBufferOpenFile')
+      vim.cmd('MadoScratchOpenFile')
       local success, _ = pcall(function()
         vim.cmd('write')
       end)
@@ -191,7 +191,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should use when_file_buffer pattern', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = 'not specified',
@@ -199,14 +199,14 @@ describe('mado-scratch-buffer', function()
         },
       })
 
-      vim.cmd('MadoScratchBufferOpenFile')
+      vim.cmd('MadoScratchOpenFile')
       local file_name = vim.fn.expand('%:p')
       local expected = string.format(mado.get_config().file_pattern.when_file_buffer, 0) .. '.md'
       assert.equals(file_name, expected)
     end)
 
     it('should support auto saving file buffer on InsertLeave', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -215,7 +215,7 @@ describe('mado-scratch-buffer', function()
         auto_save_file_buffer = true,
       })
 
-      vim.cmd('MadoScratchBufferOpenFile md')
+      vim.cmd('MadoScratchOpenFile md')
       vim.fn.setline(1, 'insert leave content')
       vim.cmd('doautocmd InsertLeave')
 
@@ -272,9 +272,9 @@ describe('mado-scratch-buffer', function()
     end)
   end)
 
-  describe('MadoScratchBufferOpen and MadoScratchBufferOpenFile', function()
+  describe('MadoScratchOpen and MadoScratchOpenFile', function()
     it('should make different buffers when options are different', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -282,10 +282,10 @@ describe('mado-scratch-buffer', function()
         },
       })
 
-      vim.cmd('MadoScratchBufferOpen')
+      vim.cmd('MadoScratchOpen')
       local tmp_file = vim.fn.expand('%:p')
 
-      vim.cmd('MadoScratchBufferOpenFile')
+      vim.cmd('MadoScratchOpenFile')
       local persistent_file = vim.fn.expand('%:p')
 
       assert.is_not.equals(tmp_file, persistent_file)
@@ -293,7 +293,7 @@ describe('mado-scratch-buffer', function()
 
     it('should change buffer type from tmp to file when pattern is same', function()
       local file_pattern = vim.fn.fnamemodify('./tests/tmp/scratch-%d', ':p')
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = file_pattern,
@@ -301,10 +301,10 @@ describe('mado-scratch-buffer', function()
         },
       })
 
-      vim.cmd('MadoScratchBufferOpen')
+      vim.cmd('MadoScratchOpen')
       local first_file = vim.fn.expand('%:p')
 
-      vim.cmd('MadoScratchBufferOpenFile')
+      vim.cmd('MadoScratchOpenFile')
       local second_file = vim.fn.expand('%:p')
 
       assert.equals(second_file, first_file)
@@ -315,7 +315,7 @@ describe('mado-scratch-buffer', function()
 
     it('should change buffer type from file to tmp when pattern is same', function()
       local file_pattern = vim.fn.fnamemodify('./tests/tmp/scratch-%d', ':p')
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = file_pattern,
@@ -323,10 +323,10 @@ describe('mado-scratch-buffer', function()
         },
       })
 
-      vim.cmd('MadoScratchBufferOpenFile')
+      vim.cmd('MadoScratchOpenFile')
       local first_file = vim.fn.expand('%:p')
 
-      vim.cmd('MadoScratchBufferOpen')
+      vim.cmd('MadoScratchOpen')
       local second_file = vim.fn.expand('%:p')
 
       assert.equals(second_file, first_file)
@@ -336,13 +336,13 @@ describe('mado-scratch-buffer', function()
     end)
   end)
 
-  describe('MadoScratchBufferClean', function()
+  describe('MadoScratchClean', function()
     it('should wipe opened files and buffers', function()
-      vim.cmd('MadoScratchBufferOpenFile md')
+      vim.cmd('MadoScratchOpenFile md')
       local first_file = vim.fn.expand('%:p')
       vim.cmd('write')
 
-      vim.cmd('MadoScratchBufferOpen md')
+      vim.cmd('MadoScratchOpen md')
       local second_file = vim.fn.expand('%:p')
 
       -- Check the created files exist
@@ -352,7 +352,7 @@ describe('mado-scratch-buffer', function()
       assert.is_true(contains(all_buffer_names, second_file))
 
       -- Wipe all scratch buffers and files
-      vim.cmd('MadoScratchBufferClean')
+      vim.cmd('MadoScratchClean')
 
       -- Check the created files are removed
       local new_all_buffer_names = helper.get_all_buffer_names()
@@ -364,9 +364,9 @@ describe('mado-scratch-buffer', function()
 
   describe('float window support', function()
     it('should open a new file in float window (legacy float)', function()
-      vim.cmd('MadoScratchBufferOpen md float')
+      vim.cmd('MadoScratchOpen md float')
       local file_name = vim.fn.expand('%:p')
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       local config = mado.get_config()
       local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.md'
       assert.equals(expected, file_name)
@@ -377,9 +377,9 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should open a new file in float-fixed window', function()
-      vim.cmd('MadoScratchBufferOpen md float-fixed')
+      vim.cmd('MadoScratchOpen md float-fixed')
       local file_name = vim.fn.expand('%:p')
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       local config = mado.get_config()
       local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.md'
       assert.equals(expected, file_name)
@@ -391,14 +391,14 @@ describe('mado-scratch-buffer', function()
 
     it('should load existing file content in float window', function()
       -- Create a file with content
-      vim.cmd('MadoScratchBufferOpenFile md')
+      vim.cmd('MadoScratchOpenFile md')
       local file_name = vim.fn.expand('%:p')
       vim.fn.setline(1, { 'line 1', 'line 2', 'line 3' })
       vim.cmd('write')
       vim.cmd('bwipeout!')
 
       -- Open the same file in float window
-      vim.cmd('MadoScratchBufferOpenFile md float')
+      vim.cmd('MadoScratchOpenFile md float')
       local reopened_file = vim.fn.expand('%:p')
       assert.equals(file_name, reopened_file)
 
@@ -411,7 +411,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should set correct float window size', function()
-      vim.cmd('MadoScratchBufferOpen md float 100x50')
+      vim.cmd('MadoScratchOpen md float 100x50')
 
       -- Check if window is floating
       local win_config = vim.api.nvim_win_get_config(0)
@@ -423,7 +423,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should use default float window size when not specified', function()
-      vim.cmd('MadoScratchBufferOpen md float')
+      vim.cmd('MadoScratchOpen md float')
 
       -- Check if window is floating
       local win_config = vim.api.nvim_win_get_config(0)
@@ -435,7 +435,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should use config default float window size when not specified', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -444,7 +444,7 @@ describe('mado-scratch-buffer', function()
         default_open_method = { method = 'float', size = { width = 120, height = 40 } },
       })
 
-      vim.cmd('MadoScratchBufferOpen md float')
+      vim.cmd('MadoScratchOpen md float')
 
       -- Check if window is floating
       local win_config = vim.api.nvim_win_get_config(0)
@@ -456,7 +456,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should support float-fixed with default_open_method config', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -465,7 +465,7 @@ describe('mado-scratch-buffer', function()
         default_open_method = { method = 'float-fixed', size = { width = 100, height = 30 } },
       })
 
-      vim.cmd('MadoScratchBufferOpen md')
+      vim.cmd('MadoScratchOpen md')
 
       -- Check if window is floating
       local win_config = vim.api.nvim_win_get_config(0)
@@ -477,7 +477,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should support float-aspect with scale ratio', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -486,7 +486,7 @@ describe('mado-scratch-buffer', function()
         default_open_method = { method = 'float-aspect', scale = { width = 0.5, height = 0.5 } },
       })
 
-      vim.cmd('MadoScratchBufferOpen md')
+      vim.cmd('MadoScratchOpen md')
 
       -- Check if window is floating
       local win_config = vim.api.nvim_win_get_config(0)
@@ -513,7 +513,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should normalize legacy float to float-fixed', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -530,7 +530,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should support float-fixed with command-line size argument', function()
-      vim.cmd('MadoScratchBufferOpen md float-fixed 30x20')
+      vim.cmd('MadoScratchOpen md float-fixed 30x20')
 
       -- Check if window is floating
       local win_config = vim.api.nvim_win_get_config(0)
@@ -542,7 +542,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should support float (legacy) with command-line size argument', function()
-      vim.cmd('MadoScratchBufferOpen md float 40x25')
+      vim.cmd('MadoScratchOpen md float 40x25')
 
       -- Check if window is floating
       local win_config = vim.api.nvim_win_get_config(0)
@@ -554,7 +554,7 @@ describe('mado-scratch-buffer', function()
     end)
 
     it('should support float-aspect with command-line scale argument', function()
-      vim.cmd('MadoScratchBufferOpen md float-aspect 0.9x0.9')
+      vim.cmd('MadoScratchOpen md float-aspect 0.9x0.9')
 
       -- Check if window is floating
       local win_config = vim.api.nvim_win_get_config(0)

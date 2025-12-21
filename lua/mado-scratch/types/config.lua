@@ -2,7 +2,7 @@
 ---`./user-config.lua`, the difference is that `mado_scratch_buffer.UserConfig`, allowing some optionality.
 ---See also `mado_scratch_buffer.UserConfig` for configuration what the users can set.
 
-local c = require('mado-scratch-buffer.chotto')
+local c = require('mado-scratch.chotto')
 
 local M = {}
 
@@ -87,7 +87,7 @@ M.config_schema = c.object({
     when_file_buffer = c.boolean(),
   }),
 })
----A completed type for nvim-mado-scratch-buffer configuration.
+---A completed type for nvim-mado-scratch configuration.
 ---Not Contains optional fields.
 ---@class mado_scratch_buffer.Config
 ---@field file_pattern { when_tmp_buffer: string, when_file_buffer: string }

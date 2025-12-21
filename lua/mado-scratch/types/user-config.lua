@@ -1,7 +1,7 @@
 ---Defines the type `mado_scratch_buffer.UserConfig`, other types, and schemas,  what the users can set
 
-local c = require('mado-scratch-buffer.chotto')
-local config_types = require('mado-scratch-buffer.types.config')
+local c = require('mado-scratch.chotto')
+local config_types = require('mado-scratch.types.config')
 
 local M = {}
 
@@ -30,7 +30,7 @@ M.user_config_schema = c.object({
     })
   ),
 })
----A type for user to set nvim-mado-scratch-buffer
+---A type for user to set nvim-mado-scratch
 ---@class mado_scratch_buffer.UserConfig
 ---@field file_pattern? { when_tmp_buffer?: string, when_file_buffer?: string }
 ---@field default_file_ext? string
