@@ -25,20 +25,16 @@ function M.hide_buffer_if_enabled()
 end
 
 function M.setup_autocmds()
-  local config = require('mado-scratch-buffer').get_config()
+  local config = require('mado-scratch-buffer').config
   local augroup = vim.api.nvim_create_augroup('MadoScratchBuffer', { clear = true })
 
-  -- Save on InsertLeave
-  vim.api.nvim_create_autocmd('InsertLeave', {
-    group = augroup,
-    pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*'),
-    callback = M.save_file_buffer_if_enabled,
-  })
+  local file_buffer_pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*')
+  local tmp_buffer_pattern = config.file_pattern.when_tmp_buffer:gsub('%%d', '*')
 
-  -- Save before buffer is destroyed
-  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout', 'BufUnload' }, {
+  -- Save on InsertLeave and a buffer is closed
+  vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufDelete', 'BufWipeout', 'BufUnload' }, {
     group = augroup,
-    pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*'),
+    pattern = file_buffer_pattern,
     callback = M.save_file_buffer_if_enabled,
   })
 
@@ -46,8 +42,8 @@ function M.setup_autocmds()
   vim.api.nvim_create_autocmd('WinLeave', {
     group = augroup,
     pattern = {
-      config.file_pattern.when_tmp_buffer:gsub('%%d', '*'),
-      config.file_pattern.when_file_buffer:gsub('%%d', '*'),
+      tmp_buffer_pattern,
+      file_buffer_pattern,
     },
     callback = M.hide_buffer_if_enabled,
   })
