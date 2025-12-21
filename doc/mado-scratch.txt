@@ -164,7 +164,7 @@ See below file to see what types the each options have :
     - and `mado_scratch_buffer.Options` type
 
 
-                        *option.mado_scratch_buffer_file_pattern*
+                        *option.mado_scratch_file_pattern*
 file_pattern ~
   Default: >lua
   {
@@ -175,12 +175,12 @@ file_pattern ~
   File path patterns for temporary and persistent buffers. The `%d` will be
   replaced with an incremental number.
 
-                        *option.mado_scratch_buffer_default_file_ext*
+                        *option.mado_scratch_default_file_ext*
 default_file_ext ~
   Default: `'md'`
   Default file extension when no extension is specified.
 
-                        *option.mado_scratch_buffer_default_open_method*
+                        *option.mado_scratch_default_open_method*
 default_open_method ~
   Default: `{ method = 'sp', height = 15 }`
   Default method to open buffers with size configuration.
@@ -195,7 +195,7 @@ default_open_method ~
   Note: `{ method = 'float', ... }` is supported for backward compatibility
   and is treated as `float-fixed`.
 
-                        *option.mado_scratch_buffer_auto_save_file_buffer*
+                        *option.mado_scratch_auto_save_file_buffer*
 auto_save_file_buffer ~
   Default: `true`
   Automatically save file buffers when leaving insert mode (InsertLeave event)
@@ -207,7 +207,7 @@ auto_save_file_buffer ~
   It's recommended to keep this option `true` if you use floating windows.
   (Fix in progress: https://github.com/aiya000/nvim-mado-scratch/issues/19)
 
-                        *option.mado_scratch_buffer_use_default_keymappings*
+                        *option.mado_scratch_use_default_keymappings*
 use_default_keymappings ~
   Default: `false`
   Enable default keymappings. When enabled:
@@ -216,7 +216,7 @@ use_default_keymappings ~
   - `<leader><leader>b` → `:MadoScratchOpen ` (interactive)
   - `<leader><leader>B` → `:MadoScratchOpenFile ` (interactive)
 
-                        *option.mado_scratch_buffer_auto_hide_buffer*
+                        *option.mado_scratch_auto_hide_buffer*
 auto_hide_buffer ~
   Default: >lua
     {

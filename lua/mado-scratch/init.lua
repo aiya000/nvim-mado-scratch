@@ -5,7 +5,7 @@ local user_config_types = require('mado-scratch.types.user-config')
 
 local M = {}
 
----@type mado_scratch_buffer.Config | nil
+---@type mado_scratch.Config | nil
 local config = nil
 
 local function define_default_keymaps()
@@ -15,9 +15,9 @@ local function define_default_keymaps()
   vim.keymap.set('n', '<leader><leader>B', ':<C-u>MadoScratchOpenFile<Space>', { noremap = true })
 end
 
----@param user_config? mado_scratch_buffer.UserConfig
+---@param user_config? mado_scratch.UserConfig
 local function define_config_detail(user_config)
-  ---@type mado_scratch_buffer.Config
+  ---@type mado_scratch.Config
   local default_config = config_types.config_schema:parse({
     file_pattern = {
       when_tmp_buffer = '/tmp/mado-scratch-tmp-%d',
@@ -70,7 +70,7 @@ local function define_config_detail(user_config)
 end
 
 ---Setups the plugin
----@param user_config? mado_scratch_buffer.UserConfig
+---@param user_config? mado_scratch.UserConfig
 function M.setup(user_config)
   fn.ensure(
     c.optional(user_config_types.user_config_schema),
@@ -82,7 +82,7 @@ function M.setup(user_config)
 
   define_config_detail(user_config)
   fn.ensure(config_types.config_schema, config)
-  local config_ = config --[[@as mado_scratch_buffer.Config]]
+  local config_ = config --[[@as mado_scratch.Config]]
 
   if config_.use_default_keymappings then
     define_default_keymaps()
@@ -93,7 +93,7 @@ end
 
 ---Returns your current configuration.
 ---Or throws an error if `setup()` is never called.
----@return mado_scratch_buffer.Config
+---@return mado_scratch.Config
 function M.get_config()
   if config == nil then
     error("mado-scratch is not setup yet. Please call require('mado-scratch').setup() first.")
