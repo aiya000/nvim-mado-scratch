@@ -168,8 +168,8 @@ local function open_in_new_float_window(file_name, geometry)
   
   if existing_bufnr ~= -1 then
     -- If the buffer has unsaved changes, preserve the content
-    local is_modified = vim.api.nvim_buf_get_option(existing_bufnr, 'modified')
-    local buftype = vim.api.nvim_buf_get_option(existing_bufnr, 'buftype')
+    local is_modified = vim.bo[existing_bufnr].modified
+    local buftype = vim.bo[existing_bufnr].buftype
     
     if is_modified then
       -- Get the buffer contents before deletion
