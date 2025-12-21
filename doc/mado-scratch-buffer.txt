@@ -201,6 +201,11 @@ auto_save_file_buffer ~
   Automatically save file buffers when leaving insert mode (InsertLeave event)
   or before buffer destruction (BufDelete, BufWipeout, BufUnload events).
 
+  WARNING: If set to `false` and using floating windows, unsaved content may be
+  lost when closing the window without explicitly saving (`:w`). This is because
+  floating windows may close without triggering the buffer destruction events.
+  It's recommended to keep this option `true` if you use floating windows.
+
                         *option.mado_scratch_buffer_use_default_keymappings*
 use_default_keymappings ~
   Default: `false`

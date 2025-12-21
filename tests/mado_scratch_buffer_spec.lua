@@ -215,7 +215,6 @@ describe('mado-scratch-buffer', function()
       local mado = require('mado-scratch-buffer')
       mado.setup({
         file_pattern = {
-          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
           when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
         },
         auto_save_file_buffer = true,

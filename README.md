@@ -136,6 +136,7 @@ require('scratch-buffer').setup({
 
   -- Behavior options
   auto_save_file_buffer = true,      -- Auto-save file buffers on InsertLeave and before buffer destruction
+                                      -- WARNING: If set to false with float windows, unsaved content may be lost on window close
   use_default_keymappings = true,    -- Enable default keymaps
 
   -- Auto-hide settings (like scratch.vim)
