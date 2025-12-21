@@ -5,7 +5,7 @@ local fn = require('mado-scratch-buffer.functions')
 local M = {}
 
 local default_sp_height = 15
-local default_vsp_height = 30
+local default_vsp_width = 30
 local default_float_fixed_size = { width = 80, height = 24 }
 local default_float_aspect_scale = { width = 0.8, height = 0.8 }
 
@@ -343,7 +343,7 @@ local function get_actual_non_floating_buffer_size(open_method, buffer_size)
   return open_method == 'sp'
     and (config.default_open_method.height or default_sp_height)
     or open_method == 'vsp'
-      and (config.default_open_method.width or default_vsp_height)
+      and (config.default_open_method.width or default_vsp_width)
       or open_method == 'tabnew'
         and 'no-auto-resize'
         or error('Unreachable code reached in open_no_floating_buffer. Please report this.')
