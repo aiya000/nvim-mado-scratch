@@ -3,6 +3,11 @@ local fn = require('mado-scratch-buffer.functions')
 
 local M = {}
 
+local default_sp_height = 15
+local default_vsp_height = 30
+local default_float_fixed_size = { width = 80, height = 24 }
+local default_float_aspect_scale = { width = 0.8, height = 0.8 }
+
 ---@class OpenBufferOptions
 ---@field opening_as_tmp_buffer boolean -- Whether opening as tmp buffer
 ---@field opening_next_fresh_buffer boolean -- Whether to open next fresh buffer
@@ -280,14 +285,14 @@ local function get_actual_floating_buffer_size(open_method, buffer_size)
     return config.default_open_method.size
       or fn.fallback(
         "No size for 'float-fixed' specified, and config.default_open_method.size is nil. Fallback",
-        { width = 80, height = 24 }
+        default_float_fixed_size
       )
   end
   if buffer_size == nil and open_method == 'float-aspect' then
     return config.default_open_method.scale
       or fn.fallback(
         "No scale for 'float-aspect' specified, and config.default_open_method.scale is nil. Fallback",
-        { width = 0.8, height = 0.8 }
+        default_float_aspect_scale
       )
   end
   buffer_size = buffer_size --[[@as string]]
@@ -331,9 +336,9 @@ local function get_actual_non_floating_buffer_size(open_method, buffer_size)
   -- Use default size if not specified
   local config = require('mado-scratch-buffer').get_config()
   return open_method == 'sp'
-    and config.default_open_method.height
+    and (config.default_open_method.height or default_sp_height)
     or open_method == 'vsp'
-      and config.default_open_method.width
+      and (config.default_open_method.width or default_vsp_height)
       or open_method == 'tabnew'
         and 'no-auto-resize'
         or error('Unreachable code reached in open_no_floating_buffer. Please report this.')
