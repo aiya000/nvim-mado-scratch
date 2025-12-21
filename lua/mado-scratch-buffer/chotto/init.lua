@@ -20,7 +20,7 @@ function Schema:parse(validatee)
   return self.parse_raw(validatee)
 end
 
----Simular to `:parse()`, but returns `boolean, T` instead, like:
+---Similar to `:parse()`, but returns `boolean, T` instead, like:
 ---```lua
 ---pcall(function() return foo:parse(validatee) end)
 ---```
@@ -36,7 +36,7 @@ function Schema:safe_parse(validatee)
   end)
 end
 
----Simular to `:parse()`, but no value returns, and throws an error if `validatee` is invalid.
+---Similar to `:parse()`, but no value returns, and throws an error if `validatee` is invalid.
 ---Also catches the error by `handle` if provided and an error is thrown.
 ---@generic T
 ---@param self chotto.Schema<T>

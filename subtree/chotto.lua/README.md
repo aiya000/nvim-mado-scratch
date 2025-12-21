@@ -40,7 +40,7 @@ else
 end
 ```
 
-Offcource, you can name `z` instead of `c`, like zod! (lol)
+Of course, you can name `z` instead of `c`, like zod! (lol)
 
 ```lua
 local z = require('chotto')

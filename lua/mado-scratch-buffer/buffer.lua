@@ -247,7 +247,7 @@ end
 
 ---Parses float window aspect ratio scale from string
 ---@param scale_str string | nil
----@return { width: integer, height: integer } | nil
+---@return { width: number, height: number } | nil
 local function parse_float_aspect_scale(scale_str)
   if scale_str == nil then
     return nil
@@ -309,7 +309,7 @@ local function get_actual_floating_buffer_size(open_method, buffer_size)
       end)
   end
 
-  error('Unreachable code reached in open_floating_buffer. "Invalid open_method". Please report this.')
+  error('Reached supposedly unreachable code in open_floating_buffer. "Invalid open_method". Please report this.')
 end
 
 ---Opens a window for 'float-fixed', 'float', or 'float-aspect' method
@@ -346,7 +346,7 @@ local function get_actual_non_floating_buffer_size(open_method, buffer_size)
       and (config.default_open_method.width or default_vsp_width)
       or open_method == 'tabnew'
         and 'no-auto-resize'
-        or error('Unreachable code reached in open_no_floating_buffer. Please report this.')
+        or error('Reached supposedly unreachable code in open_no_floating_buffer. Please report this.')
 end
 
 ---Opens a window for 'sp', 'vsp', or 'tabnew' method

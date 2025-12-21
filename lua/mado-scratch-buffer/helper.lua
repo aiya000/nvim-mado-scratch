@@ -26,7 +26,7 @@ function M.readonly(x)
   })
 end
 
----Simular to `readonly()`
+---Similar to `readonly()`
 ---```lua
 ----- These are same:
 ---local x = readonly({ value = 10 })
