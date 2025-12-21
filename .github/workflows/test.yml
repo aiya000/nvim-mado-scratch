@@ -27,6 +27,12 @@ jobs:
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim \
             ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
 
+      - name: Clone nui.nvim
+        run: |
+          mkdir -p ~/.local/share/nvim/site/pack/vendor/start
+          git clone --depth 1 https://github.com/MunifTanjim/nui.nvim \
+            ~/.local/share/nvim/site/pack/vendor/start/nui.nvim
+
       - name: Run tests
         run: |
           nvim --headless -c "lua require('plenary.test_harness').test_directory('tests/', {minimal_init='tests/minimal_init.lua'})"
