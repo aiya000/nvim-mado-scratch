@@ -120,8 +120,8 @@ You can specify:
 3. Buffer size (optional):
    - For sp: number for height
    - For vsp: number for width
-   - For float-fixed: WIDTHxHEIGHT (e.g., 80x40)
-   - For float-aspect: not supported via command (use configuration)
+   - For float-fixed: (width)x(height) (e.g., 80x40)
+   - For float-aspect: (width)x(height) (e.g., 0.9x0.8)
    - For tabnew: not applicable
 
 
