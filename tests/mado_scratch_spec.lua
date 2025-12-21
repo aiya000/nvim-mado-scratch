@@ -580,5 +580,37 @@ describe('mado-scratch', function()
       assert.equals(expected_height, win_config.height)
     end)
 
+    it('should preserve unsaved content when switching to float window with auto_save_file_buffer = false', function()
+      -- Create a file buffer with content
+      vim.cmd('MadoScratchOpenFile md sp')
+      local file_name = vim.fn.expand('%:p')
+      vim.fn.setline(1, { 'initial line 1', 'initial line 2' })
+      vim.cmd('write')
+
+      -- Modify the buffer without saving (auto_save_file_buffer is false in test setup)
+      vim.fn.setline(1, { 'modified line 1', 'modified line 2', 'new line 3' })
+
+      -- Verify buffer is modified
+      assert.is_true(vim.bo.modified)
+
+      -- Switch to float window - this should preserve the unsaved changes
+      vim.cmd('MadoScratchOpenFile md float')
+      local reopened_file = vim.fn.expand('%:p')
+      assert.equals(file_name, reopened_file)
+
+      -- Check if the modified content is preserved (not the original file content)
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      assert.equals(#lines, 3)
+      assert.equals(lines[1], 'modified line 1')
+      assert.equals(lines[2], 'modified line 2')
+      assert.equals(lines[3], 'new line 3')
+
+      -- Verify the file on disk was also updated
+      local file_lines = vim.fn.readfile(file_name)
+      assert.equals(#file_lines, 3)
+      assert.equals(file_lines[1], 'modified line 1')
+      assert.equals(file_lines[2], 'modified line 2')
+      assert.equals(file_lines[3], 'new line 3')
+    end)
   end)
 end)
