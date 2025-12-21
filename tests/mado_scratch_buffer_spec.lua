@@ -51,9 +51,8 @@ describe('mado-scratch-buffer', function()
       vim.cmd('MadoScratchBufferOpen')
       local file_name = vim.fn.expand('%:p')
       local mado = require('mado-scratch-buffer')
-      local config = mado.get_config()
-      local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.md'
-      assert.equals(expected, file_name)
+      local expected = string.format(mado.config.file_pattern.when_tmp_buffer, 0) .. '.md'
+      assert.equals(file_name, expected)
     end)
 
     it('should open readonly file (nofile buftype)', function()
@@ -105,10 +104,9 @@ describe('mado-scratch-buffer', function()
       vim.cmd('MadoScratchBufferOpen')
 
       local file_name = vim.fn.expand('%:p')
-      local config = mado.get_config()
-      local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.ts'
-      assert.equals(expected, file_name)
-      assert.equals(20, vim.fn.winwidth(0))
+      local expected = string.format(mado.config.file_pattern.when_tmp_buffer, 0) .. '.ts'
+      assert.equals(file_name, expected)
+      assert.equals(vim.fn.winwidth(0), 20)
     end)
 
     it('should use when_tmp_buffer pattern', function()
@@ -122,9 +120,8 @@ describe('mado-scratch-buffer', function()
 
       vim.cmd('MadoScratchBufferOpen')
       local file_name = vim.fn.expand('%:p')
-      local config = mado.get_config()
-      local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.md'
-      assert.equals(expected, file_name)
+      local expected = string.format(mado.config.file_pattern.when_tmp_buffer, 0) .. '.md'
+      assert.equals(file_name, expected)
     end)
 
     it('should support auto hiding tmp buffer', function()
@@ -142,7 +139,7 @@ describe('mado-scratch-buffer', function()
 
       vim.cmd('MadoScratchBufferOpen md')
       vim.cmd('wincmd p')  -- Trigger WinLeave
-      assert.equals(1, vim.fn.winnr('$'))
+      assert.equals(vim.fn.winnr('$'), 1)
     end)
   end)
 
@@ -166,7 +163,7 @@ describe('mado-scratch-buffer', function()
       vim.cmd('MadoScratchBufferOpen')
       local second_file = vim.fn.expand('%:p')
 
-      assert.equals(first_file, second_file)
+      assert.equals(second_file, first_file)
     end)
   end)
 
@@ -190,9 +187,8 @@ describe('mado-scratch-buffer', function()
 
       vim.cmd('MadoScratchBufferOpenFile')
       local file_name = vim.fn.expand('%:p')
-      local config = mado.get_config()
-      local expected = string.format(config.file_pattern.when_file_buffer, 0) .. '.md'
-      assert.equals(expected, file_name)
+      local expected = string.format(mado.config.file_pattern.when_file_buffer, 0) .. '.md'
+      assert.equals(file_name, expected)
     end)
 
     it('should support auto saving file buffer on InsertLeave', function()
@@ -210,9 +206,9 @@ describe('mado-scratch-buffer', function()
       vim.cmd('doautocmd InsertLeave')
 
       local file_name = vim.fn.expand('%:p')
-      assert.equals(1, vim.fn.filereadable(file_name))
+      assert.equals(vim.fn.filereadable(file_name), 1)
       local content = vim.fn.readfile(file_name)
-      assert.equals('insert leave content', content[1])
+      assert.equals(content[1], 'insert leave content')
     end)
 
     it('should support auto saving file buffer before buffer destruction', function()
@@ -230,9 +226,9 @@ describe('mado-scratch-buffer', function()
       vim.fn.setline(1, 'buffer delete content')
       vim.cmd('doautocmd BufDelete')
 
-      assert.equals(1, vim.fn.filereadable(file_name))
+      assert.equals(vim.fn.filereadable(file_name), 1)
       local content = vim.fn.readfile(file_name)
-      assert.equals('buffer delete content', content[1])
+      assert.equals(content[1], 'buffer delete content')
     end)
 
     it('should not auto save when auto_save_file_buffer is disabled', function()
@@ -252,7 +248,7 @@ describe('mado-scratch-buffer', function()
       vim.cmd('doautocmd BufDelete')
 
       -- File should not exist because auto save is disabled
-      assert.equals(0, vim.fn.filereadable(file_name))
+      assert.equals(vim.fn.filereadable(file_name), 0)
     end)
 
     -- Note: This test is flaky in headless mode due to window event timing issues
@@ -298,10 +294,10 @@ describe('mado-scratch-buffer', function()
       vim.cmd('MadoScratchBufferOpenFile')
       local second_file = vim.fn.expand('%:p')
 
-      assert.equals(first_file, second_file)
+      assert.equals(second_file, first_file)
       -- Check buffer type is file (empty buftype)
-      assert.equals('', vim.bo.buftype)
-      assert.equals('', vim.bo.bufhidden)
+      assert.equals(vim.bo.buftype, '')
+      assert.equals(vim.bo.bufhidden, '')
     end)
 
     it('should change buffer type from file to tmp when pattern is same', function()
@@ -320,10 +316,10 @@ describe('mado-scratch-buffer', function()
       vim.cmd('MadoScratchBufferOpen')
       local second_file = vim.fn.expand('%:p')
 
-      assert.equals(first_file, second_file)
+      assert.equals(second_file, first_file)
       -- Check buffer type is tmp (nofile buftype)
-      assert.equals('nofile', vim.bo.buftype)
-      assert.equals('hide', vim.bo.bufhidden)
+      assert.equals(vim.bo.buftype, 'nofile')
+      assert.equals(vim.bo.bufhidden, 'hide')
     end)
   end)
 
@@ -338,18 +334,18 @@ describe('mado-scratch-buffer', function()
 
       -- Check the created files exist
       local all_buffer_names = helper.get_all_buffer_names()
-      assert.equals(1, vim.fn.filereadable(first_file))
-      assert.is_true(vim.list_contains(all_buffer_names, first_file))
-      assert.is_true(vim.list_contains(all_buffer_names, second_file))
+      assert.equals(vim.fn.filereadable(first_file), 1)
+      assert.is_true(helper.contains(all_buffer_names, first_file))
+      assert.is_true(helper.contains(all_buffer_names, second_file))
 
       -- Wipe all scratch buffers and files
       vim.cmd('MadoScratchBufferClean')
 
       -- Check the created files are removed
       local new_all_buffer_names = helper.get_all_buffer_names()
-      assert.equals(0, vim.fn.filereadable(first_file))
-      assert.is_false(vim.list_contains(new_all_buffer_names, first_file))
-      assert.is_false(vim.list_contains(new_all_buffer_names, second_file))
+      assert.equals(vim.fn.filereadable(first_file), 0)
+      assert.is_false(helper.contains(new_all_buffer_names, first_file))
+      assert.is_false(helper.contains(new_all_buffer_names, second_file))
     end)
   end)
 
@@ -570,5 +566,6 @@ describe('mado-scratch-buffer', function()
       assert.equals(expected_width, win_config.width)
       assert.equals(expected_height, win_config.height)
     end)
+
   end)
 end)

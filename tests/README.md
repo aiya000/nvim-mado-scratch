@@ -60,9 +60,15 @@ Tests use plenary.nvim's busted-style API. Example:
 describe('my feature', function()
   it('should do something', function()
     -- Test code here
-    assert.equals(expected, actual)
+    assert.equals(actual, expected)
   end)
 end)
 ```
+
+### Test Conventions
+
+- **Assert argument order**: Use `assert.equals(actual, expected)` - the actual value first, then the expected value.
+  - ✅ Correct: `assert.equals(content[1], 'expected text')`
+  - ❌ Incorrect: `assert.equals('expected text', content[1])`
 
 See [plenary.nvim documentation](https://github.com/nvim-lua/plenary.nvim) for more details.
