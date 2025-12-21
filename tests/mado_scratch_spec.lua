@@ -64,7 +64,7 @@ describe('mado-scratch', function()
     it('should create a buffer', function()
       vim.cmd('MadoScratchOpen')
       local file_name = vim.fn.expand('%:p')
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       local expected = string.format(mado.get_config().file_pattern.when_tmp_buffer, 0) .. '.md'
       assert.equals(file_name, expected)
     end)
@@ -226,7 +226,7 @@ describe('mado-scratch', function()
     end)
 
     it('should support auto saving file buffer before buffer destruction', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
@@ -234,7 +234,7 @@ describe('mado-scratch', function()
         auto_save_file_buffer = true,
       })
 
-      vim.cmd('MadoScratchBufferOpenFile md')
+      vim.cmd('MadoScratchOpenFile md')
       local file_name = vim.fn.expand('%:p')
       vim.fn.setline(1, 'buffer delete content')
       vim.cmd('doautocmd BufDelete')
@@ -245,7 +245,7 @@ describe('mado-scratch', function()
     end)
 
     it('should not auto save when auto_save_file_buffer is disabled', function()
-      local mado = require('mado-scratch-buffer')
+      local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
           when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
@@ -254,7 +254,7 @@ describe('mado-scratch', function()
         auto_save_file_buffer = false,
       })
 
-      vim.cmd('MadoScratchBufferOpenFile md')
+      vim.cmd('MadoScratchOpenFile md')
       local file_name = vim.fn.expand('%:p')
       vim.fn.setline(1, 'should not save automatically')
       vim.cmd('doautocmd InsertLeave')
