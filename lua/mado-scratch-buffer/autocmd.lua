@@ -28,21 +28,23 @@ function M.setup_autocmds()
   local config = require('mado-scratch-buffer').get_config()
   local augroup = vim.api.nvim_create_augroup('MadoScratchBuffer', { clear = true })
 
-  vim.api.nvim_create_autocmd('TextChanged', {
+  local file_buffer_pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*')
+  local tmp_buffer_pattern = config.file_pattern.when_tmp_buffer:gsub('%%d', '*')
+
+  -- Save on InsertLeave and a buffer is closed
+  vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufDelete', 'BufWipeout', 'BufUnload' }, {
     group = augroup,
-    pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*'),
+    pattern = file_buffer_pattern,
     callback = M.save_file_buffer_if_enabled,
   })
 
+  -- Hide buffer when leaving window
   vim.api.nvim_create_autocmd('WinLeave', {
     group = augroup,
-    pattern = config.file_pattern.when_tmp_buffer:gsub('%%d', '*'),
-    callback = M.hide_buffer_if_enabled,
-  })
-
-  vim.api.nvim_create_autocmd('WinLeave', {
-    group = augroup,
-    pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*'),
+    pattern = {
+      tmp_buffer_pattern,
+      file_buffer_pattern,
+    },
     callback = M.hide_buffer_if_enabled,
   })
 end
