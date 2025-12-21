@@ -41,7 +41,7 @@ execute code instantly!
 Please see the |mado-scratch-buffer-usage| section for usage details.
 
 Repository:
-https://github.com/aiya000/mado-scratch-buffer.nvim
+https://github.com/aiya000/nvim-mado-scratch-buffer
 
 
 ==============================================================================
@@ -51,7 +51,7 @@ Install the plugin using your favorite plugin manager:
 
 Using lazy.nvim: >lua
   {
-    'aiya000/mado-scratch-buffer.nvim',
+    'aiya000/nvim-mado-scratch-buffer',
     config = function()
       require('mado-scratch-buffer').setup({
         -- your configuration here
@@ -62,7 +62,7 @@ Using lazy.nvim: >lua
 
 Using packer.nvim: >lua
   use {
-    'aiya000/mado-scratch-buffer.nvim',
+    'aiya000/nvim-mado-scratch-buffer',
     config = function()
       require('mado-scratch-buffer').setup({
         -- your configuration here
@@ -103,6 +103,7 @@ Open a scratch buffer with or without a file extension:
   " Open with custom split method and size
   :MadoScratchBufferOpen md sp 10
   :MadoScratchBufferOpen ts vsp 80
+  :MadoScratchBufferOpen hs float-fixed 80x40
 
   " Clean up all scratch buffers and files
   :MadoScratchBufferClean
@@ -110,8 +111,18 @@ Open a scratch buffer with or without a file extension:
 
 You can specify:
 1. File extension (optional): md, ts, js, py, etc. or `--no-file-ext`
-2. Open method (optional): sp (horizontal split) or vsp (vertical split)
-3. Buffer size (optional): number for height (sp) or width (vsp)
+2. Open method (optional):
+   - sp (horizontal split)
+   - vsp (vertical split)
+   - tabnew (new tab)
+   - float-fixed (floating window with fixed size)
+   - float-aspect (floating window with aspect ratio)
+3. Buffer size (optional):
+   - For sp: number for height
+   - For vsp: number for width
+   - For float-fixed: (width)x(height) (e.g., 80x40)
+   - For float-aspect: (width)x(height) (e.g., 0.9x0.8)
+   - For tabnew: not applicable
 
 
 ==============================================================================
@@ -130,9 +141,8 @@ Configure the plugin by calling the setup function:
     },
 
     -- Options when you didn't specify to the commands
-    default_file_ext = 'md',           -- Default file extension
-    default_open_method = 'sp',        -- 'sp' or 'vsp'
-    default_buffer_size = 30,          -- Default buffer height/width
+    default_file_ext = 'md',                                -- Default file extension
+    default_open_method = { method = 'sp', height = 15 },   -- Default open method and size
 
     -- Behavior options
     auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged
@@ -172,15 +182,18 @@ default_file_ext ~
 
                         *option.mado_scratch_buffer_default_open_method*
 default_open_method ~
-  Default: `'sp'`
-  Default method to open buffers.
-  e.g., 'sp', 'vsp', and etc.
+  Default: `{ method = 'sp', height = 15 }`
+  Default method to open buffers with size configuration.
 
-                        *option.mado_scratch_buffer_default_buffer_size*
-default_buffer_size ~
-  Default: `30`
-  Default buffer size (height for sp, width for vsp).
-  Set to `'no-auto-resize'` to disable auto resizing.
+  Examples:
+  - `{ method = 'sp', height = 15 }` - horizontal split with height
+  - `{ method = 'vsp', width = 30 }` - vertical split with width
+  - `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size (requires nui.nvim)
+  - `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio (requires nui.nvim)
+  - `{ method = 'tabnew' }` - new tab (no size needed)
+
+  Note: `{ method = 'float', ... }` is supported for backward compatibility
+  and is treated as `float-fixed`.
 
                         *option.mado_scratch_buffer_auto_save_file_buffer*
 auto_save_file_buffer ~
@@ -215,16 +228,17 @@ COMMANDS                *mado-scratch-buffer-commands*
 
   Parameters:
   - file_ext: File extension (e.g., 'md', 'ts') or '--no-file-ext'
-  - open_method: 'sp' or 'vsp'
-  - buffer_size: Number for height/width
+  - open_method: 'sp', 'vsp', 'tabnew', 'float-fixed', or 'float-aspect'
+  - buffer_size: Number for height/width, or WIDTHxHEIGHT for float-fixed
 
   Examples: >
     :MadoScratchBufferOpen
     :MadoScratchBufferOpen md
     :MadoScratchBufferOpen ts sp 10
-    :MadoScratchBufferOpen js vsp 80
+    :MadoScratchBufferOpen hs vsp 80
+    :MadoScratchBufferOpen py float-fixed 80x40
+    :MadoScratchBufferOpen lua float-aspect 0.9x0.8
 <
-
                         *:MadoScratchBufferOpenFile*
 :MadoScratchBufferOpenFile [file_ext] [open_method] [buffer_size]
   Open a persistent file buffer (auto-saved).
@@ -271,16 +285,16 @@ require('mado-scratch-buffer.buffer').clean()
 ==============================================================================
 CHANGELOG                    *mado-scratch-buffer-changelog*
 
-2025
-- Complete rewrite in Lua for Neovim
-    - The new repository:
-    https://github.com/aiya000/nvim-mado-scratch-buffer
-- Renamed from vim-scratch-buffer to mado-scratch-buffer.nvim
-- Modern Neovim plugin structure with setup() function
-- Removed backward compatibility with old Vim script version
-- Updated command names to Mado* prefix
-- Improved configuration system
-- Added comprehensive Lua API documentation
+- See https://github.com/aiya000/nvim-mado-scratch-buffer/commits/main
+  - We use Conventional Commits for the changelog
+  - In Conventional Commits, a bang (!) indicates breaking changes
+    - Please update your config if you encounter these commits
+    - Example: `change!: Change argument types of 'create_foo()' in 'mado-scratch-buffer.foo' module`
+
+- - -
+
+2025~
+- Create the new repository: https://github.com/aiya000/vim-scratch-buffer
 
 2024
 - Create original repository: https://github.com/aiya000/vim-scratch-buffer

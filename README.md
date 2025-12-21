@@ -1,4 +1,4 @@
-# :sparkles: mado-scratch-buffer.nvim :sparkles:
+# :sparkles: nvim-mado-scratch-buffer :sparkles:
 
 :rocket: **No more hassle with file paths!** The fastest way to open an instant scratch buffer.
 
@@ -8,11 +8,11 @@ For :star:Neovim:star: (lua-based modern implementation).
 
 ## Table of Contents
 
-- [:sparkles: mado-scratch-buffer.nvim :sparkles:](#sparkles-mado-scratch-buffernvim-sparkles)
+- [:sparkles: nvim-mado-scratch-buffer :sparkles:](#sparkles-mado-scratch-buffernvim-sparkles)
   - [:gear: Installation](#gear-installation)
   - [:wrench: Configuration](#wrench-configuration)
   - [:wrench: Quick Start](#wrench-quick-start)
-  - [:fire: Why mado-scratch-buffer.nvim?](#fire-why-mado-scratch-buffernvim)
+  - [:fire: Why nvim-mado-scratch-buffer?](#fire-why-mado-scratch-buffernvim)
   - [:zap: Supercharge with vim-quickrun!](#zap-supercharge-with-vim-quickrun)
   - [:balance_scale: Comparison with scratch.vim](#balance_scale-comparison-with-scratchvim)
     - [:gear: Detailed Usage](#gear-detailed-usage)
@@ -59,7 +59,7 @@ And more features...
 
 ```lua
 {
-  'aiya000/mado-scratch-buffer.nvim',
+  'aiya000/nvim-mado-scratch-buffer',
   config = function()
     require('scratch-buffer').setup({
       -- Optional configuration (these are defaults)
@@ -68,8 +68,7 @@ And more features...
         when_file_buffer = '/tmp/mado-scratch-file-%d',
       },
       default_file_ext = 'md',
-      default_open_method = 'sp',
-      default_buffer_size = 30,
+      default_open_method = { method = 'sp', height = 15 },
       auto_save_file_buffer = true,
       use_default_keymappings = false,  -- Set to true to enable default keymaps
       auto_hide_buffer = {
@@ -85,12 +84,39 @@ And more features...
 
 ```lua
 use {
-  'aiya000/mado-scratch-buffer.nvim',
+  'aiya000/nvim-mado-scratch-buffer',
   config = function()
     require('scratch-buffer').setup()
   end
 }
 ```
+
+### Optional Dependency
+
+- [nui.nvim](https://github.com/MunifTanjim/nui.nvim) for floating window support ↓
+
+To use floating windows, configure `default_open_method` like this:
+
+```lua
+{
+  'aiya000/nvim-mado-scratch-buffer',
+  config = function()
+    require('scratch-buffer').setup({
+      default_open_method = { method = 'float', size = { width = 80, height = 24 } },
+      -- other options...
+    })
+  end,
+}
+```
+
+You can also use other open methods:
+- `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size (requires nui.nvim)
+- `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio (requires nui.nvim)
+- `{ method = 'sp', height = 15 }` - horizontal split (no nui.nvim required)
+- `{ method = 'vsp', width = 30 }` - vertical split (no nui.nvim required)
+- `{ method = 'tabnew' }` - new tab (no nui.nvim required)
+
+Note: `{ method = 'float', ... }` is supported for backward compatibility and treated as `float-fixed`.
 
 ## :wrench: Configuration
 
@@ -106,8 +132,7 @@ require('scratch-buffer').setup({
 
   -- Default settings
   default_file_ext = 'md',           -- Default file extension
-  default_open_method = 'sp',        -- 'sp', 'vsp', or etc (See ':help mado-scratch-buffer-configuration')
-  default_buffer_size = 30,          -- Default buffer height/width, or 'no-auto-resize' to disable auto resizing
+  default_open_method = { method = 'sp', height = 15 }, -- Default open method (See ':help mado-scratch-buffer-configuration')
 
   -- Behavior options
   auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged
@@ -127,13 +152,18 @@ require('scratch-buffer').setup({
 :MadoScratchBufferOpen  " Open a temporary buffer using default options
 :MadoScratchBufferOpen md sp 5  " Open a temporary Markdown buffer with :sp and height 5
 :MadoScratchBufferOpenFile ts vsp 100  " Open a persistent TypeScript buffer with :vsp and width 100
+:MadoScratchBufferOpen py float-fixed 80x40  " Open a Python buffer in a floating window with size 80x40
+:MadoScratchBufferOpen hs float-aspect 0.9x0.8  " Open a Haskell buffer in a floating window with 90% width and 80% height of the screen
+```
+
+```vim
 :MadoScratchBufferOpenNext  " Open next temporary buffer
 :MadoScratchBufferOpenFileNext  " Open next persistent buffer
 ```
 
 Please see '[Detailed Usage](#gear-detailed-usage)' section for more information.
 
-## :fire: Why mado-scratch-buffer.nvim?
+## :fire: Why nvim-mado-scratch-buffer?
 
 - **Open instantly!** Just run `:MadoScratchBufferOpen`!
 - **No file management!** Perfect for quick notes and testing code snippets.
@@ -172,7 +202,7 @@ Compared to scratch.vim, vim-scratch-buffer provides these additional features:
 
 - Customization options
     - Specify filetype for syntax highlighting, for `:QuickRun`, and for etc
-    - Choose opening method (`:split` or `:vsplit`)
+    - Choose opening method (`:split`, `:vsplit`, `:tabnew`, or floating window)
     - Control buffer height/width
     - Configurable auto-hiding behavior: [scratch.vim compatibility](#sparkles-scratchvim-compatibility)
     - Customize buffer file locations:
@@ -225,6 +255,10 @@ Please also see [doc/mado-scratch-buffer.txt](./doc/mado-scratch-buffer.txt) for
 " Open a small buffer at the top for quick notes
 :MadoScratchBufferOpen md sp 5
 :MadoScratchBufferOpen --no-file-ext sp 5
+
+" Open a floating window for focused work
+:MadoScratchBufferOpen md float 80
+:MadoScratchBufferOpen js float 60
 ```
 
 ```vim

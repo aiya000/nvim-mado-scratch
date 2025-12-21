@@ -35,6 +35,6 @@ end, {
 })
 
 -- Auto-setup with default configuration if not already configured
-if not require('mado-scratch-buffer').config or vim.tbl_isempty(require('mado-scratch-buffer').config) then
+if not pcall(require('mado-scratch-buffer').get_config) then
   require('mado-scratch-buffer').setup()
 end
