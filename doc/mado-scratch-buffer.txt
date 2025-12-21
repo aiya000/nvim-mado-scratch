@@ -145,7 +145,7 @@ Configure the plugin by calling the setup function:
     default_open_method = { method = 'sp', height = 15 },   -- Default open method and size
 
     -- Behavior options
-    auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged
+    auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged and InsertLeave
     use_default_keymappings = false,   -- Enable default keymaps
 
     -- Auto-hide settings (like scratch.vim)
@@ -198,7 +198,8 @@ default_open_method ~
                         *option.mado_scratch_buffer_auto_save_file_buffer*
 auto_save_file_buffer ~
   Default: `true`
-  Automatically save file buffers when text changes.
+  Automatically save file buffers when text changes (TextChanged event) or when
+  leaving insert mode (InsertLeave event).
 
                         *option.mado_scratch_buffer_use_default_keymappings*
 use_default_keymappings ~

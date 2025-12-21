@@ -34,6 +34,12 @@ function M.setup_autocmds()
     callback = M.save_file_buffer_if_enabled,
   })
 
+  vim.api.nvim_create_autocmd('InsertLeave', {
+    group = augroup,
+    pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*'),
+    callback = M.save_file_buffer_if_enabled,
+  })
+
   vim.api.nvim_create_autocmd('WinLeave', {
     group = augroup,
     pattern = config.file_pattern.when_tmp_buffer:gsub('%%d', '*'),
