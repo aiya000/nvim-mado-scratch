@@ -135,7 +135,7 @@ require('scratch-buffer').setup({
   default_open_method = { method = 'sp', height = 15 }, -- Default open method (See ':help mado-scratch-buffer-configuration')
 
   -- Behavior options
-  auto_save_file_buffer = true,      -- Auto-save file buffers on TextChanged and InsertLeave
+  auto_save_file_buffer = true,      -- Auto-save file buffers on InsertLeave and before buffer destruction
   use_default_keymappings = true,    -- Enable default keymaps
 
   -- Auto-hide settings (like scratch.vim)

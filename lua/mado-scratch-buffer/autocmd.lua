@@ -28,13 +28,15 @@ function M.setup_autocmds()
   local config = require('mado-scratch-buffer').get_config()
   local augroup = vim.api.nvim_create_augroup('MadoScratchBuffer', { clear = true })
 
-  vim.api.nvim_create_autocmd('TextChanged', {
+  -- Save on InsertLeave
+  vim.api.nvim_create_autocmd('InsertLeave', {
     group = augroup,
     pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*'),
     callback = M.save_file_buffer_if_enabled,
   })
 
-  vim.api.nvim_create_autocmd('InsertLeave', {
+  -- Save before buffer is destroyed
+  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout', 'BufUnload' }, {
     group = augroup,
     pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*'),
     callback = M.save_file_buffer_if_enabled,

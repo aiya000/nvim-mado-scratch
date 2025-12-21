@@ -195,26 +195,6 @@ describe('mado-scratch-buffer', function()
       assert.equals(expected, file_name)
     end)
 
-    it('should support auto saving file buffer on TextChanged', function()
-      local mado = require('mado-scratch-buffer')
-      mado.setup({
-        file_pattern = {
-          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
-          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
-        },
-        auto_save_file_buffer = true,
-      })
-
-      vim.cmd('MadoScratchBufferOpenFile md')
-      vim.fn.setline(1, 'test content')
-      vim.cmd('doautocmd TextChanged')
-
-      local file_name = vim.fn.expand('%:p')
-      assert.equals(1, vim.fn.filereadable(file_name))
-      local content = vim.fn.readfile(file_name)
-      assert.equals('test content', content[1])
-    end)
-
     it('should support auto saving file buffer on InsertLeave', function()
       local mado = require('mado-scratch-buffer')
       mado.setup({
@@ -235,6 +215,26 @@ describe('mado-scratch-buffer', function()
       assert.equals('insert leave content', content[1])
     end)
 
+    it('should support auto saving file buffer before buffer destruction', function()
+      local mado = require('mado-scratch-buffer')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        auto_save_file_buffer = true,
+      })
+
+      vim.cmd('MadoScratchBufferOpenFile md')
+      local file_name = vim.fn.expand('%:p')
+      vim.fn.setline(1, 'buffer delete content')
+      vim.cmd('doautocmd BufDelete')
+
+      assert.equals(1, vim.fn.filereadable(file_name))
+      local content = vim.fn.readfile(file_name)
+      assert.equals('buffer delete content', content[1])
+    end)
+
     it('should not auto save when auto_save_file_buffer is disabled', function()
       local mado = require('mado-scratch-buffer')
       mado.setup({
@@ -249,7 +249,7 @@ describe('mado-scratch-buffer', function()
       local file_name = vim.fn.expand('%:p')
       vim.fn.setline(1, 'should not save automatically')
       vim.cmd('doautocmd InsertLeave')
-      vim.cmd('doautocmd TextChanged')
+      vim.cmd('doautocmd BufDelete')
 
       -- File should not exist because auto save is disabled
       assert.equals(0, vim.fn.filereadable(file_name))
