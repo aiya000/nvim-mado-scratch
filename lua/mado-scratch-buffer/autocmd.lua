@@ -42,15 +42,13 @@ function M.setup_autocmds()
     callback = M.save_file_buffer_if_enabled,
   })
 
+  -- Hide buffer when leaving window
   vim.api.nvim_create_autocmd('WinLeave', {
     group = augroup,
-    pattern = config.file_pattern.when_tmp_buffer:gsub('%%d', '*'),
-    callback = M.hide_buffer_if_enabled,
-  })
-
-  vim.api.nvim_create_autocmd('WinLeave', {
-    group = augroup,
-    pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*'),
+    pattern = {
+      config.file_pattern.when_tmp_buffer:gsub('%%d', '*'),
+      config.file_pattern.when_file_buffer:gsub('%%d', '*'),
+    },
     callback = M.hide_buffer_if_enabled,
   })
 end
