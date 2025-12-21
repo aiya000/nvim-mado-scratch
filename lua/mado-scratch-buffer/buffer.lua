@@ -1,3 +1,4 @@
+local arrow = require('mado-scratch-buffer.luarrow.arrow').arrow
 local c = require('mado-scratch-buffer.chotto')
 local fn = require('mado-scratch-buffer.functions')
 
@@ -201,7 +202,7 @@ local function open_in_new_float_window(file_name, geometry)
 end
 
 ---Opens a floating window with a buffer displaying the specified file
----@param size { width: integer, height: integer } | { width: number, height: number } -- size or scale
+---@param size { width: integer, height: integer }
 ---@param file_name string
 local function open_floating_window(size, file_name)
   local width = size.width
@@ -234,28 +235,9 @@ local function parse_float_fixed_size(size_str)
   return nil
 end
 
----Parses float window aspect ratio scale from string
----@param scale_str string | nil
----@return { width: number, height: number } | nil
-local function parse_float_aspect_scale(scale_str)
-  local function preparse(str)
-    if str == nil then
-      return nil
-    end
-
-    local width, height = str:match('^([%d%.]+)x([%d%.]+)$')
-    if width ~= nil and height ~= nil then
-      return { width = tonumber(width), height = tonumber(height) }
-    end
-
-    return nil
-  end
-
-  local float_scale = preparse(scale_str)
-  if float_scale == nil then
-    return nil
-  end
-
+---@param float_scale { width: number, height: number }
+---@return { width: integer, height: integer }
+local function convert_float_aspect_scale_to_size(float_scale)
   local win_width, win_height = get_neovim_winsize()
   return {
     width = math.floor(win_width * float_scale.width),
@@ -263,9 +245,25 @@ local function parse_float_aspect_scale(scale_str)
   }
 end
 
+---Parses float window aspect ratio scale from string
+---@param scale_str string | nil
+---@return { width: integer, height: integer } | nil
+local function parse_float_aspect_scale(scale_str)
+  if scale_str == nil then
+    return nil
+  end
+
+  local width, height = scale_str:match('^([%d%.]+)x([%d%.]+)$')
+  if width ~= nil and height ~= nil then
+    return { width = tonumber(width), height = tonumber(height) }
+  end
+
+  return nil
+end
+
 ---@param open_method 'float-fixed' | 'float' | 'float-aspect'
 ---@param buffer_size string | nil
----@return { width: integer, height: integer } | { width: number, height: number } -- size or scale
+---@return { width: integer, height: integer }
 local function get_actual_floating_buffer_size(open_method, buffer_size)
   fn.ensure(
     c.union({
@@ -289,11 +287,13 @@ local function get_actual_floating_buffer_size(open_method, buffer_size)
       )
   end
   if buffer_size == nil and open_method == 'float-aspect' then
-    return config.default_open_method.scale
-      or fn.fallback(
-        "No scale for 'float-aspect' specified, and config.default_open_method.scale is nil. Fallback",
-        default_float_aspect_scale
-      )
+    return convert_float_aspect_scale_to_size(
+      config.default_open_method.scale
+        or fn.fallback(
+          "No scale for 'float-aspect' specified, and config.default_open_method.scale is nil. Fallback",
+          default_float_aspect_scale
+        )
+    )
   end
   buffer_size = buffer_size --[[@as string]]
 
@@ -301,7 +301,12 @@ local function get_actual_floating_buffer_size(open_method, buffer_size)
     return parse_float_fixed_size(buffer_size) or error('Invalid buffer_size for float-fixed method: ' .. tostring(buffer_size))
   end
   if open_method == 'float-aspect' then
-    return parse_float_aspect_scale(buffer_size) or error('Invalid buffer_size for float-aspect method: ' .. tostring(buffer_size))
+    return parse_float_aspect_scale(buffer_size)
+      % arrow(function(scale)
+        return scale ~= nil
+          and convert_float_aspect_scale_to_size(scale)
+          or error('Invalid buffer_size for float-aspect method: ' .. tostring(buffer_size))
+      end)
   end
 
   error('Unreachable code reached in open_floating_buffer. "Invalid open_method". Please report this.')
