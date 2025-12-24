@@ -163,28 +163,33 @@ end
 ---@param geometry { width: integer, height: integer, row: integer, col: integer }
 ---@param opening_as_tmp_buffer boolean
 local function open_in_new_float_window(file_name, geometry, opening_as_tmp_buffer)
-  -- Check if buffer with this name already exists and wipe it
+  -- Check if buffer with this name already exists and reuse it
   local existing_bufnr = vim.fn.bufnr(file_name)
+  local bufnr
+  local buffer_existed = false
+
   if existing_bufnr ~= -1 then
-    vim.api.nvim_buf_delete(existing_bufnr, { force = true })
+    -- Reuse existing buffer
+    bufnr = existing_bufnr
+    buffer_existed = true
+  else
+    -- Create a new buffer
+    bufnr = vim.api.nvim_create_buf(false, false)
+
+    -- Set buffer name first to ensure proper file association
+    vim.api.nvim_buf_set_name(bufnr, file_name)
+
+    -- Read file content if it exists
+    if vim.fn.filereadable(file_name) == 1 then
+      local lines = vim.fn.readfile(file_name)
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+      -- Mark buffer as unmodified after loading
+      vim.api.nvim_buf_set_option(bufnr, 'modified', false)
+    end
   end
 
   -- Extract just the filename from the full path for display
   local display_name = vim.fn.fnamemodify(file_name, ':t')
-
-  -- Create a new buffer
-  local bufnr = vim.api.nvim_create_buf(false, false)
-
-  -- Set buffer name first to ensure proper file association
-  vim.api.nvim_buf_set_name(bufnr, file_name)
-
-  -- Read file content if it exists
-  if vim.fn.filereadable(file_name) == 1 then
-    local lines = vim.fn.readfile(file_name)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    -- Mark buffer as unmodified after loading
-    vim.api.nvim_buf_set_option(bufnr, 'modified', false)
-  end
 
   -- Create floating window using plenary.popup
   local popup = require("plenary.popup")
@@ -200,34 +205,36 @@ local function open_in_new_float_window(file_name, geometry, opening_as_tmp_buff
   -- Focus the window
   vim.api.nvim_set_current_win(winid)
 
-  -- Set buffer type based on whether this is a tmp buffer or file buffer
-  if opening_as_tmp_buffer then
-    vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
-    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
-  else
-    -- For file buffers, set up proper options and write handler
-    vim.api.nvim_buf_set_option(bufnr, 'buftype', '')
-    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
-    vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
+  -- Set buffer type and options (only if buffer didn't exist before)
+  if not buffer_existed then
+    if opening_as_tmp_buffer then
+      vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
+      vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
+    else
+      -- For file buffers, set up proper options and write handler
+      vim.api.nvim_buf_set_option(bufnr, 'buftype', '')
+      vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
+      vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
 
-    -- Handle writes explicitly with BufWriteCmd
-    vim.api.nvim_create_autocmd('BufWriteCmd', {
-      group = vim.api.nvim_create_augroup('MadoScratchFileSave_' .. bufnr, { clear = true }),
-      buffer = bufnr,
-      callback = function()
-        -- Write buffer contents to file with error handling
-        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-        local success, err = pcall(vim.fn.writefile, lines, file_name)
-        if success then
-          vim.api.nvim_buf_set_option(bufnr, 'modified', false)
-        else
-          vim.notify(
-            string.format('Failed to write file %s: %s', file_name, tostring(err)),
-            vim.log.levels.ERROR
-          )
-        end
-      end,
-    })
+      -- Handle writes explicitly with BufWriteCmd
+      vim.api.nvim_create_autocmd('BufWriteCmd', {
+        group = vim.api.nvim_create_augroup('MadoScratchFileSave_' .. bufnr, { clear = true }),
+        buffer = bufnr,
+        callback = function()
+          -- Write buffer contents to file with error handling
+          local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+          local success, err = pcall(vim.fn.writefile, lines, file_name)
+          if success then
+            vim.api.nvim_buf_set_option(bufnr, 'modified', false)
+          else
+            vim.notify(
+              string.format('Failed to write file %s: %s', file_name, tostring(err)),
+              vim.log.levels.ERROR
+            )
+          end
+        end,
+      })
+    end
   end
 end
 

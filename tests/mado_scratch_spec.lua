@@ -583,5 +583,38 @@ describe('mado-scratch', function()
     it('should display file name in float window border title', function()
       pending('Skipped: border title check is flaky in headless mode') -- TODO: Implement
     end)
+
+    it('should allow writing when opening same file buffer twice in float-aspect', function()
+      -- First call to MadoScratchOpenFile md float-aspect
+      vim.cmd('MadoScratchOpenFile md float-aspect')
+      local file_name1 = vim.fn.expand('%:p')
+      local bufnr1 = vim.fn.bufnr('%')
+
+      -- Second call to MadoScratchOpenFile md float-aspect (should reuse buffer)
+      vim.cmd('MadoScratchOpenFile md float-aspect')
+      local file_name2 = vim.fn.expand('%:p')
+      local bufnr2 = vim.fn.bufnr('%')
+
+      -- Both calls should open the same file
+      assert.equals(file_name1, file_name2)
+      -- Buffer should be reused
+      assert.equals(bufnr1, bufnr2)
+
+      -- Add some content
+      vim.fn.setline(1, 'test content')
+
+      -- Try to write - this should succeed without error
+      local success, err = pcall(function()
+        vim.cmd('write')
+      end)
+
+      -- Write should succeed
+      assert.is_true(success, string.format('Write failed with error: %s', tostring(err)))
+
+      -- Verify file was written
+      assert.equals(vim.fn.filereadable(file_name1), 1)
+      local content = vim.fn.readfile(file_name1)
+      assert.equals('test content', content[1])
+    end)
   end)
 end)
