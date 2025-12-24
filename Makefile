@@ -13,16 +13,19 @@ help:
 test:
 	./tests/run_tests.sh
 
-# Install plenary.nvim for testing
+# Install dependencies for testing
+install-test-deps:
+	$(MAKE) install-plenary
+
 install-plenary:
 	@echo 'Installing plenary.nvim...'
 	@mkdir -p ~/.local/share/nvim/site/pack/vendor/start
 	@if [ ! -d ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim ] ; then \
 		git clone --depth 1 https://github.com/nvim-lua/plenary.nvim \
 			~/.local/share/nvim/site/pack/vendor/start/plenary.nvim ; \
-		echo 'plenary.nvim installed successfully!'; \
+		echo 'plenary.nvim installed successfully!' ; \
 	else \
-		echo 'plenary.nvim is already installed.'; \
+		echo 'plenary.nvim is already installed.' ; \
 	fi
 
 # Clean test artifacts
