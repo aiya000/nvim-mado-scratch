@@ -602,7 +602,7 @@ describe('mado-scratch', function()
       end)
 
       assert.is_true(success, 'Should not error when reopening file: ' .. tostring(err))
-      
+
       -- Verify the file is opened with correct content
       local reopened_file = vim.fn.expand('%:p')
       assert.equals(file_name, reopened_file)
