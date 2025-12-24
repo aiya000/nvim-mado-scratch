@@ -111,7 +111,7 @@ To use floating windows, configure `default_open_method` like this:
   'aiya000/nvim-mado-scratch',
   config = function()
     require('mado-scratch').setup({
-      default_open_method = { method = 'float-aspect', scale = { width = 0.8, height = 0.8 } } -- Scale
+      default_open_method = { method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }, -- Scale
       -- default_open_method = { method = 'float-fixed', size = { width = 80, height = 24 } }, -- Fixed size
     })
   end,
