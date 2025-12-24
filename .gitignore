@@ -2,3 +2,5 @@
 .netrwhist
 !tests/tmp/.gitkeep
 tests/tmp/
+*.appimage
+squashfs-root/
