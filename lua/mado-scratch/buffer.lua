@@ -403,6 +403,9 @@ function M.open_buffer(options)
   end
 
   set_buffer_type(options.opening_as_tmp_buffer)
+  
+  -- Trigger filetype detection based on the buffer name
+  vim.cmd('filetype detect')
 end
 
 ---Cleans up all scratch buffers and files
