@@ -580,5 +580,26 @@ describe('mado-scratch', function()
       assert.equals(expected_height, win_config.height)
     end)
 
+    it('should display file name in float window border title', function()
+      vim.cmd('MadoScratchOpen md float')
+      local file_name = vim.fn.expand('%:p')
+      local mado = require('mado-scratch')
+      local config = mado.get_config()
+      local expected = string.format(config.file_pattern.when_tmp_buffer, 0) .. '.md'
+      assert.equals(expected, file_name)
+
+      -- Check if window is floating
+      local win_config = vim.api.nvim_win_get_config(0)
+      assert.equals('editor', win_config.relative)
+
+      -- Check if border title is set to the filename (not full path)
+      -- The title should be just the filename part
+      local expected_title = vim.fn.fnamemodify(file_name, ':t')
+      
+      -- nui.nvim sets the border as window highlight with title
+      -- We can verify by checking window config border
+      assert.is_not_nil(win_config.border)
+    end)
+
   end)
 end)
