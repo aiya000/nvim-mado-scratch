@@ -168,11 +168,20 @@ local function open_in_new_float_window(file_name, geometry)
     vim.api.nvim_buf_delete(existing_bufnr, { force = true })
   end
 
+  -- Extract just the filename from the full path for display
+  local display_name = vim.fn.fnamemodify(file_name, ':t')
+
   local Popup = require('nui.popup')
   local popup = Popup({
     enter = true,
     focusable = true,
-    border = { style = 'rounded' },
+    border = {
+      style = 'rounded',
+      text = {
+        top = ' ' .. display_name .. ' ',
+        top_align = 'center',
+      },
+    },
     relative = 'editor',
     position = { row = geometry.row, col = geometry.col },
     size = { width = geometry.width, height = geometry.height },
