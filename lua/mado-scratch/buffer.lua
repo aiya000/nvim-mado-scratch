@@ -205,18 +205,18 @@ local function open_in_new_float_window(file_name, geometry, opening_as_tmp_buff
   -- Focus the window
   vim.api.nvim_set_current_win(winid)
 
-  -- Set buffer type and options (only if buffer didn't exist before)
-  if not buffer_existed then
-    if opening_as_tmp_buffer then
-      vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
-      vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
-    else
-      -- For file buffers, set up proper options and write handler
-      vim.api.nvim_buf_set_option(bufnr, 'buftype', '')
-      vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
-      vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
+  -- Set buffer type and options based on whether this is a tmp buffer or file buffer
+  if opening_as_tmp_buffer then
+    vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
+    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
+  else
+    -- For file buffers, set up proper options and write handler
+    vim.api.nvim_buf_set_option(bufnr, 'buftype', '')
+    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
+    vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
 
-      -- Handle writes explicitly with BufWriteCmd
+    -- Handle writes explicitly with BufWriteCmd (only if buffer didn't exist before)
+    if not buffer_existed then
       vim.api.nvim_create_autocmd('BufWriteCmd', {
         group = vim.api.nvim_create_augroup('MadoScratchFileSave_' .. bufnr, { clear = true }),
         buffer = bufnr,
