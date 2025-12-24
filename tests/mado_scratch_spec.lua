@@ -83,6 +83,26 @@ describe('mado-scratch', function()
       assert.is_true(file_name:match('%.md$') ~= nil)
     end)
 
+    it('should set filetype based on file extension', function()
+      vim.cmd('MadoScratchOpen md')
+      assert.equals('markdown', vim.bo.filetype)
+    end)
+
+    it('should set filetype for typescript files', function()
+      vim.cmd('MadoScratchOpen ts')
+      assert.equals('typescript', vim.bo.filetype)
+    end)
+
+    it('should set filetype for python files', function()
+      vim.cmd('MadoScratchOpen py')
+      assert.equals('python', vim.bo.filetype)
+    end)
+
+    it('should set filetype for javascript files', function()
+      vim.cmd('MadoScratchOpen js')
+      assert.equals('javascript', vim.bo.filetype)
+    end)
+
     it('should accept open method', function()
       vim.cmd('MadoScratchOpen md sp')
       local file_name1 = vim.fn.expand('%:p')
@@ -203,6 +223,21 @@ describe('mado-scratch', function()
       local file_name = vim.fn.expand('%:p')
       local expected = string.format(mado.get_config().file_pattern.when_file_buffer, 0) .. '.md'
       assert.equals(file_name, expected)
+    end)
+
+    it('should set filetype based on file extension', function()
+      vim.cmd('MadoScratchOpenFile md')
+      assert.equals('markdown', vim.bo.filetype)
+    end)
+
+    it('should set filetype for typescript files', function()
+      vim.cmd('MadoScratchOpenFile ts')
+      assert.equals('typescript', vim.bo.filetype)
+    end)
+
+    it('should set filetype for python files', function()
+      vim.cmd('MadoScratchOpenFile py')
+      assert.equals('python', vim.bo.filetype)
     end)
 
     it('should support auto saving file buffer on InsertLeave', function()
