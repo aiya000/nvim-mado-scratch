@@ -161,7 +161,8 @@ end
 ---Edits file in a new floating window
 ---@param file_name string
 ---@param geometry { width: integer, height: integer, row: integer, col: integer }
-local function open_in_new_float_window(file_name, geometry)
+---@param opening_as_tmp_buffer boolean
+local function open_in_new_float_window(file_name, geometry, opening_as_tmp_buffer)
   -- Check if buffer with this name already exists and wipe it
   local existing_bufnr = vim.fn.bufnr(file_name)
   if existing_bufnr ~= -1 then
@@ -193,35 +194,41 @@ local function open_in_new_float_window(file_name, geometry)
     col = geometry.col + 1,  -- plenary uses 1-based indexing
     minwidth = geometry.width,
     minheight = geometry.height,
-    borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+    borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
   })
 
   -- Focus the window
   vim.api.nvim_set_current_win(winid)
 
-  -- Set up proper buffer options for saving
-  vim.api.nvim_buf_set_option(bufnr, 'buftype', '')
-  vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
-  vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
+  -- Set buffer type based on whether this is a tmp buffer or file buffer
+  if opening_as_tmp_buffer then
+    vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
+    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
+  else
+    -- For file buffers, set up proper options and write handler
+    vim.api.nvim_buf_set_option(bufnr, 'buftype', '')
+    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
+    vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
 
-  -- Enable normal file writing by setting appropriate buffer type
-  vim.api.nvim_create_autocmd('BufWritePre', {
-    group = vim.api.nvim_create_augroup('MadoScratchFileSave', { clear = false }),
-    buffer = bufnr,
-    callback = function()
-      -- Ensure the buffer has proper file association
-      local current_name = vim.api.nvim_buf_get_name(bufnr)
-      if current_name ~= file_name then
-        vim.api.nvim_buf_set_name(bufnr, file_name)
-      end
-    end,
-  })
+    -- Handle writes explicitly with BufWriteCmd
+    vim.api.nvim_create_autocmd('BufWriteCmd', {
+      group = vim.api.nvim_create_augroup('MadoScratchFileSave', { clear = false }),
+      buffer = bufnr,
+      callback = function()
+        -- Write buffer contents to file
+        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+        vim.fn.writefile(lines, file_name)
+        vim.api.nvim_buf_set_option(bufnr, 'modified', false)
+      end,
+    })
+  end
 end
 
 ---Opens a floating window with a buffer displaying the specified file
 ---@param size { width: integer, height: integer }
 ---@param file_name string
-local function open_floating_window(size, file_name)
+---@param opening_as_tmp_buffer boolean
+local function open_floating_window(size, file_name, opening_as_tmp_buffer)
   local width = size.width
   local height = size.height
   local win_width, win_height = get_neovim_winsize()
@@ -233,7 +240,7 @@ local function open_floating_window(size, file_name)
     height = height,
     row = row,
     col = col,
-  })
+  }, opening_as_tmp_buffer)
 end
 
 ---Parses float window size from string
@@ -333,10 +340,12 @@ end
 ---@param open_method 'float-fixed' | 'float' | 'float-aspect'
 ---@param buffer_size string | nil
 ---@param file_name string
-local function open_floating_buffer(open_method, buffer_size, file_name)
+---@param opening_as_tmp_buffer boolean
+local function open_floating_buffer(open_method, buffer_size, file_name, opening_as_tmp_buffer)
   open_floating_window(
     get_actual_floating_buffer_size(open_method, buffer_size),
-    file_name
+    file_name,
+    opening_as_tmp_buffer
   )
 end
 
@@ -403,23 +412,25 @@ function M.open_buffer(options)
     open_floating_buffer(
       open_method --[[@as 'float-fixed' | 'float' | 'float-aspect']],
       buffer_size,
-      file_name
+      file_name,
+      options.opening_as_tmp_buffer
     )
+    -- No need to call set_buffer_type here as it's handled in open_in_new_float_window
   elseif open_method == 'sp' or open_method == 'vsp' or open_method == 'tabnew' then
     open_no_floating_buffer(
       open_method --[[@as 'sp' | 'vsp' | 'tabnew']],
       buffer_size,
       file_name
     )
+    set_buffer_type(options.opening_as_tmp_buffer)
   else
     vim.notify(
       ("Unknown open method ('%s'). Fallback to 'sp'"):format(tostring(open_method)),
       vim.log.levels.WARN
     )
     open_no_floating_buffer('sp', buffer_size, file_name)
+    set_buffer_type(options.opening_as_tmp_buffer)
   end
-
-  set_buffer_type(options.opening_as_tmp_buffer)
 end
 
 ---Cleans up all scratch buffers and files
