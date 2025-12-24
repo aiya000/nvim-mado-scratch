@@ -616,5 +616,44 @@ describe('mado-scratch', function()
       local content = vim.fn.readfile(file_name1)
       assert.equals('test content', content[1])
     end)
+
+    it('should change buffer type from tmp to file in float mode when pattern is same', function()
+      local file_pattern = vim.fn.fnamemodify('./tests/tmp/scratch-%d', ':p')
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = file_pattern,
+          when_file_buffer = file_pattern,
+        },
+      })
+
+      -- Open as tmp buffer first
+      vim.cmd('MadoScratchOpen md float-aspect')
+      local first_file = vim.fn.expand('%:p')
+      local bufnr1 = vim.fn.bufnr('%')
+
+      -- Check buffer type is tmp (nofile buftype)
+      assert.equals(vim.bo.buftype, 'nofile')
+
+      -- Open same buffer as file buffer
+      vim.cmd('MadoScratchOpenFile md float-aspect')
+      local second_file = vim.fn.expand('%:p')
+      local bufnr2 = vim.fn.bufnr('%')
+
+      -- Should be same file and buffer
+      assert.equals(second_file, first_file)
+      assert.equals(bufnr1, bufnr2)
+
+      -- Check buffer type is now file (empty buftype)
+      assert.equals(vim.bo.buftype, '')
+      assert.equals(vim.bo.bufhidden, 'hide')
+
+      -- Verify we can write
+      vim.fn.setline(1, 'test write content')
+      local success, err = pcall(function()
+        vim.cmd('write')
+      end)
+      assert.is_true(success, string.format('Write failed with error: %s', tostring(err)))
+    end)
   end)
 end)
