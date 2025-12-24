@@ -171,41 +171,49 @@ local function open_in_new_float_window(file_name, geometry)
   -- Extract just the filename from the full path for display
   local display_name = vim.fn.fnamemodify(file_name, ':t')
 
-  local Popup = require('nui.popup')
-  local popup = Popup({
-    enter = true,
-    focusable = true,
-    border = {
-      style = 'rounded',
-      text = {
-        top = ' ' .. display_name .. ' ',
-        top_align = 'center',
-      },
-    },
-    relative = 'editor',
-    position = { row = geometry.row, col = geometry.col },
-    size = { width = geometry.width, height = geometry.height },
-  })
-  popup:mount()
-  local bufnr = popup.bufnr
+  -- Create a new buffer
+  local bufnr = vim.api.nvim_create_buf(false, false)
 
+  -- Set buffer name first to ensure proper file association
   vim.api.nvim_buf_set_name(bufnr, file_name)
 
+  -- Read file content if it exists
   if vim.fn.filereadable(file_name) == 1 then
     local lines = vim.fn.readfile(file_name)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    -- Mark buffer as unmodified after loading
+    vim.api.nvim_buf_set_option(bufnr, 'modified', false)
   end
 
-  vim.api.nvim_create_autocmd('BufWriteCmd', {
-    group = vim.api.nvim_create_augroup('MadoScratchBufSync', { clear = false }),
+  -- Create floating window using plenary.popup
+  local popup = require("plenary.popup")
+  local winid = popup.create(bufnr, {
+    title = ' ' .. display_name .. ' ',
+    line = geometry.row + 1, -- plenary uses 1-based indexing
+    col = geometry.col + 1,  -- plenary uses 1-based indexing
+    minwidth = geometry.width,
+    minheight = geometry.height,
+    borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+  })
+
+  -- Focus the window
+  vim.api.nvim_set_current_win(winid)
+
+  -- Set up proper buffer options for saving
+  vim.api.nvim_buf_set_option(bufnr, 'buftype', '')
+  vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
+  vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
+
+  -- Enable normal file writing by setting appropriate buffer type
+  vim.api.nvim_create_autocmd('BufWritePre', {
+    group = vim.api.nvim_create_augroup('MadoScratchFileSave', { clear = false }),
     buffer = bufnr,
     callback = function()
-      if vim.bo[bufnr].buftype == 'nofile' then
-        return
+      -- Ensure the buffer has proper file association
+      local current_name = vim.api.nvim_buf_get_name(bufnr)
+      if current_name ~= file_name then
+        vim.api.nvim_buf_set_name(bufnr, file_name)
       end
-      local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-      vim.fn.writefile(lines, file_name)
-      vim.api.nvim_buf_set_option(bufnr, 'modified', false)
     end,
   })
 end
