@@ -592,10 +592,6 @@ describe('mado-scratch', function()
       local win_config = vim.api.nvim_win_get_config(0)
       assert.equals('editor', win_config.relative)
 
-      -- Verify the border title is set
-      -- The expected filename should be just the basename (not full path)
-      local expected_title = vim.fn.fnamemodify(file_name, ':t')
-      
       -- plenary.popup uses window border attribute to set title
       -- We can verify the window has border and proper dimensions
       assert.is_not_nil(win_config.border)
