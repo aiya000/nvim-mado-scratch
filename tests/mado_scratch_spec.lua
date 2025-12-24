@@ -580,5 +580,35 @@ describe('mado-scratch', function()
       assert.equals(expected_height, win_config.height)
     end)
 
+    it('should not error when reopening existing file in float window', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        auto_save_file_buffer = true,
+      })
+
+      -- Open file with float-aspect, write content, and close
+      vim.cmd('MadoScratchOpenFile md float-aspect')
+      local file_name = vim.fn.expand('%:p')
+      vim.fn.setline(1, 'test content')
+      vim.cmd('write')
+      vim.cmd('quit')
+
+      -- Reopen the same file - should not error
+      local success, err = pcall(function()
+        vim.cmd('MadoScratchOpenFile md float-aspect')
+      end)
+
+      assert.is_true(success, 'Should not error when reopening file: ' .. tostring(err))
+      
+      -- Verify the file is opened with correct content
+      local reopened_file = vim.fn.expand('%:p')
+      assert.equals(file_name, reopened_file)
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      assert.equals('test content', lines[1])
+    end)
+
   end)
 end)
