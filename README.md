@@ -80,6 +80,15 @@ And more features...
 }
 ```
 
+You can also use other open methods:
+- `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size (requires plenary.nvim)
+- `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio (requires plenary.nvim)
+- `{ method = 'sp', height = 15 }` - horizontal split (no plenary.nvim required)
+- `{ method = 'vsp', width = 30 }` - vertical split (no plenary.nvim required)
+- `{ method = 'tabnew' }` - new tab (no plenary.nvim required)
+
+Please also see [Configuration](#wrench-configuration) section and `:help mado-scratch.nvim` for more details.
+
 ### Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
@@ -93,7 +102,7 @@ use {
 
 ### Optional Dependency
 
-- [nui.nvim](https://github.com/MunifTanjim/nui.nvim) for floating window support ↓
+- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) for floating window support ↓
 
 To use floating windows, configure `default_open_method` like this:
 
@@ -102,21 +111,12 @@ To use floating windows, configure `default_open_method` like this:
   'aiya000/nvim-mado-scratch',
   config = function()
     require('mado-scratch').setup({
-      default_open_method = { method = 'float', size = { width = 80, height = 24 } },
-      -- other options...
+      default_open_method = { method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }, -- Scale
+      -- default_open_method = { method = 'float-fixed', size = { width = 80, height = 24 } }, -- Fixed size
     })
   end,
 }
 ```
-
-You can also use other open methods:
-- `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size (requires nui.nvim)
-- `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio (requires nui.nvim)
-- `{ method = 'sp', height = 15 }` - horizontal split (no nui.nvim required)
-- `{ method = 'vsp', width = 30 }` - vertical split (no nui.nvim required)
-- `{ method = 'tabnew' }` - new tab (no nui.nvim required)
-
-Note: `{ method = 'float', ... }` is supported for backward compatibility and treated as `float-fixed`.
 
 ## :wrench: Configuration
 
