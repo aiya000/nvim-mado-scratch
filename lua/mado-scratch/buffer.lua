@@ -212,13 +212,20 @@ local function open_in_new_float_window(file_name, geometry, opening_as_tmp_buff
 
     -- Handle writes explicitly with BufWriteCmd
     vim.api.nvim_create_autocmd('BufWriteCmd', {
-      group = vim.api.nvim_create_augroup('MadoScratchFileSave', { clear = false }),
+      group = vim.api.nvim_create_augroup('MadoScratchFileSave_' .. bufnr, { clear = true }),
       buffer = bufnr,
       callback = function()
-        -- Write buffer contents to file
+        -- Write buffer contents to file with error handling
         local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-        vim.fn.writefile(lines, file_name)
-        vim.api.nvim_buf_set_option(bufnr, 'modified', false)
+        local success, err = pcall(vim.fn.writefile, lines, file_name)
+        if success then
+          vim.api.nvim_buf_set_option(bufnr, 'modified', false)
+        else
+          vim.notify(
+            string.format('Failed to write file %s: %s', file_name, tostring(err)),
+            vim.log.levels.ERROR
+          )
+        end
       end,
     })
   end
