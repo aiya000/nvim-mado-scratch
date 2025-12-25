@@ -441,6 +441,7 @@ function M.open_buffer(options)
 
   set_buffer_type(options.opening_as_tmp_buffer)
   vim.cmd('filetype detect')
+  vim.cmd('doautocmd User MadoScratchBufferOpened')
 end
 
 ---Cleans up all scratch buffers and files
