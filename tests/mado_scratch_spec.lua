@@ -586,8 +586,8 @@ describe('mado-scratch', function()
   end)
 
   describe('User autocmd MadoScratchBufferOpened', function()
-    it('should trigger MadoScratchBufferOpened autocmd when buffer is opened', function()
-      -- Setup autocmd to track if it was triggered
+    -- Helper function to test if autocmd is triggered
+    local function test_autocmd_triggered(command_to_run)
       local autocmd_triggered = false
       vim.api.nvim_create_autocmd('User', {
         pattern = 'MadoScratchBufferOpened',
@@ -597,47 +597,23 @@ describe('mado-scratch', function()
         once = true,
       })
 
-      -- Open a scratch buffer
-      vim.cmd('MadoScratchOpen md')
+      vim.cmd(command_to_run)
+      return autocmd_triggered
+    end
 
-      -- Check if autocmd was triggered
-      assert.is_true(autocmd_triggered)
+    it('should trigger MadoScratchBufferOpened autocmd when buffer is opened', function()
+      local triggered = test_autocmd_triggered('MadoScratchOpen md')
+      assert.is_true(triggered)
     end)
 
     it('should trigger MadoScratchBufferOpened autocmd for file buffers', function()
-      -- Setup autocmd to track if it was triggered
-      local autocmd_triggered = false
-      vim.api.nvim_create_autocmd('User', {
-        pattern = 'MadoScratchBufferOpened',
-        callback = function()
-          autocmd_triggered = true
-        end,
-        once = true,
-      })
-
-      -- Open a file buffer
-      vim.cmd('MadoScratchOpenFile md')
-
-      -- Check if autocmd was triggered
-      assert.is_true(autocmd_triggered)
+      local triggered = test_autocmd_triggered('MadoScratchOpenFile md')
+      assert.is_true(triggered)
     end)
 
     it('should trigger MadoScratchBufferOpened autocmd for floating windows', function()
-      -- Setup autocmd to track if it was triggered
-      local autocmd_triggered = false
-      vim.api.nvim_create_autocmd('User', {
-        pattern = 'MadoScratchBufferOpened',
-        callback = function()
-          autocmd_triggered = true
-        end,
-        once = true,
-      })
-
-      -- Open a floating window buffer
-      vim.cmd('MadoScratchOpen md float')
-
-      -- Check if autocmd was triggered
-      assert.is_true(autocmd_triggered)
+      local triggered = test_autocmd_triggered('MadoScratchOpen md float')
+      assert.is_true(triggered)
     end)
   end)
 end)
