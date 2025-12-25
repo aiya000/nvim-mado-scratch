@@ -10,6 +10,7 @@ INTRODUCTION            |mado-scratch-introduction|
 SETUP                   |mado-scratch-setup|
 USAGE                   |mado-scratch-usage|
 INTERFACE               |mado-scratch-interface|
+  AUTOCMDS              |mado-scratch-autocmds|
   CONFIGURATION         |mado-scratch-configuration|
   COMMANDS              |mado-scratch-commands|
   FUNCTIONS             |mado-scratch-functions|
@@ -127,6 +128,33 @@ You can specify:
 
 ==============================================================================
 INTERFACE               *mado-scratch-interface*
+
+------------------------------------------------------------------------------
+AUTOCMDS                *mado-scratch-autocmds*
+
+                        *User-MadoScratchBufferOpened*
+User MadoScratchBufferOpened
+  Triggered after a scratch buffer is opened by this plugin.
+  This event is triggered for all buffer types (temporary or persistent)
+  and all open methods (split, vsplit, tab, floating).
+
+  You can use this autocmd to perform custom actions when a scratch buffer
+  is opened, such as setting buffer-local options, mappings, or running
+  specific commands.
+
+  Example: >
+    " Set buffer-local option when scratch buffer is opened
+    autocmd User MadoScratchBufferOpened setlocal wrap
+
+    " Or using Lua:
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchBufferOpened',
+      callback = function()
+        vim.opt_local.wrap = true
+        print('Scratch buffer opened!')
+      end,
+    })
+<
 
 ------------------------------------------------------------------------------
 CONFIGURATION           *mado-scratch-configuration*

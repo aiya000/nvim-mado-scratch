@@ -438,6 +438,9 @@ function M.open_buffer(options)
     open_no_floating_buffer('sp', buffer_size, file_name)
     set_buffer_type(options.opening_as_tmp_buffer)
   end
+
+  -- Trigger User autocmd for plugins/users to hook into
+  vim.cmd('doautocmd User MadoScratchBufferOpened')
 end
 
 ---Cleans up all scratch buffers and files

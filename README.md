@@ -9,6 +9,8 @@ For :star:Neovim:star: (lua-based modern implementation).
 ## Table of Contents
 
 - [:sparkles: nvim-mado-scratch :sparkles:](#sparkles-mado-scratchnvim-sparkles)
+  - [:star: Features](#star-features)
+  - [:hook: User Autocmd](#hook-user-autocmd)
   - [:gear: Installation](#gear-installation)
   - [:wrench: Configuration](#wrench-configuration)
   - [:wrench: Quick Start](#wrench-quick-start)
@@ -52,6 +54,30 @@ Allright, you can clean them up when you want.
 - - -
 
 And more features...
+
+## :hook: User Autocmd
+
+The plugin provides a User autocmd that you can hook into:
+
+- **`MadoScratchBufferOpened`** - Triggered after a scratch buffer is opened
+
+You can use this to perform custom actions when a scratch buffer is opened:
+
+```lua
+-- Example: Set buffer-local options
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'MadoScratchBufferOpened',
+  callback = function()
+    vim.opt_local.wrap = true
+    print('Scratch buffer opened!')
+  end,
+})
+```
+
+Or using Vimscript:
+```vim
+autocmd User MadoScratchBufferOpened setlocal wrap
+```
 
 ## :gear: Installation
 
