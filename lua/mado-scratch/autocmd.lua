@@ -3,10 +3,21 @@ local M = {}
 function M.save_file_buffer_if_enabled()
   local config = require('mado-scratch').get_config()
   if config.auto_save_file_buffer and vim.bo.buftype ~= 'nofile' then
-    vim.cmd.write({
+    -- Check if buffer has a valid file name before attempting to write
+    local bufname = vim.api.nvim_buf_get_name(0)
+    if bufname == '' then
+      return
+    end
+    
+    -- Use pcall to catch and ignore write errors (e.g., E32: No file name)
+    local success, err = pcall(vim.cmd.write, {
       mods = { silent = true },
       bang = true,
     })
+    if not success then
+      -- Silently ignore write errors during buffer cleanup
+      -- This can happen when closing buffers immediately after opening
+    end
   end
 end
 
