@@ -9,15 +9,12 @@ function M.save_file_buffer_if_enabled()
       return
     end
     
-    -- Use pcall to catch and ignore write errors (e.g., E32: No file name)
-    local success, err = pcall(vim.cmd.write, {
+    -- Use pcall to catch and silently ignore write errors (e.g., E32: No file name)
+    -- This can happen when closing buffers immediately after opening
+    pcall(vim.cmd.write, {
       mods = { silent = true },
       bang = true,
     })
-    if not success then
-      -- Silently ignore write errors during buffer cleanup
-      -- This can happen when closing buffers immediately after opening
-    end
   end
 end
 
