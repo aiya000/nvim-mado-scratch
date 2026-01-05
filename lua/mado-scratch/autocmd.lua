@@ -3,12 +3,15 @@ local M = {}
 function M.save_file_buffer_if_enabled()
   local config = require('mado-scratch').get_config()
   if config.auto_save_file_buffer and vim.bo.buftype ~= 'nofile' then
-    -- Use pcall to catch and silently ignore write errors (e.g., E32: No file name)
-    -- This can happen when closing buffers immediately after opening
-    pcall(vim.cmd.write, {
+    -- Catch only E32 (No file name) errors that occur during buffer cleanup
+    -- Other errors should be propagated to help with debugging
+    local success, err = pcall(vim.cmd.write, {
       mods = { silent = true },
       bang = true,
     })
+    if not success and not string.match(err, 'E32:') then
+      error(err)
+    end
   end
 end
 
