@@ -9,7 +9,7 @@ function M.save_file_buffer_if_enabled()
       mods = { silent = true },
       bang = true,
     })
-    if not success and not string.match(err, 'E32:') then
+    if not success and not (err and string.match(err, 'E32:')) then
       error(err)
     end
   end
