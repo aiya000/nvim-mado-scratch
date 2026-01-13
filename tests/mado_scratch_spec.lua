@@ -583,5 +583,49 @@ describe('mado-scratch', function()
     it('should display file name in float window border title', function()
       pending('Skipped: border title check is flaky in headless mode') -- TODO: Implement
     end)
+
+    it('should not error when closing float-fixed file buffer immediately with auto_save enabled', function()
+      -- This test reproduces the issue from GitHub issue:
+      -- "Error when doing `:MadoScratchOpenFile md float-fixed 80x80` and then immediately `:q` the buffer"
+      -- The E32 error occurred because BufUnload tried to save a buffer during cleanup
+      
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_file_ext = 'md',
+        auto_save_file_buffer = true,  -- Enable auto-save to trigger the autocmd
+        use_default_keymappings = false,
+        auto_hide_buffer = {
+          when_tmp_buffer = false,
+          when_file_buffer = false,
+        },
+      })
+
+      -- Open a float-fixed file buffer
+      vim.cmd('MadoScratchOpenFile md float-fixed 80x80')
+      
+      -- Verify the buffer was created
+      local file_name = vim.fn.expand('%:p')
+      assert.is_not.equals('', file_name)
+      
+      -- Get the current buffer number
+      local bufnr = vim.api.nvim_get_current_buf()
+      
+      -- Close the buffer immediately (this should trigger BufUnload event)
+      -- Without the fix, this would throw E32: No file name error
+      -- With the fix, the E32 error should be caught and suppressed
+      local success, err = pcall(function()
+        vim.cmd('quit')
+      end)
+      
+      -- The test passes if no error is thrown
+      assert.is_true(success, string.format('Expected quit to succeed, but got error: %s', tostring(err)))
+      
+      -- Verify the buffer was closed
+      assert.is_false(vim.api.nvim_buf_is_valid(bufnr))
+    end)
   end)
 end)
