@@ -65,14 +65,23 @@ end)
 
 ### 1. Test WITHOUT the fix (expected to FAIL)
 
-To verify the test correctly identifies the bug, temporarily revert to the original code:
+To verify the test correctly identifies the bug, temporarily revert to the original code before the fix was applied.
+
+**Step 1: Check out the commit before the fix**
+
+The fix was first introduced in commit `74be363`. To test without the fix, revert to the commit before it:
 
 ```bash
-# Get the original code before the fix
-git show 4842895:lua/mado-scratch/autocmd.lua > lua/mado-scratch/autocmd.lua
+# Temporarily checkout the autocmd.lua file from before the fix
+git show 74be363~1:lua/mado-scratch/autocmd.lua > lua/mado-scratch/autocmd.lua
+
+# Or use git checkout to the specific commit
+git checkout 9647fef -- lua/mado-scratch/autocmd.lua
 ```
 
-The original code in `lua/mado-scratch/autocmd.lua` was:
+**Step 2: Verify the reverted code**
+
+The original code in `lua/mado-scratch/autocmd.lua` should look like this (without pcall):
 
 ```lua
 function M.save_file_buffer_if_enabled()
@@ -86,7 +95,7 @@ function M.save_file_buffer_if_enabled()
 end
 ```
 
-Run the test:
+**Step 3: Run the test**
 
 ```bash
 make test
