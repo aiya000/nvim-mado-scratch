@@ -3,10 +3,15 @@ local M = {}
 function M.save_file_buffer_if_enabled()
   local config = require('mado-scratch').get_config()
   if config.auto_save_file_buffer and vim.bo.buftype ~= 'nofile' then
-    vim.cmd.write({
+    -- Catch E32 (No file name) error
+    -- (Occurs when a buffer before opening mado-scratch buffer has no name)
+    local success, err = pcall(vim.cmd.write, {
       mods = { silent = true },
       bang = true,
     })
+    if not success and not (err and string.match(err, 'E32:')) then
+      error(err)
+    end
   end
 end
 

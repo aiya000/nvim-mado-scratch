@@ -618,5 +618,48 @@ describe('mado-scratch', function()
     it('should display file name in float window border title', function()
       pending('Skipped: border title check is flaky in headless mode') -- TODO: Implement
     end)
+
+    -- The reproduction for [#33](https://github.com/aiya000/nvim-mado-scratch/issues/33)
+    it('should not error when closing float-fixed file buffer immediately with auto_save enabled', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_file_ext = 'md',
+        auto_save_file_buffer = true,  -- Enable auto-save to trigger the autocmd
+        use_default_keymappings = false,
+        auto_hide_buffer = {
+          when_tmp_buffer = false,
+          when_file_buffer = false,
+        },
+      })
+      vim.cmd('MadoScratchOpenFile md float-fixed 80x80')
+
+      -- Verify the buffer was created
+      local file_name = vim.fn.expand('%:p')
+      assert.is_not.equals('', file_name)
+
+      -- Backup
+      local bufnr = vim.api.nvim_get_current_buf()
+      local winid = vim.api.nvim_get_current_win()
+
+      -- Simulate the condition that causes `E32` error
+      vim.api.nvim_buf_set_name(bufnr, '')
+      local success, err = pcall(function()
+        require('mado-scratch.autocmd').save_file_buffer_if_enabled()
+      end)
+
+      -- Restore buffer name
+      vim.api.nvim_buf_set_name(bufnr, file_name)
+
+      -- The test passes if no error is thrown (E32 was caught and suppressed)
+      assert.is_true(success, string.format('Expected save to handle E32 gracefully, but got error: %s', tostring(err)))
+
+      -- Clean up: close the window
+      vim.cmd('quit')
+      assert.is_false(vim.api.nvim_win_is_valid(winid))
+    end)
   end)
 end)
