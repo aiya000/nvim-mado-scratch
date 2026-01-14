@@ -191,6 +191,14 @@ require('mado-scratch').setup({
 
 Please see '[Detailed Usage](#gear-detailed-usage)' section for more information.
 
+### Secret Trick
+
+After opening `:MadoScratchOpen md float-fixed` or `:MadoScratchOpen ts float-aspect`,
+did you wish to open that buffer in a non-float window?
+
+If so, try executing `:vsp` or `:sp` while keeping the float window open.  
+The mado-scratch buffer will open in a new non-float window :shushing_face:
+
 ## :fire: Why nvim-mado-scratch?
 
 - **Open instantly!** Just run `:MadoScratchOpen`!
