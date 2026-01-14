@@ -611,10 +611,10 @@ describe('mado-scratch', function()
       local file_name = vim.fn.expand('%:p')
       assert.is_not.equals('', file_name)
       
-      -- Get the current buffer number
-      local bufnr = vim.api.nvim_get_current_buf()
+      -- Get the current window ID before closing
+      local winid = vim.api.nvim_get_current_win()
       
-      -- Close the buffer immediately (this should trigger BufUnload event)
+      -- Close the window immediately (this should trigger BufUnload event)
       -- Without the fix, this would throw E32: No file name error
       -- With the fix, the E32 error should be caught and suppressed
       local success, err = pcall(function()
@@ -624,8 +624,8 @@ describe('mado-scratch', function()
       -- The test passes if no error is thrown
       assert.is_true(success, string.format('Expected quit to succeed, but got error: %s', tostring(err)))
       
-      -- Verify the buffer was closed
-      assert.is_false(vim.api.nvim_buf_is_valid(bufnr))
+      -- Verify the window was closed (window should no longer be valid)
+      assert.is_false(vim.api.nvim_win_is_valid(winid))
     end)
   end)
 end)
