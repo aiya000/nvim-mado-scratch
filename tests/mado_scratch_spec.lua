@@ -611,20 +611,28 @@ describe('mado-scratch', function()
       local file_name = vim.fn.expand('%:p')
       assert.is_not.equals('', file_name)
       
-      -- Get the current window ID before closing
+      -- Get the current buffer and window
+      local bufnr = vim.api.nvim_get_current_buf()
       local winid = vim.api.nvim_get_current_win()
       
-      -- Close the window immediately (this should trigger BufUnload event)
-      -- Without the fix, this would throw E32: No file name error
+      -- Now simulate the condition that causes E32: clear the buffer name temporarily
+      -- This reproduces the race condition that can occur during buffer cleanup
+      vim.api.nvim_buf_set_name(bufnr, '')
+      
+      -- Try to call the save function directly - this should trigger E32 without the fix
       -- With the fix, the E32 error should be caught and suppressed
       local success, err = pcall(function()
-        vim.cmd('quit')
+        require('mado-scratch.autocmd').save_file_buffer_if_enabled()
       end)
       
-      -- The test passes if no error is thrown
-      assert.is_true(success, string.format('Expected quit to succeed, but got error: %s', tostring(err)))
+      -- Restore buffer name
+      vim.api.nvim_buf_set_name(bufnr, file_name)
       
-      -- Verify the window was closed (window should no longer be valid)
+      -- The test passes if no error is thrown (E32 was caught and suppressed)
+      assert.is_true(success, string.format('Expected save to handle E32 gracefully, but got error: %s', tostring(err)))
+      
+      -- Clean up: close the window
+      vim.cmd('quit')
       assert.is_false(vim.api.nvim_win_is_valid(winid))
     end)
   end)

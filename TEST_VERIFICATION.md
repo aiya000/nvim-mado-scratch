@@ -11,6 +11,8 @@ Error detected while processing BufUnload Autocommands for "/tmp/mado-scratch-fi
 Error executing lua callback: ...lua/mado-scratch/autocmd.lua:6: Vim:E32: No file name
 ```
 
+This occurred because during buffer cleanup, the buffer name could be cleared or invalid when the auto-save autocmd tried to write the buffer.
+
 ## Test Added
 
 A new test was added in `tests/mado_scratch_spec.lua`:
@@ -43,23 +45,41 @@ it('should not error when closing float-fixed file buffer immediately with auto_
   local file_name = vim.fn.expand('%:p')
   assert.is_not.equals('', file_name)
   
-  -- Get the current window ID before closing
+  -- Get the current buffer and window
+  local bufnr = vim.api.nvim_get_current_buf()
   local winid = vim.api.nvim_get_current_win()
   
-  -- Close the window immediately (this should trigger BufUnload event)
-  -- Without the fix, this would throw E32: No file name error
+  -- Now simulate the condition that causes E32: clear the buffer name temporarily
+  -- This reproduces the race condition that can occur during buffer cleanup
+  vim.api.nvim_buf_set_name(bufnr, '')
+  
+  -- Try to call the save function directly - this should trigger E32 without the fix
   -- With the fix, the E32 error should be caught and suppressed
   local success, err = pcall(function()
-    vim.cmd('quit')
+    require('mado-scratch.autocmd').save_file_buffer_if_enabled()
   end)
   
-  -- The test passes if no error is thrown
-  assert.is_true(success, string.format('Expected quit to succeed, but got error: %s', tostring(err)))
+  -- Restore buffer name
+  vim.api.nvim_buf_set_name(bufnr, file_name)
   
-  -- Verify the window was closed (window should no longer be valid)
+  -- The test passes if no error is thrown (E32 was caught and suppressed)
+  assert.is_true(success, string.format('Expected save to handle E32 gracefully, but got error: %s', tostring(err)))
+  
+  -- Clean up: close the window
+  vim.cmd('quit')
   assert.is_false(vim.api.nvim_win_is_valid(winid))
 end)
 ```
+
+## Test Design
+
+The test directly simulates the E32 error condition by:
+1. Opening a float-fixed file buffer with auto_save enabled
+2. Temporarily clearing the buffer name (`vim.api.nvim_buf_set_name(bufnr, '')`)
+3. Calling `save_file_buffer_if_enabled()` directly
+4. This triggers `vim.cmd.write()` on a buffer with no name, causing E32 error
+
+This approach ensures the test actually reproduces the E32 condition reliably, regardless of the complex buffer lifecycle during window closing.
 
 ## Verification Steps
 
