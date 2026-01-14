@@ -584,11 +584,8 @@ describe('mado-scratch', function()
       pending('Skipped: border title check is flaky in headless mode') -- TODO: Implement
     end)
 
+    -- The reproduction for [#33](https://github.com/aiya000/nvim-mado-scratch/issues/33)
     it('should not error when closing float-fixed file buffer immediately with auto_save enabled', function()
-      -- This test reproduces the issue from GitHub issue:
-      -- "Error when doing `:MadoScratchOpenFile md float-fixed 80x80` and then immediately `:q` the buffer"
-      -- The E32 error occurred because BufUnload tried to save a buffer during cleanup
-      
       local mado = require('mado-scratch')
       mado.setup({
         file_pattern = {
@@ -603,34 +600,28 @@ describe('mado-scratch', function()
           when_file_buffer = false,
         },
       })
-
-      -- Open a float-fixed file buffer
       vim.cmd('MadoScratchOpenFile md float-fixed 80x80')
-      
+
       -- Verify the buffer was created
       local file_name = vim.fn.expand('%:p')
       assert.is_not.equals('', file_name)
-      
-      -- Get the current buffer and window
+
+      -- Backup
       local bufnr = vim.api.nvim_get_current_buf()
       local winid = vim.api.nvim_get_current_win()
-      
-      -- Now simulate the condition that causes E32: clear the buffer name temporarily
-      -- This reproduces the race condition that can occur during buffer cleanup
+
+      -- Simulate the condition that causes `E32` error
       vim.api.nvim_buf_set_name(bufnr, '')
-      
-      -- Try to call the save function directly - this should trigger E32 without the fix
-      -- With the fix, the E32 error should be caught and suppressed
       local success, err = pcall(function()
         require('mado-scratch.autocmd').save_file_buffer_if_enabled()
       end)
-      
+
       -- Restore buffer name
       vim.api.nvim_buf_set_name(bufnr, file_name)
-      
+
       -- The test passes if no error is thrown (E32 was caught and suppressed)
       assert.is_true(success, string.format('Expected save to handle E32 gracefully, but got error: %s', tostring(err)))
-      
+
       -- Clean up: close the window
       vim.cmd('quit')
       assert.is_false(vim.api.nvim_win_is_valid(winid))
