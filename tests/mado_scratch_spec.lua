@@ -733,10 +733,6 @@ describe('mado-scratch', function()
     it('should trigger close autocmds when auto_hide_buffer is enabled for tmp buffers', function()
       local mado = require('mado-scratch')
       mado.setup({
-        file_pattern = {
-          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
-          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
-        },
         auto_hide_buffer = {
           when_tmp_buffer = true,
           when_file_buffer = false,
@@ -778,10 +774,6 @@ describe('mado-scratch', function()
     it('should trigger close autocmds when auto_hide_buffer is enabled for file buffers', function()
       local mado = require('mado-scratch')
       mado.setup({
-        file_pattern = {
-          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
-          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
-        },
         auto_hide_buffer = {
           when_tmp_buffer = false,
           when_file_buffer = true,
