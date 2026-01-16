@@ -57,14 +57,17 @@ And more features...
 
 ## :hook: User Autocmd
 
-The plugin provides a User autocmd that you can hook into:
+The plugin provides User autocmds that you can hook into:
 
+- **`MadoScratchBufferPreOpened`** - Triggered before a scratch buffer is opened
 - **`MadoScratchBufferOpened`** - Triggered after a scratch buffer is opened
+- **`MadoScratchBufferPreClosed`** - Triggered before a scratch buffer is closed (only with auto-hide enabled)
+- **`MadoScratchBufferClosed`** - Triggered after a scratch buffer is closed (only with auto-hide enabled)
 
-You can use this to perform custom actions when a scratch buffer is opened:
+You can use these to perform custom actions:
 
 ```lua
--- Example: Set buffer-local options
+-- Example: Set buffer-local options when opened
 vim.api.nvim_create_autocmd('User', {
   pattern = 'MadoScratchBufferOpened',
   callback = function()
@@ -72,11 +75,28 @@ vim.api.nvim_create_autocmd('User', {
     print('Scratch buffer opened!')
   end,
 })
+
+-- Example: Prepare before opening
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'MadoScratchBufferPreOpened',
+  callback = function()
+    print('About to open scratch buffer...')
+  end,
+})
+
+-- Example: Save state before closing (requires auto_hide_buffer enabled)
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'MadoScratchBufferPreClosed',
+  callback = function()
+    -- Save buffer state
+  end,
+})
 ```
 
 Or using Vimscript:
 ```vim
 autocmd User MadoScratchBufferOpened setlocal wrap
+autocmd User MadoScratchBufferPreOpened echom "Opening buffer..."
 ```
 
 ## :gear: Installation

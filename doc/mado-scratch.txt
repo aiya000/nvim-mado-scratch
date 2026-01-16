@@ -132,6 +132,21 @@ INTERFACE               *mado-scratch-interface*
 ------------------------------------------------------------------------------
 AUTOCMDS                *mado-scratch-autocmds*
 
+                        *User-MadoScratchBufferPreOpened*
+User MadoScratchBufferPreOpened
+  Triggered before a scratch buffer is opened by this plugin.
+  This event fires before the buffer window is created, allowing you to
+  prepare the environment or set up preconditions.
+
+  Example: >
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchBufferPreOpened',
+      callback = function()
+        print('About to open scratch buffer...')
+      end,
+    })
+<
+
                         *User-MadoScratchBufferOpened*
 User MadoScratchBufferOpened
   Triggered after a scratch buffer is opened by this plugin.
@@ -152,6 +167,43 @@ User MadoScratchBufferOpened
       callback = function()
         vim.opt_local.wrap = true
         print('Scratch buffer opened!')
+      end,
+    })
+<
+
+                        *User-MadoScratchBufferPreClosed*
+User MadoScratchBufferPreClosed
+  Triggered before a scratch buffer is closed by the auto-hide feature.
+  This event only fires when auto_hide_buffer is enabled and the buffer
+  is about to be closed due to leaving the window.
+
+  Note: This is triggered before the window closes, so buffer-local
+  operations can still be performed.
+
+  Example: >
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchBufferPreClosed',
+      callback = function()
+        -- Save buffer state before closing
+        print('Buffer closing...')
+      end,
+    })
+<
+
+                        *User-MadoScratchBufferClosed*
+User MadoScratchBufferClosed
+  Triggered after a scratch buffer is closed by the auto-hide feature.
+  This event only fires when auto_hide_buffer is enabled and the buffer
+  has been closed after leaving the window.
+
+  Note: This is triggered after the window closes, so buffer-local
+  operations are no longer possible. Use for cleanup or state management.
+
+  Example: >
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchBufferClosed',
+      callback = function()
+        print('Buffer has been closed')
       end,
     })
 <

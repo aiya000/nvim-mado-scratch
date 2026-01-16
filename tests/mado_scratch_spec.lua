@@ -694,4 +694,124 @@ describe('mado-scratch', function()
       assert.is_true(triggered)
     end)
   end)
+
+  describe('User autocmd MadoScratchBufferPreOpened', function()
+    it('should trigger MadoScratchBufferPreOpened autocmd before buffer is opened', function()
+      local pre_opened_triggered = false
+      local opened_triggered = false
+      local order_correct = false
+
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MadoScratchBufferPreOpened',
+        callback = function()
+          pre_opened_triggered = true
+          -- Check that buffer is not opened yet (opened autocmd hasn't fired)
+          if not opened_triggered then
+            order_correct = true
+          end
+        end,
+        once = true,
+      })
+
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MadoScratchBufferOpened',
+        callback = function()
+          opened_triggered = true
+        end,
+        once = true,
+      })
+
+      vim.cmd('MadoScratchOpen md')
+
+      assert.is_true(pre_opened_triggered)
+      assert.is_true(opened_triggered)
+      assert.is_true(order_correct)
+    end)
+  end)
+
+  describe('User autocmd MadoScratchBufferPreClosed and MadoScratchBufferClosed', function()
+    it('should trigger close autocmds when auto_hide_buffer is enabled for tmp buffers', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        auto_hide_buffer = {
+          when_tmp_buffer = true,
+          when_file_buffer = false,
+        },
+      })
+
+      local pre_closed_triggered = false
+      local closed_triggered = false
+      local order_correct = false
+
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MadoScratchBufferPreClosed',
+        callback = function()
+          pre_closed_triggered = true
+          -- Check that buffer is not closed yet (closed autocmd hasn't fired)
+          if not closed_triggered then
+            order_correct = true
+          end
+        end,
+        once = true,
+      })
+
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MadoScratchBufferClosed',
+        callback = function()
+          closed_triggered = true
+        end,
+        once = true,
+      })
+
+      vim.cmd('MadoScratchOpen md')
+      vim.cmd('wincmd p')  -- Trigger WinLeave to close buffer
+
+      assert.is_true(pre_closed_triggered)
+      assert.is_true(closed_triggered)
+      assert.is_true(order_correct)
+    end)
+
+    it('should trigger close autocmds when auto_hide_buffer is enabled for file buffers', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        auto_hide_buffer = {
+          when_tmp_buffer = false,
+          when_file_buffer = true,
+        },
+      })
+
+      local pre_closed_triggered = false
+      local closed_triggered = false
+
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MadoScratchBufferPreClosed',
+        callback = function()
+          pre_closed_triggered = true
+        end,
+        once = true,
+      })
+
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MadoScratchBufferClosed',
+        callback = function()
+          closed_triggered = true
+        end,
+        once = true,
+      })
+
+      vim.cmd('MadoScratchOpenFile md')
+      vim.cmd('wincmd p')  -- Trigger WinLeave to close buffer
+
+      assert.is_true(pre_closed_triggered)
+      assert.is_true(closed_triggered)
+    end)
+  end)
 end)

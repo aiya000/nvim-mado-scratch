@@ -404,6 +404,9 @@ end
 ---Opens a scratch buffer (either a tmp buffer or a file buffer)
 ---@param options OpenBufferOptions
 function M.open_buffer(options)
+  -- Trigger User autocmd before buffer opens
+  vim.cmd('doautocmd User MadoScratchBufferPreOpened')
+
   local config = require('mado-scratch').get_config()
 
   local file_ext = options.file_ext or config.default_file_ext
