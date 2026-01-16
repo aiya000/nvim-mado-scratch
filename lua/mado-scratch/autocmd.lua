@@ -18,10 +18,9 @@ end
 function M.hide_buffer_if_enabled()
   local config = require('mado-scratch').get_config()
 
-  -- Trigger User autocmd before buffer closes
-  vim.cmd('doautocmd User MadoScratchBufferPreClosed')
-
   if vim.bo.buftype == 'nofile' and config.auto_hide_buffer.when_tmp_buffer then
+    -- Trigger User autocmd before buffer closes
+    vim.cmd('doautocmd User MadoScratchBufferPreClosed')
     vim.cmd.quit()
     -- Trigger User autocmd after buffer closes
     vim.cmd('doautocmd User MadoScratchBufferClosed')
@@ -29,6 +28,8 @@ function M.hide_buffer_if_enabled()
   end
 
   if config.auto_hide_buffer.when_file_buffer then
+    -- Trigger User autocmd before buffer closes
+    vim.cmd('doautocmd User MadoScratchBufferPreClosed')
     vim.cmd.quit()
     -- Trigger User autocmd after buffer closes
     vim.cmd('doautocmd User MadoScratchBufferClosed')
