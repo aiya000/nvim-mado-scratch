@@ -1,3 +1,16 @@
+local test_cases = {
+  { cmd = 'MadoScratchOpen', method = 'sp', desc = ':MadoScratchOpen md sp' },
+  { cmd = 'MadoScratchOpen', method = 'vsp', desc = ':MadoScratchOpen md vsp' },
+  { cmd = 'MadoScratchOpen', method = 'tabnew', desc = ':MadoScratchOpen md tabnew' },
+  { cmd = 'MadoScratchOpen', method = 'float-fixed', desc = ':MadoScratchOpen md float-fixed' },
+  { cmd = 'MadoScratchOpen', method = 'float-aspect', desc = ':MadoScratchOpen md float-aspect' },
+  { cmd = 'MadoScratchOpenFile', method = 'sp', desc = ':MadoScratchOpenFile md sp' },
+  { cmd = 'MadoScratchOpenFile', method = 'vsp', desc = ':MadoScratchOpenFile md vsp' },
+  { cmd = 'MadoScratchOpenFile', method = 'tabnew', desc = ':MadoScratchOpenFile md tabnew' },
+  { cmd = 'MadoScratchOpenFile', method = 'float-fixed', desc = ':MadoScratchOpenFile md float-fixed' },
+  { cmd = 'MadoScratchOpenFile', method = 'float-aspect', desc = ':MadoScratchOpenFile md float-aspect' },
+}
+
 describe('mado-scratch autocmds', function()
   before_each(function()
     -- Disable swap files to avoid E325 errors when tests run in parallel
@@ -33,19 +46,6 @@ describe('mado-scratch autocmds', function()
   end)
 
   describe('User autocmd MadoScratchBufferOpened', function()
-    local test_cases = {
-      { cmd = 'MadoScratchOpen', method = 'sp', desc = ':MadoScratchOpen md sp' },
-      { cmd = 'MadoScratchOpen', method = 'vsp', desc = ':MadoScratchOpen md vsp' },
-      { cmd = 'MadoScratchOpen', method = 'tabnew', desc = ':MadoScratchOpen md tabnew' },
-      { cmd = 'MadoScratchOpen', method = 'float-fixed', desc = ':MadoScratchOpen md float-fixed' },
-      { cmd = 'MadoScratchOpen', method = 'float-aspect', desc = ':MadoScratchOpen md float-aspect' },
-      { cmd = 'MadoScratchOpenFile', method = 'sp', desc = ':MadoScratchOpenFile md sp' },
-      { cmd = 'MadoScratchOpenFile', method = 'vsp', desc = ':MadoScratchOpenFile md vsp' },
-      { cmd = 'MadoScratchOpenFile', method = 'tabnew', desc = ':MadoScratchOpenFile md tabnew' },
-      { cmd = 'MadoScratchOpenFile', method = 'float-fixed', desc = ':MadoScratchOpenFile md float-fixed' },
-      { cmd = 'MadoScratchOpenFile', method = 'float-aspect', desc = ':MadoScratchOpenFile md float-aspect' },
-    }
-
     for _, test_case in ipairs(test_cases) do
       it('should trigger for ' .. test_case.desc, function()
         local triggered = false
@@ -64,19 +64,6 @@ describe('mado-scratch autocmds', function()
   end)
 
   describe('User autocmd MadoScratchBufferPreOpened', function()
-    local test_cases = {
-      { cmd = 'MadoScratchOpen', method = 'sp', desc = ':MadoScratchOpen md sp' },
-      { cmd = 'MadoScratchOpen', method = 'vsp', desc = ':MadoScratchOpen md vsp' },
-      { cmd = 'MadoScratchOpen', method = 'tabnew', desc = ':MadoScratchOpen md tabnew' },
-      { cmd = 'MadoScratchOpen', method = 'float-fixed', desc = ':MadoScratchOpen md float-fixed' },
-      { cmd = 'MadoScratchOpen', method = 'float-aspect', desc = ':MadoScratchOpen md float-aspect' },
-      { cmd = 'MadoScratchOpenFile', method = 'sp', desc = ':MadoScratchOpenFile md sp' },
-      { cmd = 'MadoScratchOpenFile', method = 'vsp', desc = ':MadoScratchOpenFile md vsp' },
-      { cmd = 'MadoScratchOpenFile', method = 'tabnew', desc = ':MadoScratchOpenFile md tabnew' },
-      { cmd = 'MadoScratchOpenFile', method = 'float-fixed', desc = ':MadoScratchOpenFile md float-fixed' },
-      { cmd = 'MadoScratchOpenFile', method = 'float-aspect', desc = ':MadoScratchOpenFile md float-aspect' },
-    }
-
     for _, test_case in ipairs(test_cases) do
       it('should trigger for ' .. test_case.desc, function()
         local pre_opened_triggered = false
@@ -112,19 +99,6 @@ describe('mado-scratch autocmds', function()
   end)
 
   describe('User autocmd MadoScratchBufferClosed', function()
-    local test_cases = {
-      { cmd = 'MadoScratchOpen', method = 'sp', desc = ':MadoScratchOpen md sp' },
-      { cmd = 'MadoScratchOpen', method = 'vsp', desc = ':MadoScratchOpen md vsp' },
-      { cmd = 'MadoScratchOpen', method = 'tabnew', desc = ':MadoScratchOpen md tabnew' },
-      { cmd = 'MadoScratchOpen', method = 'float-fixed', desc = ':MadoScratchOpen md float-fixed' },
-      { cmd = 'MadoScratchOpen', method = 'float-aspect', desc = ':MadoScratchOpen md float-aspect' },
-      { cmd = 'MadoScratchOpenFile', method = 'sp', desc = ':MadoScratchOpenFile md sp' },
-      { cmd = 'MadoScratchOpenFile', method = 'vsp', desc = ':MadoScratchOpenFile md vsp' },
-      { cmd = 'MadoScratchOpenFile', method = 'tabnew', desc = ':MadoScratchOpenFile md tabnew' },
-      { cmd = 'MadoScratchOpenFile', method = 'float-fixed', desc = ':MadoScratchOpenFile md float-fixed' },
-      { cmd = 'MadoScratchOpenFile', method = 'float-aspect', desc = ':MadoScratchOpenFile md float-aspect' },
-    }
-
     for _, test_case in ipairs(test_cases) do
       it('should trigger for ' .. test_case.desc, function()
         local triggered = false
@@ -152,19 +126,6 @@ describe('mado-scratch autocmds', function()
   end)
 
   describe('User autocmd MadoScratchBufferPreClosed', function()
-    local test_cases = {
-      { cmd = 'MadoScratchOpen', method = 'sp', desc = ':MadoScratchOpen md sp' },
-      { cmd = 'MadoScratchOpen', method = 'vsp', desc = ':MadoScratchOpen md vsp' },
-      { cmd = 'MadoScratchOpen', method = 'tabnew', desc = ':MadoScratchOpen md tabnew' },
-      { cmd = 'MadoScratchOpen', method = 'float-fixed', desc = ':MadoScratchOpen md float-fixed' },
-      { cmd = 'MadoScratchOpen', method = 'float-aspect', desc = ':MadoScratchOpen md float-aspect' },
-      { cmd = 'MadoScratchOpenFile', method = 'sp', desc = ':MadoScratchOpenFile md sp' },
-      { cmd = 'MadoScratchOpenFile', method = 'vsp', desc = ':MadoScratchOpenFile md vsp' },
-      { cmd = 'MadoScratchOpenFile', method = 'tabnew', desc = ':MadoScratchOpenFile md tabnew' },
-      { cmd = 'MadoScratchOpenFile', method = 'float-fixed', desc = ':MadoScratchOpenFile md float-fixed' },
-      { cmd = 'MadoScratchOpenFile', method = 'float-aspect', desc = ':MadoScratchOpenFile md float-aspect' },
-    }
-
     for _, test_case in ipairs(test_cases) do
       it('should trigger for ' .. test_case.desc, function()
         local pre_closed_triggered = false
