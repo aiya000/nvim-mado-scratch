@@ -173,11 +173,11 @@ User MadoScratchBufferOpened
 
                         *User-MadoScratchBufferPreClosed*
 User MadoScratchBufferPreClosed
-  Triggered before a scratch buffer is closed by the auto-hide feature.
-  This event only fires when auto_hide_buffer is enabled and the buffer
-  is about to be closed due to leaving the window.
+  Triggered before a scratch buffer opened by this plugin is closed.
+  This event fires for all buffer closures, including manual `:quit`,
+  `:bdelete`, and auto-hide feature closures.
 
-  Note: This is triggered before the window closes, so buffer-local
+  This is triggered before the buffer is actually deleted, so buffer-local
   operations can still be performed.
 
   Example: >
@@ -192,11 +192,11 @@ User MadoScratchBufferPreClosed
 
                         *User-MadoScratchBufferClosed*
 User MadoScratchBufferClosed
-  Triggered after a scratch buffer is closed by the auto-hide feature.
-  This event only fires when auto_hide_buffer is enabled and the buffer
-  has been closed after leaving the window.
+  Triggered after a scratch buffer opened by this plugin is closed.
+  This event fires for all buffer closures, including manual `:quit`,
+  `:bdelete`, and auto-hide feature closures.
 
-  Note: This is triggered after the window closes, so buffer-local
+  This is triggered after the buffer is deleted, so buffer-local
   operations are no longer possible. Use for cleanup or state management.
 
   Example: >

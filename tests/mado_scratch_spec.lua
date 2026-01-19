@@ -731,14 +731,6 @@ describe('mado-scratch', function()
 
   describe('User autocmd MadoScratchBufferPreClosed', function()
     it('should trigger MadoScratchBufferPreClosed autocmd before buffer is closed for tmp buffers', function()
-      local mado = require('mado-scratch')
-      mado.setup({
-        auto_hide_buffer = {
-          when_tmp_buffer = true,
-          when_file_buffer = false,
-        },
-      })
-
       local pre_closed_triggered = false
       local closed_triggered = false
       local order_correct = false
@@ -764,7 +756,11 @@ describe('mado-scratch', function()
       })
 
       vim.cmd('MadoScratchOpen md')
-      vim.cmd('wincmd p')  -- Trigger WinLeave to close buffer
+      local bufnr = vim.fn.bufnr('%')
+      vim.cmd('bdelete! ' .. bufnr)
+
+      -- Wait for scheduled callback to complete
+      vim.wait(100)
 
       assert.is_true(pre_closed_triggered)
       assert.is_true(closed_triggered)
@@ -772,14 +768,6 @@ describe('mado-scratch', function()
     end)
 
     it('should trigger MadoScratchBufferPreClosed autocmd before buffer is closed for file buffers', function()
-      local mado = require('mado-scratch')
-      mado.setup({
-        auto_hide_buffer = {
-          when_tmp_buffer = false,
-          when_file_buffer = true,
-        },
-      })
-
       local pre_closed_triggered = false
 
       vim.api.nvim_create_autocmd('User', {
@@ -791,7 +779,8 @@ describe('mado-scratch', function()
       })
 
       vim.cmd('MadoScratchOpenFile md')
-      vim.cmd('wincmd p')  -- Trigger WinLeave to close buffer
+      local bufnr = vim.fn.bufnr('%')
+      vim.cmd('bdelete! ' .. bufnr)
 
       assert.is_true(pre_closed_triggered)
     end)

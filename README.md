@@ -61,8 +61,8 @@ The plugin provides User autocmds that you can hook into:
 
 - **`MadoScratchBufferPreOpened`** - Triggered before a scratch buffer is opened
 - **`MadoScratchBufferOpened`** - Triggered after a scratch buffer is opened
-- **`MadoScratchBufferPreClosed`** - Triggered before a scratch buffer is closed (only with auto-hide enabled)
-- **`MadoScratchBufferClosed`** - Triggered after a scratch buffer is closed (only with auto-hide enabled)
+- **`MadoScratchBufferPreClosed`** - Triggered before a scratch buffer is closed (all closures including manual `:quit`, `:bdelete`, and auto-hide)
+- **`MadoScratchBufferClosed`** - Triggered after a scratch buffer is closed (all closures including manual `:quit`, `:bdelete`, and auto-hide)
 
 You can use these to perform custom actions:
 
@@ -84,7 +84,7 @@ vim.api.nvim_create_autocmd('User', {
   end,
 })
 
--- Example: Save state before closing (requires auto_hide_buffer enabled)
+-- Example: Save state before closing
 vim.api.nvim_create_autocmd('User', {
   pattern = 'MadoScratchBufferPreClosed',
   callback = function()
