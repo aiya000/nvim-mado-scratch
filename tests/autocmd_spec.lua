@@ -138,7 +138,10 @@ describe('mado-scratch autocmds', function()
         vim.cmd('bdelete! ' .. bufnr)
 
         -- Wait for scheduled callback to complete
-        vim.wait(100)
+        -- Use vim.wait with a condition to ensure the callback has executed
+        vim.wait(1000, function()
+          return triggered
+        end, 10)
 
         assert.is_true(triggered)
       end)
@@ -189,7 +192,10 @@ describe('mado-scratch autocmds', function()
         vim.cmd('bdelete! ' .. bufnr)
 
         -- Wait for scheduled callback to complete
-        vim.wait(100)
+        -- Use vim.wait with a condition to ensure both callbacks have executed
+        vim.wait(1000, function()
+          return pre_closed_triggered and closed_triggered
+        end, 10)
 
         assert.is_true(pre_closed_triggered)
         assert.is_true(closed_triggered)
