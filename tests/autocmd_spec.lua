@@ -39,6 +39,12 @@ describe('mado-scratch autocmds', function()
   end)
 
   after_each(function()
+    -- Clean up any remaining User autocmds that might not have fired
+    vim.cmd('autocmd! User MadoScratchBufferOpened')
+    vim.cmd('autocmd! User MadoScratchBufferPreOpened')
+    vim.cmd('autocmd! User MadoScratchBufferClosed')
+    vim.cmd('autocmd! User MadoScratchBufferPreClosed')
+    
     vim.cmd([[
       MadoScratchClean
       only
