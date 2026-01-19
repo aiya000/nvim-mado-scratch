@@ -48,6 +48,19 @@ describe('mado-scratch autocmds', function()
     pcall(vim.cmd, 'autocmd! User MadoScratchBufferClosed')
     pcall(vim.cmd, 'autocmd! User MadoScratchBufferPreClosed')
     
+    -- Collect file paths before cleaning up buffers
+    local files_to_delete = {}
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_valid(buf) then
+        local name = vim.api.nvim_buf_get_name(buf)
+        if name:match('scratch%-tmp') or name:match('scratch%-file') then
+          if name ~= '' and vim.fn.filereadable(name) == 1 then
+            table.insert(files_to_delete, name)
+          end
+        end
+      end
+    end
+    
     -- Clean up buffers
     vim.cmd([[
       MadoScratchClean
@@ -64,8 +77,15 @@ describe('mado-scratch autocmds', function()
       end
     end
     
-    -- Wait for buffer cleanup to complete
-    vim.wait(50, function() return false end, 10)
+    -- Delete any remaining files on disk that MadoScratchClean might have missed
+    for _, file in ipairs(files_to_delete) do
+      if vim.fn.filereadable(file) == 1 then
+        pcall(vim.fn.delete, file)
+      end
+    end
+    
+    -- Wait for buffer and file cleanup to complete
+    vim.wait(100, function() return false end, 10)
   end)
 
   describe('User autocmd MadoScratchBufferOpened', function()
