@@ -1,9 +1,6 @@
 describe('mado-scratch autocmds', function()
-  -- Setup before all tests
   before_each(function()
-    -- Setup test configuration
-    local mado = require('mado-scratch')
-    mado.setup({
+    require('mado-scratch').setup({
       file_pattern = {
         when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
         when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
@@ -18,18 +15,18 @@ describe('mado-scratch autocmds', function()
       },
     })
 
-    -- Clean all created scratch files and buffers
-    vim.cmd('MadoScratchClean')
-
-    -- Close all windows except current
-    vim.cmd('new')
-    vim.cmd('only')
+    vim.cmd([[
+      MadoScratchClean
+      new
+      only
+    ]])
   end)
 
   after_each(function()
-    -- Clean up after each test
-    vim.cmd('MadoScratchClean')
-    vim.cmd('only')
+    vim.cmd([[
+      MadoScratchClean
+      only
+    ]])
   end)
 
   describe('User autocmd MadoScratchBufferOpened', function()
@@ -87,7 +84,6 @@ describe('mado-scratch autocmds', function()
           pattern = 'MadoScratchBufferPreOpened',
           callback = function()
             pre_opened_triggered = true
-            -- Check that buffer is not opened yet (opened autocmd hasn't fired)
             if not opened_triggered then
               order_correct = true
             end
@@ -173,7 +169,6 @@ describe('mado-scratch autocmds', function()
           pattern = 'MadoScratchBufferPreClosed',
           callback = function()
             pre_closed_triggered = true
-            -- Check that buffer is not closed yet (closed autocmd hasn't fired)
             if not closed_triggered then
               order_correct = true
             end
