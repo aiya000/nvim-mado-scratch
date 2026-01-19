@@ -1,5 +1,8 @@
 describe('mado-scratch autocmds', function()
   before_each(function()
+    -- Disable swap files to avoid E325 errors when tests run in parallel
+    vim.o.swapfile = false
+
     require('mado-scratch').setup({
       file_pattern = {
         when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),

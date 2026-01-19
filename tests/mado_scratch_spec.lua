@@ -17,6 +17,9 @@ end
 describe('mado-scratch', function()
   -- Setup before all tests
   before_each(function()
+    -- Disable swap files to avoid E325 errors when tests run in parallel
+    vim.o.swapfile = false
+
     -- Setup test configuration
     local mado = require('mado-scratch')
     mado.setup({
