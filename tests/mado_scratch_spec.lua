@@ -15,11 +15,11 @@ local function contains(tbl, value)
 end
 
 describe('mado-scratch', function()
-  -- Setup before all tests
   before_each(function()
-    -- Setup test configuration
-    local mado = require('mado-scratch')
-    mado.setup({
+    -- Disable swap files to avoid E325 errors when tests run in parallel
+    vim.o.swapfile = false
+
+    require('mado-scratch').setup({
       file_pattern = {
         when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
         when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
@@ -34,17 +34,15 @@ describe('mado-scratch', function()
       },
     })
 
-    -- Clean all created scratch files and buffers
-    vim.cmd('MadoScratchClean')
-
-    -- Close all windows except current
-    vim.cmd('new')
-    vim.cmd('only')
+    vim.cmd([[
+      MadoScratchClean
+      new
+      only
+    ]])
   end)
 
   after_each(function()
-    local mado = require('mado-scratch')
-    local config = mado.get_config()
+    local config = require('mado-scratch').get_config()
     local file_pattern_tmp = config.file_pattern.when_tmp_buffer
     local file_pattern_file = config.file_pattern.when_file_buffer
 
@@ -53,7 +51,6 @@ describe('mado-scratch', function()
     for _, file in ipairs(tmp_files) do
       vim.fn.delete(file)
     end
-
     local file_files = vim.fn.glob(file_pattern_file:gsub('%%d', '*'), false, true)
     for _, file in ipairs(file_files) do
       vim.fn.delete(file)

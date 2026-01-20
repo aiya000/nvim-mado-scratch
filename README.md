@@ -9,6 +9,8 @@ For :star:Neovim:star: (lua-based modern implementation).
 ## Table of Contents
 
 - [:sparkles: nvim-mado-scratch :sparkles:](#sparkles-mado-scratchnvim-sparkles)
+  - [:star: Features](#star-features)
+  - [:hook: User Autocmd](#hook-user-autocmd)
   - [:gear: Installation](#gear-installation)
   - [:wrench: Configuration](#wrench-configuration)
   - [:wrench: Quick Start](#wrench-quick-start)
@@ -52,6 +54,50 @@ Allright, you can clean them up when you want.
 - - -
 
 And more features...
+
+## :hook: User Autocmd
+
+The plugin provides User autocmds that you can hook into:
+
+- **`MadoScratchBufferPreOpened`** - Triggered before a scratch buffer is opened
+- **`MadoScratchBufferOpened`** - Triggered after a scratch buffer is opened
+- **`MadoScratchBufferPreClosed`** - Triggered before a scratch buffer is closed (all closures including manual `:quit`, `:bdelete`, and auto-hide)
+- **`MadoScratchBufferClosed`** - Triggered after a scratch buffer is closed (all closures including manual `:quit`, `:bdelete`, and auto-hide)
+
+You can use these to perform custom actions:
+
+```lua
+-- Example: Set buffer-local options when opened
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'MadoScratchBufferOpened',
+  callback = function()
+    vim.opt_local.wrap = true
+    print('Scratch buffer opened!')
+  end,
+})
+
+-- Example: Prepare before opening
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'MadoScratchBufferPreOpened',
+  callback = function()
+    print('About to open scratch buffer...')
+  end,
+})
+
+-- Example: Save state before closing
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'MadoScratchBufferPreClosed',
+  callback = function()
+    -- Save buffer state
+  end,
+})
+```
+
+Or using Vimscript:
+```vim
+autocmd User MadoScratchBufferOpened setlocal wrap
+autocmd User MadoScratchBufferPreOpened echom "Opening buffer..."
+```
 
 ## :gear: Installation
 
@@ -164,6 +210,14 @@ require('mado-scratch').setup({
 ```
 
 Please see '[Detailed Usage](#gear-detailed-usage)' section for more information.
+
+### Secret Trick
+
+After opening `:MadoScratchOpen md float-fixed` or `:MadoScratchOpen ts float-aspect`,
+did you wish to open that buffer in a non-float window?
+
+If so, try executing `:vsp` or `:sp` while keeping the float window open.  
+The mado-scratch buffer will open in a new non-float window :shushing_face:
 
 ## :fire: Why nvim-mado-scratch?
 

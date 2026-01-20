@@ -15,6 +15,14 @@ function M.save_file_buffer_if_enabled()
   end
 end
 
+function M.trigger_pre_closed_autocmd()
+  vim.cmd('doautocmd User MadoScratchBufferPreClosed')
+end
+
+function M.trigger_closed_autocmd()
+  vim.cmd('doautocmd User MadoScratchBufferClosed')
+end
+
 function M.hide_buffer_if_enabled()
   local config = require('mado-scratch').get_config()
 
@@ -35,6 +43,30 @@ function M.setup_autocmds()
 
   local file_buffer_pattern = config.file_pattern.when_file_buffer:gsub('%%d', '*')
   local tmp_buffer_pattern = config.file_pattern.when_tmp_buffer:gsub('%%d', '*')
+
+  -- Trigger PreClosed before buffer is deleted
+  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout', 'BufUnload' }, {
+    group = augroup,
+    pattern = {
+      tmp_buffer_pattern,
+      file_buffer_pattern,
+    },
+    callback = M.trigger_pre_closed_autocmd,
+  })
+
+  -- Trigger Closed after buffer is deleted
+  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout', 'BufUnload' }, {
+    group = augroup,
+    pattern = {
+      tmp_buffer_pattern,
+      file_buffer_pattern,
+    },
+    nested = true,
+    callback = function()
+      -- Use vim.schedule to ensure this runs after the buffer is actually deleted
+      vim.schedule(M.trigger_closed_autocmd)
+    end,
+  })
 
   -- Save on InsertLeave and a buffer is closed
   vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufDelete', 'BufWipeout', 'BufUnload' }, {

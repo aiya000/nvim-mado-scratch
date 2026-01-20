@@ -10,6 +10,7 @@ INTRODUCTION            |mado-scratch-introduction|
 SETUP                   |mado-scratch-setup|
 USAGE                   |mado-scratch-usage|
 INTERFACE               |mado-scratch-interface|
+  AUTOCMDS              |mado-scratch-autocmds|
   CONFIGURATION         |mado-scratch-configuration|
   COMMANDS              |mado-scratch-commands|
   FUNCTIONS             |mado-scratch-functions|
@@ -127,6 +128,76 @@ You can specify:
 
 ==============================================================================
 INTERFACE               *mado-scratch-interface*
+
+------------------------------------------------------------------------------
+AUTOCMDS                *mado-scratch-autocmds*
+
+                        *User-MadoScratchBufferPreOpened*
+User MadoScratchBufferPreOpened
+  Triggered before a scratch buffer is opened by this plugin.
+  This event fires before the buffer window is created, allowing you to
+  prepare the environment or set up preconditions.
+
+  Example: >lua
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchBufferPreOpened',
+      callback = function()
+        print('Buffer will open...')
+      end,
+    })
+<
+
+                        *User-MadoScratchBufferOpened*
+User MadoScratchBufferOpened
+  Triggered after a scratch buffer is opened by this plugin.
+  This event is triggered for all buffer types (temporary or persistent)
+  and all open methods (split, vsplit, tab, floating).
+
+  Example: >lua
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchBufferOpened',
+      callback = function()
+        vim.opt_local.wrap = true
+        print('Buffer opened!')
+      end,
+    })
+<
+
+                        *User-MadoScratchBufferPreClosed*
+User MadoScratchBufferPreClosed
+  Triggered before a scratch buffer opened by this plugin is closed.
+  This event fires for all buffer closures, including manual `:quit`,
+  `:bdelete`, and auto-hide feature closures.
+
+  This is triggered before the buffer is actually deleted, so buffer-local
+  operations can still be performed.
+
+  Example: >lua
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchBufferPreClosed',
+      callback = function()
+        print('Buffer will close...')
+      end,
+    })
+<
+
+                        *User-MadoScratchBufferClosed*
+User MadoScratchBufferClosed
+  Triggered after a scratch buffer opened by this plugin is closed.
+  This event fires for all buffer closures, including manual `:quit`,
+  `:bdelete`, and auto-hide feature closures.
+
+  This is triggered after the buffer is deleted, so buffer-local
+  operations are no longer possible. Use for cleanup or state management.
+
+  Example: >lua
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchBufferClosed',
+      callback = function()
+        print('Buffer has been closed')
+      end,
+    })
+<
 
 ------------------------------------------------------------------------------
 CONFIGURATION           *mado-scratch-configuration*
