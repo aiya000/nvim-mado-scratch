@@ -692,6 +692,54 @@ describe('mado-scratch', function()
       assert.is_false(vim.api.nvim_win_is_valid(winid))
     end)
 
+    it('should preserve buffer content when reopening MadoScratchOpen in float window', function()
+      -- Open a buffer and add content
+      vim.cmd('MadoScratchOpen md float-aspect')
+      local file_name = vim.fn.expand('%:p')
+      local bufnr = vim.fn.bufnr('%')
+      vim.fn.setline(1, { 'preserved line 1', 'preserved line 2' })
+      vim.cmd('quit')
+
+      -- Reopen the same buffer with the same command
+      vim.cmd('MadoScratchOpen md float-aspect')
+      local reopened_file = vim.fn.expand('%:p')
+      local reopened_bufnr = vim.fn.bufnr('%')
+      assert.equals(file_name, reopened_file)
+      assert.equals(bufnr, reopened_bufnr)
+
+      -- Content should be preserved
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      assert.equals(2, #lines)
+      assert.equals('preserved line 1', lines[1])
+      assert.equals('preserved line 2', lines[2])
+    end)
+
+    it('should preserve buffer content when reopening MadoScratchOpenFile in float window with auto_save disabled', function()
+      require('mado-scratch').setup({
+        auto_save_file_buffer = false,
+      })
+
+      -- Open a buffer and add content
+      vim.cmd('MadoScratchOpenFile md float-aspect')
+      local file_name = vim.fn.expand('%:p')
+      local bufnr = vim.fn.bufnr('%')
+      vim.fn.setline(1, { 'unsaved line 1', 'unsaved line 2' })
+      vim.cmd('quit')
+
+      -- Reopen the same buffer with the same command
+      vim.cmd('MadoScratchOpenFile md float-aspect')
+      local reopened_file = vim.fn.expand('%:p')
+      local reopened_bufnr = vim.fn.bufnr('%')
+      assert.equals(file_name, reopened_file)
+      assert.equals(bufnr, reopened_bufnr)
+
+      -- Content should be preserved
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      assert.equals(2, #lines)
+      assert.equals('unsaved line 1', lines[1])
+      assert.equals('unsaved line 2', lines[2])
+    end)
+
     it('should change buffer type from tmp to file in float mode when pattern is same', function()
       local file_pattern = vim.fn.fnamemodify('./tests/tmp/scratch-%d', ':p')
       local mado = require('mado-scratch')
