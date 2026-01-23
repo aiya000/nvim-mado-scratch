@@ -212,7 +212,7 @@ local function open_in_new_float_window(file_name, geometry, opening_as_tmp_buff
   else
     -- For file buffers, set up proper options and write handler
     vim.api.nvim_buf_set_option(bufnr, 'buftype', '')
-    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'hide')
+    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', '')
     vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
 
     -- Handle writes explicitly with BufWriteCmd (only if buffer didn't exist before)
