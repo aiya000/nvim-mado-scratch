@@ -721,7 +721,7 @@ describe('mado-scratch', function()
 
       -- Check buffer type is now file (empty buftype)
       assert.equals(vim.bo.buftype, '')
-      assert.equals(vim.bo.bufhidden, 'hide')
+      assert.equals(vim.bo.bufhidden, '')
 
       -- Verify we can write
       vim.fn.setline(1, 'test write content')
