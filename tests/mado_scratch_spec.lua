@@ -37,7 +37,7 @@ describe('mado-scratch', function()
     vim.cmd([[
       MadoScratchClean
       new
-      only
+      silent! only
     ]])
   end)
 
@@ -556,9 +556,9 @@ describe('mado-scratch', function()
 
       -- After setup, the method should be normalized to 'float-fixed'
       local config = mado.get_config()
-      assert.equals('float-fixed', config.default_open_method.method)
-      assert.equals(90, config.default_open_method.size.width)
-      assert.equals(35, config.default_open_method.size.height)
+      assert.equals('float-fixed', config.default_open_method)
+      assert.equals(90, config.default_open_params['float-fixed'].size.width)
+      assert.equals(35, config.default_open_params['float-fixed'].size.height)
     end)
 
     it('should support float-fixed with command-line size argument', function()
@@ -777,6 +777,162 @@ describe('mado-scratch', function()
         vim.cmd('write')
       end)
       assert.is_true(success, string.format('Write failed with error: %s', tostring(err)))
+    end)
+  end)
+
+  describe('backward compatibility', function()
+    after_each(function()
+      -- Clean up windows and buffers
+      vim.cmd('silent! %bdelete!')
+      vim.cmd('silent! only!')
+    end)
+
+    it('should support legacy sp format with height', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_open_method = { method = 'sp', height = 20 },
+      })
+
+      local config = mado.get_config()
+      assert.equals('sp', config.default_open_method)
+      assert.equals(20, config.default_open_params.sp.height)
+
+      -- Test that the command uses the default height
+      vim.cmd('MadoScratchOpen md sp')
+      local win_height = vim.api.nvim_win_get_height(0)
+      assert.equals(20, win_height)
+    end)
+
+    it('should support legacy vsp format with width', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_open_method = { method = 'vsp', width = 50 },
+      })
+
+      local config = mado.get_config()
+      assert.equals('vsp', config.default_open_method)
+      assert.equals(50, config.default_open_params.vsp.width)
+
+      -- Test that the command uses the default width
+      vim.cmd('MadoScratchOpen md vsp')
+      local win_width = vim.api.nvim_win_get_width(0)
+      assert.equals(50, win_width)
+    end)
+
+    it('should support legacy float-fixed format with size', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_open_method = { method = 'float-fixed', size = { width = 100, height = 40 } },
+      })
+
+      local config = mado.get_config()
+      assert.equals('float-fixed', config.default_open_method)
+      assert.equals(100, config.default_open_params['float-fixed'].size.width)
+      assert.equals(40, config.default_open_params['float-fixed'].size.height)
+
+      -- Test that the command uses the default size
+      vim.cmd('MadoScratchOpen md float-fixed')
+      local win_config = vim.api.nvim_win_get_config(0)
+      assert.equals('editor', win_config.relative)
+      assert.equals(100, win_config.width)
+      assert.equals(40, win_config.height)
+    end)
+
+    it('should support legacy float-aspect format with scale', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_open_method = { method = 'float-aspect', scale = { width = 0.9, height = 0.7 } },
+      })
+
+      local config = mado.get_config()
+      assert.equals('float-aspect', config.default_open_method)
+      assert.equals(0.9, config.default_open_params['float-aspect'].scale.width)
+      assert.equals(0.7, config.default_open_params['float-aspect'].scale.height)
+
+      -- Test that the command uses the default scale
+      vim.cmd('MadoScratchOpen md float-aspect')
+      local win_config = vim.api.nvim_win_get_config(0)
+      assert.equals('editor', win_config.relative)
+
+      -- Verify size is calculated from scale (approximately)
+      local ui = vim.api.nvim_list_uis()[1]
+      local ui_width, ui_height
+      if ui ~= nil then
+        ui_width = ui.width
+        ui_height = ui.height
+      else
+        -- Fallback for headless mode
+        ui_width = 120
+        ui_height = 40
+      end
+      local expected_width = math.floor(ui_width * 0.9)
+      local expected_height = math.floor(ui_height * 0.7)
+      assert.equals(expected_width, win_config.width)
+      assert.equals(expected_height, win_config.height)
+    end)
+
+    it('should support legacy tabnew format', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_open_method = { method = 'tabnew' },
+      })
+
+      local config = mado.get_config()
+      assert.equals('tabnew', config.default_open_method)
+
+      -- Test that the command creates a new tab
+      local initial_tab_count = vim.fn.tabpagenr('$')
+      vim.cmd('MadoScratchOpen md tabnew')
+      local new_tab_count = vim.fn.tabpagenr('$')
+      assert.equals(initial_tab_count + 1, new_tab_count)
+    end)
+
+    it('should allow mixing legacy and new formats', function()
+      local mado = require('mado-scratch')
+      mado.setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        -- Use legacy format for default_open_method
+        default_open_method = { method = 'sp', height = 25 },
+        -- But also specify new format for other methods
+        default_open_params = {
+          vsp = { width = 60 },
+          ['float-aspect'] = { scale = { width = 0.85, height = 0.85 } },
+        },
+      })
+
+      local config = mado.get_config()
+
+      -- Legacy format should be converted to new format
+      assert.equals('sp', config.default_open_method)
+      assert.equals(25, config.default_open_params.sp.height)
+
+      -- New format should be preserved
+      assert.equals(60, config.default_open_params.vsp.width)
+      assert.equals(0.85, config.default_open_params['float-aspect'].scale.width)
+      assert.equals(0.85, config.default_open_params['float-aspect'].scale.height)
     end)
   end)
 end)
