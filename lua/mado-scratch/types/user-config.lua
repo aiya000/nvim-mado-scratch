@@ -15,12 +15,19 @@ M.user_config_schema = c.object({
   default_file_ext = c.optional(c.string()),
   default_open_method = c.optional(
     c.union({
+      c.literal('sp'),
+      c.literal('vsp'),
+      c.literal('tabnew'),
+      c.literal('float-fixed'),
+      c.literal('float'),
+      c.literal('float-aspect'),
       config_types.vertical_split_method_schema,
       config_types.horizontal_split_method_schema,
       config_types.tab_new_method_schema,
       config_types.float_window_method_schema,
     })
   ),
+  default_open_params = c.optional(config_types.default_open_params_schema),
   auto_save_file_buffer = c.optional(c.boolean()),
   use_default_keymappings = c.optional(c.boolean()),
   auto_hide_buffer = c.optional(
@@ -34,7 +41,8 @@ M.user_config_schema = c.object({
 ---@class mado_scratch.UserConfig
 ---@field file_pattern? { when_tmp_buffer?: string, when_file_buffer?: string }
 ---@field default_file_ext? string
----@field default_open_method? mado_scratch.OpenMethod
+---@field default_open_method? string | mado_scratch.OpenMethod
+---@field default_open_params? mado_scratch.DefaultOpenParams
 ---@field auto_save_file_buffer? boolean
 ---@field use_default_keymappings? boolean
 ---@field auto_hide_buffer? { when_tmp_buffer?: boolean, when_file_buffer?: boolean }
