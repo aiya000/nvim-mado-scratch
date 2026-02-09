@@ -40,7 +40,8 @@ local function define_config_detail(user_config)
   })
 
   -- Merge default config with user config
-  -- Note: We don't validate here because user_config may contain table format for default_open_method
+  -- Note: user_config is already validated against user_config_schema in setup() before this function is called.
+  -- We don't validate here because user_config may contain table format for default_open_method
   -- which will be normalized below. Final validation happens after normalization in setup().
   config = vim.tbl_deep_extend('force', default_config, user_config or {})
 
