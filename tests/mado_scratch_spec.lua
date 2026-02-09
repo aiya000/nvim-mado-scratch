@@ -716,7 +716,18 @@ describe('mado-scratch', function()
 
     it('should preserve buffer content when reopening MadoScratchOpenFile in float window with auto_save disabled', function()
       require('mado-scratch').setup({
+        file_pattern = {
+          when_tmp_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-tmp-%d', ':p'),
+          when_file_buffer = vim.fn.fnamemodify('./tests/tmp/scratch-file-%d', ':p'),
+        },
+        default_file_ext = 'md',
+        default_open_method = { method = 'sp', height = 15 },
         auto_save_file_buffer = false,
+        use_default_keymappings = false,
+        auto_hide_buffer = {
+          when_tmp_buffer = false,
+          when_file_buffer = false,
+        },
       })
 
       -- Open a buffer and add content
