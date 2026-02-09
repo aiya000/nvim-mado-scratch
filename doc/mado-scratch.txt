@@ -212,8 +212,16 @@ Configure the plugin by calling the setup function:
     },
 
     -- Options when you didn't specify to the commands
-    default_file_ext = 'md',                                -- Default file extension
-    default_open_method = { method = 'sp', height = 15 },   -- Default open method and size
+    default_file_ext = 'md',            -- Default file extension
+    default_open_method = 'sp',         -- Default open method ('sp', 'vsp', 'tabnew', 'float-fixed', 'float-aspect')
+
+    -- Default parameters for each open method
+    default_open_params = {
+      sp = { height = 15 },
+      vsp = { width = 30 },
+      ['float-fixed'] = { size = { width = 80, height = 24 } },
+      ['float-aspect'] = { scale = { width = 0.8, height = 0.8 } },
+    },
 
     -- Behavior options
     auto_save_file_buffer = true,      -- Auto-save file buffers on InsertLeave and before buffer destruction
@@ -253,20 +261,61 @@ default_file_ext ~
 
                         *option.mado_scratch_default_open_method*
 default_open_method ~
-  Default: `{ method = 'sp', height = 15 }`
-  Default method to open buffers with size configuration.
+  Default: `'sp'`
+  Default method to open buffers. Can be a string or table format.
 
-  Examples:
+  String format (recommended):
+  - `'sp'` - horizontal split
+  - `'vsp'` - vertical split
+  - `'tabnew'` - new tab
+  - `'float-fixed'` - floating window with fixed size (requires plenary.nvim)
+  - `'float-aspect'` - floating window with aspect ratio (requires plenary.nvim)
+
+  Table format (legacy, for backward compatibility):
   - `{ method = 'sp', height = 15 }` - horizontal split with height
   - `{ method = 'vsp', width = 30 }` - vertical split with width
-  - `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio (requires plenary.nvim)
-  - `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size (requires plenary.nvim)
+  - `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio
+  - `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size
   - `{ method = 'tabnew' }` - new tab (no size needed)
 
-  `height/width/scale/size` is optional field.
-  When you omit it:
-  - For `sp` and `vsp`: The created window is not resized
-  - For `float-aspect` and `float-fixed`: Default scale/size is used
+  When using string format, parameters should be specified in |option.mado_scratch_default_open_params|.
+
+                        *option.mado_scratch_default_open_params*
+default_open_params ~
+  Default: >lua
+  {
+    sp = { height = 15 },
+    vsp = { width = 30 },
+    ['float-fixed'] = { size = { width = 80, height = 24 } },
+    ['float-aspect'] = { scale = { width = 0.8, height = 0.8 } },
+  }
+<
+  Default parameters for each open method. When a command is executed without
+  specifying parameters, the corresponding values from this table are used.
+
+  Examples:
+  >lua
+    -- With this configuration:
+    default_open_method = 'float-aspect',
+    default_open_params = {
+      ['float-aspect'] = { scale = { width = 0.8, height = 0.8 } },
+      vsp = { width = 'no-auto-resize' },
+    },
+
+    -- `:MadoScratchOpen md float-aspect`
+    --   becomes `:MadoScratchOpen md float-aspect 0.8x0.8`
+    --
+    -- `:MadoScratchOpenFile md vsp`
+    --   becomes `:MadoScratchOpenFile md vsp 'no-auto-resize'`
+<
+
+  Fields:
+  - `sp.height` - Height for horizontal split (integer or 'no-auto-resize')
+  - `vsp.width` - Width for vertical split (integer or 'no-auto-resize')
+  - `['float-fixed'].size` - Fixed size for floating window ({ width, height })
+  - `['float-aspect'].scale` - Aspect ratio for floating window ({ width, height })
+
+  When 'no-auto-resize' is specified, the window is not resized after creation.
 
                         *option.mado_scratch_auto_save_file_buffer*
 auto_save_file_buffer ~

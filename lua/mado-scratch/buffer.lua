@@ -318,17 +318,19 @@ local function get_actual_floating_buffer_size(open_method, buffer_size)
   local config = require('mado-scratch').get_config()
 
   if buffer_size == nil and (open_method == 'float-fixed' or open_method == 'float') then
-    return config.default_open_method.size
+    local params = config.default_open_params['float-fixed']
+    return (params and params.size)
       or fn.fallback(
-        "No size for 'float-fixed' specified, and config.default_open_method.size is nil. Fallback",
+        "No size for 'float-fixed' specified in default_open_params. Fallback",
         default_float_fixed_size
       )
   end
   if buffer_size == nil and open_method == 'float-aspect' then
+    local params = config.default_open_params['float-aspect']
     return convert_float_aspect_scale_to_size(
-      config.default_open_method.scale
+      (params and params.scale)
         or fn.fallback(
-          "No scale for 'float-aspect' specified, and config.default_open_method.scale is nil. Fallback",
+          "No scale for 'float-aspect' specified in default_open_params. Fallback",
           default_float_aspect_scale
         )
     )
@@ -380,13 +382,17 @@ local function get_actual_non_floating_buffer_size(open_method, buffer_size)
 
   -- Use default size if not specified
   local config = require('mado-scratch').get_config()
-  return open_method == 'sp'
-    and (config.default_open_method.height or default_sp_height)
-    or open_method == 'vsp'
-      and (config.default_open_method.width or default_vsp_width)
-      or open_method == 'tabnew'
-        and 'no-auto-resize'
-        or error('Reached supposedly unreachable code in open_no_floating_buffer. Please report this.')
+  if open_method == 'sp' then
+    local params = config.default_open_params.sp
+    return (params and params.height) or default_sp_height
+  elseif open_method == 'vsp' then
+    local params = config.default_open_params.vsp
+    return (params and params.width) or default_vsp_width
+  elseif open_method == 'tabnew' then
+    return 'no-auto-resize'
+  else
+    error('Reached supposedly unreachable code in open_no_floating_buffer. Please report this.')
+  end
 end
 
 ---Opens a window for 'sp', 'vsp', or 'tabnew' method
@@ -422,9 +428,9 @@ function M.open_buffer(options)
   local index = find_current_index(file_pattern) + (options.opening_next_fresh_buffer and 1 or 0)
   local file_name = vim.fn.expand(file_pattern:format(index))
 
-  local open_method = options.open_method or config.default_open_method.method
+  -- Get open_method from config (already normalized to a string in setup)
+  local open_method = options.open_method or config.default_open_method
   local buffer_size = options.buffer_size
-
   if open_method == 'float-fixed' or open_method == 'float' or open_method == 'float-aspect' then
     open_floating_buffer(
       open_method --[[@as 'float-fixed' | 'float' | 'float-aspect']],

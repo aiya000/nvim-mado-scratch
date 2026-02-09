@@ -24,7 +24,13 @@ local function define_config_detail(user_config)
       when_file_buffer = '/tmp/mado-scratch-file-%d',
     },
     default_file_ext = 'md',
-    default_open_method = { method = 'sp', height = 15 },
+    default_open_method = 'sp',
+    default_open_params = {
+      sp = { height = 15 },
+      vsp = { width = 30 },
+      ['float-fixed'] = { size = { width = 80, height = 24 } },
+      ['float-aspect'] = { scale = { width = 0.8, height = 0.8 } },
+    },
     auto_save_file_buffer = true,
     use_default_keymappings = false,
     auto_hide_buffer = {
@@ -33,40 +39,61 @@ local function define_config_detail(user_config)
     },
   })
 
-  -- TODO: Notify warn for user instead of `error()`
-  config = config_types.config_schema:parse(
-    vim.tbl_deep_extend('force', default_config, user_config or {})
-  )
+  -- Merge default config with user config
+  -- Note: user_config is already validated against user_config_schema in setup() before this function is called.
+  -- We don't validate here because user_config may contain table format for default_open_method
+  -- which will be normalized below. Final validation happens after normalization in setup().
+  config = vim.tbl_deep_extend('force', default_config, user_config or {})
 
-  -- TODO: Remove 'float' from 'various places' as this absorbs the difference, although 'float' type is now considered in various places
   -- Normalize 'float' to 'float-fixed' for backward compatibility
-  if config.default_open_method.method == 'float' then
-    config.default_open_method.method = 'float-fixed'
+  if type(config.default_open_method) == 'string' then
+    if config.default_open_method == 'float' then
+      config.default_open_method = 'float-fixed'
+    end
+  else
+    -- For backward compatibility: if default_open_method is a table (old format),
+    -- convert it to the new format with default_open_params
+    ---@diagnostic disable-next-line: undefined-field
+    local method = config.default_open_method.method
+
+    -- TODO: Remove 'float' from 'various places' as this absorbs the difference, although 'float' type is now considered in various places
+    -- Normalize 'float' to 'float-fixed' for backward compatibility
+    if method == 'float' then
+      method = 'float-fixed'
+    end
+
+    -- Extract parameters from the old format
+    ---@diagnostic disable-next-line: undefined-field
+    if method == 'sp' and config.default_open_method.height then
+      config.default_open_params.sp = config.default_open_params.sp or {}
+      ---@diagnostic disable-next-line: undefined-field
+      config.default_open_params.sp.height = config.default_open_method.height
+    ---@diagnostic disable-next-line: undefined-field
+    elseif method == 'vsp' and config.default_open_method.width then
+      config.default_open_params.vsp = config.default_open_params.vsp or {}
+      ---@diagnostic disable-next-line: undefined-field
+      config.default_open_params.vsp.width = config.default_open_method.width
+    ---@diagnostic disable-next-line: undefined-field
+    elseif method == 'float-fixed' and config.default_open_method.size then
+      config.default_open_params['float-fixed'] = config.default_open_params['float-fixed'] or {}
+      ---@diagnostic disable-next-line: undefined-field
+      config.default_open_params['float-fixed'].size = config.default_open_method.size
+    ---@diagnostic disable-next-line: undefined-field
+    elseif method == 'float-aspect' and config.default_open_method.scale then
+      config.default_open_params['float-aspect'] = config.default_open_params['float-aspect'] or {}
+      ---@diagnostic disable-next-line: undefined-field
+      config.default_open_params['float-aspect'].scale = config.default_open_method.scale
+    end
+
+    -- Convert to string format
+    config.default_open_method = method
   end
 
-  -- Apply default sizes if not specified
-  local default_sizes = {
-    sp = { height = 15 },
-    vsp = { width = 30 },
-    ['float-fixed'] = { width = 80, height = 24 },
-    ['float-aspect'] = { width = 0.8, height = 0.8 },
-  }
-
-  if config.default_open_method.method == 'sp' and config.default_open_method.height == nil then
-    config.default_open_method.height = default_sizes.sp.height
-  elseif config.default_open_method.method == 'vsp' and config.default_open_method.width == nil then
-    config.default_open_method.width = default_sizes.vsp.width
-  elseif config.default_open_method.method == 'float-fixed' and config.default_open_method.size == nil then
-    config.default_open_method.size = {
-      width = default_sizes['float-fixed'].width,
-      height = default_sizes['float-fixed'].height,
-    }
-  elseif config.default_open_method.method == 'float-aspect' and config.default_open_method.scale == nil then
-    config.default_open_method.scale = {
-      width = default_sizes['float-aspect'].width,
-      height = default_sizes['float-aspect'].height,
-    }
-  end
+  -- Ensure default_open_params has all method entries
+  config.default_open_params.sp = config.default_open_params.sp or {}
+  config.default_open_params.vsp = config.default_open_params.vsp or {}
+  config.default_open_params['float-fixed'] = config.default_open_params['float-fixed'] or {}
+  config.default_open_params['float-aspect'] = config.default_open_params['float-aspect'] or {}
 end
 
 ---Setups the plugin
