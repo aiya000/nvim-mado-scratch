@@ -39,10 +39,10 @@ local function define_config_detail(user_config)
     },
   })
 
-  -- TODO: Notify warn for user instead of `error()`
-  config = config_types.config_schema:parse(
-    vim.tbl_deep_extend('force', default_config, user_config or {})
-  )
+  -- Merge default config with user config
+  -- Note: We don't validate here because user_config may contain table format for default_open_method
+  -- which will be normalized below. Final validation happens after normalization in setup().
+  config = vim.tbl_deep_extend('force', default_config, user_config or {})
 
   -- Normalize 'float' to 'float-fixed' for backward compatibility
   if type(config.default_open_method) == 'string' then
