@@ -428,15 +428,9 @@ function M.open_buffer(options)
   local index = find_current_index(file_pattern) + (options.opening_next_fresh_buffer and 1 or 0)
   local file_name = vim.fn.expand(file_pattern:format(index))
 
-  -- Get open_method from config, handling both string and table formats
-  local default_open_method = config.default_open_method
-  if type(default_open_method) == 'table' then
-    ---@diagnostic disable-next-line: undefined-field
-    default_open_method = default_open_method.method
-  end
-  local open_method = options.open_method or default_open_method
+  -- Get open_method from config (already normalized to a string in setup)
+  local open_method = options.open_method or config.default_open_method
   local buffer_size = options.buffer_size
-
   if open_method == 'float-fixed' or open_method == 'float' or open_method == 'float-aspect' then
     open_floating_buffer(
       open_method --[[@as 'float-fixed' | 'float' | 'float-aspect']],
