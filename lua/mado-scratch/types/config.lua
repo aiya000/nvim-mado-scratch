@@ -125,7 +125,7 @@ M.config_schema = c.object({
 ---@class mado_scratch.Config
 ---@field file_pattern { when_tmp_buffer: string, when_file_buffer: string }
 ---@field default_file_ext string
----@field default_open_method string | mado_scratch.OpenMethod
+---@field default_open_method string
 ---@field default_open_params mado_scratch.DefaultOpenParams
 ---@field auto_save_file_buffer boolean
 ---@field use_default_keymappings boolean
