@@ -49,8 +49,9 @@ end
 local function extract_index_from_name(name, pattern)
   -- Expand ~ and $VAR to absolute path to avoid E33 (~ is special in Vim regex: last substitute string)
   -- and to correctly match buffer names which are stored as absolute paths.
-  -- Protect %d with a control character placeholder since vim.fn.expand() interprets % as a Vim modifier.
-  pattern = vim.fn.expand(pattern:gsub('%%d', '\x01')):gsub('\x01', '%%d')
+  -- Protect %d with a sentinel placeholder since vim.fn.expand() interprets % as a Vim modifier.
+  local percent_d_sentinel = '__MADO_SCRATCH_PERCENT_D__'
+  pattern = vim.fn.expand(pattern:gsub('%%d', percent_d_sentinel)):gsub(percent_d_sentinel, '%%d')
 
   -- Replace %d with a unique placeholder that won't appear in paths
   local temp_placeholder = '__INDEX__'
