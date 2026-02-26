@@ -47,6 +47,11 @@ end
 ---@param pattern string -- Pattern with %d placeholder
 ---@return integer | nil -- Index number, or nil if not found
 local function extract_index_from_name(name, pattern)
+  -- Expand ~ and $VAR to absolute path to avoid E33 (~ is special in Vim regex: last substitute string)
+  -- and to correctly match buffer names which are stored as absolute paths.
+  -- Protect %d with a control character placeholder since vim.fn.expand() interprets % as a Vim modifier.
+  pattern = vim.fn.expand(pattern:gsub('%%d', '\x01')):gsub('\x01', '%%d')
+
   -- Replace %d with a unique placeholder that won't appear in paths
   local temp_placeholder = '__INDEX__'
   local protected_pattern = pattern:gsub('%%d', temp_placeholder)
