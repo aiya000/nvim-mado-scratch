@@ -26,6 +26,15 @@ end
 function M.hide_buffer_if_enabled()
   local config = require('mado-scratch').get_config()
 
+  -- Always close float windows on WinLeave, since Neovim does not allow
+  -- splitting float windows (E5601). Closing the float here allows commands
+  -- like :vsp to operate on the underlying regular window without error.
+  local win_config = vim.api.nvim_win_get_config(0)
+  if win_config.relative ~= '' then
+    pcall(vim.cmd.quit)
+    return
+  end
+
   if vim.bo.buftype == 'nofile' and config.auto_hide_buffer.when_tmp_buffer then
     vim.cmd.quit()
     return

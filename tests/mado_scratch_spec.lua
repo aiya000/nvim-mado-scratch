@@ -694,12 +694,18 @@ describe('mado-scratch', function()
 
     it('should not error when executing :vsp in a float window', function()
       vim.cmd('MadoScratchOpen md float-aspect')
+      local float_winid = vim.api.nvim_get_current_win()
 
       local success, err = pcall(function()
         vim.cmd('vsp')
       end)
 
+      -- Wait for any scheduled callbacks (e.g. vim.schedule in autocmds) to complete
+      vim.wait(100, function() return false end, 10)
+
       assert.is_true(success, string.format('Expected :vsp in float window to succeed, but got error: %s', tostring(err)))
+      -- The float window should have been closed when WinLeave fired
+      assert.is_false(vim.api.nvim_win_is_valid(float_winid), 'Expected float window to be closed after :vsp')
     end)
 
     it('should preserve buffer content when reopening MadoScratchOpen in float window', function()
