@@ -197,19 +197,16 @@ local function open_in_new_float_window(file_name, geometry, opening_as_tmp_buff
   -- Extract just the filename from the full path for display
   local display_name = vim.fn.fnamemodify(file_name, ':t')
 
-  -- Create floating window using plenary.popup
-  local popup = require("plenary.popup")
-  local winid = popup.create(bufnr, {
+  vim.api.nvim_open_win(bufnr, true, {
+    relative = 'editor',
+    row = geometry.row,
+    col = geometry.col,
+    width = geometry.width,
+    height = geometry.height,
+    style = 'minimal',
+    border = 'rounded',
     title = ' ' .. display_name .. ' ',
-    line = geometry.row + 1, -- plenary uses 1-based indexing
-    col = geometry.col + 1,  -- plenary uses 1-based indexing
-    minwidth = geometry.width,
-    minheight = geometry.height,
-    borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
   })
-
-  -- Focus the window
-  vim.api.nvim_set_current_win(winid)
 
   -- Set buffer type and options based on whether this is a tmp buffer or file buffer
   if opening_as_tmp_buffer then
