@@ -127,11 +127,11 @@ autocmd User MadoScratchBufferPreOpened echom "Opening buffer..."
 ```
 
 You can also use other open methods:
-- `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size (requires plenary.nvim)
-- `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio (requires plenary.nvim)
-- `{ method = 'sp', height = 15 }` - horizontal split (no plenary.nvim required)
-- `{ method = 'vsp', width = 30 }` - vertical split (no plenary.nvim required)
-- `{ method = 'tabnew' }` - new tab (no plenary.nvim required)
+- `{ method = 'float-fixed', size = { width = 80, height = 24 } }` - floating window with fixed size
+- `{ method = 'float-aspect', scale = { width = 0.8, height = 0.8 } }` - floating window with aspect ratio
+- `{ method = 'sp', height = 15 }` - horizontal split
+- `{ method = 'vsp', width = 30 }` - vertical split
+- `{ method = 'tabnew' }` - new tab
 
 Please also see [Configuration](#wrench-configuration) section and `:help mado-scratch.nvim` for more details.
 
@@ -146,9 +146,7 @@ use {
 }
 ```
 
-### Optional Dependency
-
-- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) for floating window support ↓
+### Floating Window
 
 To use floating windows, configure `default_open_method` like this:
 
