@@ -268,8 +268,8 @@ default_open_method ~
   - `'sp'` - horizontal split
   - `'vsp'` - vertical split
   - `'tabnew'` - new tab
-  - `'float-fixed'` - floating window with fixed size (requires plenary.nvim)
-  - `'float-aspect'` - floating window with aspect ratio (requires plenary.nvim)
+  - `'float-fixed'` - floating window with fixed size
+  - `'float-aspect'` - floating window with aspect ratio
 
   Table format (legacy, for backward compatibility):
   - `{ method = 'sp', height = 15 }` - horizontal split with height
