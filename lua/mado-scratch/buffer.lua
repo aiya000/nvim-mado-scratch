@@ -423,6 +423,9 @@ end
 ---Opens a scratch buffer (either a tmp buffer or a file buffer)
 ---@param options OpenBufferOptions
 function M.open_buffer(options)
+  -- Trigger window-level autocmd before buffer opens
+  vim.cmd('doautocmd User MadoScratchWindowPreOpened')
+
   -- Trigger User autocmd before buffer opens
   vim.cmd('doautocmd User MadoScratchBufferPreOpened')
 
@@ -463,7 +466,14 @@ function M.open_buffer(options)
 
   set_buffer_type(options.opening_as_tmp_buffer)
   vim.cmd('filetype detect')
+
+  -- Register per-window WinClosed handler for window-level close autocmds
+  require('mado-scratch.autocmd').register_window_close_autocmd(vim.api.nvim_get_current_win())
+
   vim.cmd('doautocmd User MadoScratchBufferOpened')
+
+  -- Trigger window-level autocmd after buffer and window are ready
+  vim.cmd('doautocmd User MadoScratchWindowOpened')
 end
 
 ---Cleans up all scratch buffers and files

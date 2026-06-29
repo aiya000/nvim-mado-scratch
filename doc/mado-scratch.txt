@@ -199,6 +199,76 @@ User MadoScratchBufferClosed
     })
 <
 
+                        *User-MadoScratchWindowPreOpened*
+User MadoScratchWindowPreOpened
+  Triggered before a scratch window is opened by this plugin.
+  This event fires before the buffer window is created, allowing you to
+  prepare the environment or set up preconditions.
+  This fires before |User-MadoScratchBufferPreOpened|.
+
+  Example: >lua
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchWindowPreOpened',
+      callback = function()
+        print('Window will open...')
+      end,
+    })
+<
+
+                        *User-MadoScratchWindowOpened*
+User MadoScratchWindowOpened
+  Triggered after a scratch window is opened by this plugin.
+  This event is triggered for all buffer types (temporary or persistent)
+  and all open methods (split, vsplit, tab, floating).
+  At this point `vim.api.nvim_get_current_win()` returns the new window ID.
+  This fires after |User-MadoScratchBufferOpened|.
+
+  Example: >lua
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchWindowOpened',
+      callback = function()
+        local winid = vim.api.nvim_get_current_win()
+        vim.wo[winid].winblend = 10
+        print('Window opened, winid: ' .. winid)
+      end,
+    })
+<
+
+                        *User-MadoScratchWindowPreClosed*
+User MadoScratchWindowPreClosed
+  Triggered before `MadoScratchWindowClosed` when a scratch window is closed.
+  This fires for all window closures (manual `:quit`, `:bdelete`, auto-hide).
+  Unlike the Buffer equivalent, this fires even when the buffer is only
+  hidden (not deleted), e.g. when a float window is closed.
+
+  Note: This fires synchronously inside the `WinClosed` callback.
+  The window is no longer accessible at this point.
+
+  Example: >lua
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchWindowPreClosed',
+      callback = function()
+        print('Window will close...')
+      end,
+    })
+<
+
+                        *User-MadoScratchWindowClosed*
+User MadoScratchWindowClosed
+  Triggered after a scratch window opened by this plugin is closed.
+  This fires for all window closures (manual `:quit`, `:bdelete`, auto-hide).
+  Unlike the Buffer equivalent, this fires even when the buffer is only
+  hidden (not deleted), e.g. when a float window is closed.
+
+  Example: >lua
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'MadoScratchWindowClosed',
+      callback = function()
+        print('Window has been closed')
+      end,
+    })
+<
+
 ------------------------------------------------------------------------------
 CONFIGURATION           *mado-scratch-configuration*
 
