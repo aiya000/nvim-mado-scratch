@@ -43,7 +43,9 @@ end
 ---Fires MadoScratchWindowPreClosed then MadoScratchWindowClosed when the window closes.
 ---@param winid integer
 function M.register_window_close_autocmd(winid)
+  local augroup = vim.api.nvim_create_augroup('MadoScratch', { clear = false })
   vim.api.nvim_create_autocmd('WinClosed', {
+    group = augroup,
     pattern = tostring(winid),
     once = true,
     nested = true,

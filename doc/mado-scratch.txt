@@ -237,7 +237,7 @@ User MadoScratchWindowOpened
                         *User-MadoScratchWindowPreClosed*
 User MadoScratchWindowPreClosed
   Triggered before `MadoScratchWindowClosed` when a scratch window is closed.
-  This fires for all window closures (manual `:quit`, `:bdelete`, auto-hide).
+  This fires for window closures (manual `:quit`, auto-hide).
   Unlike the Buffer equivalent, this fires even when the buffer is only
   hidden (not deleted), e.g. when a float window is closed.
 
@@ -256,7 +256,7 @@ User MadoScratchWindowPreClosed
                         *User-MadoScratchWindowClosed*
 User MadoScratchWindowClosed
   Triggered after a scratch window opened by this plugin is closed.
-  This fires for all window closures (manual `:quit`, `:bdelete`, auto-hide).
+  This fires for window closures (manual `:quit`, auto-hide).
   Unlike the Buffer equivalent, this fires even when the buffer is only
   hidden (not deleted), e.g. when a float window is closed.
 

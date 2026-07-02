@@ -293,18 +293,13 @@ describe('mado-scratch autocmds', function()
         })
 
         vim.cmd(test_case.cmd .. ' md ' .. test_case.method)
-        local bufnr = vim.fn.bufnr('%')
-        vim.cmd('bdelete! ' .. bufnr)
+        local winid = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_close(winid, true)
 
         -- Wait for scheduled callback to complete
-        local success = vim.wait(1000, function()
+        vim.wait(1000, function()
           return triggered
         end, 10)
-
-        if not success then
-          vim.cmd('doautocmd User')
-          vim.wait(100, function() return triggered end, 10)
-        end
 
         assert.is_true(triggered)
       end)
@@ -338,18 +333,13 @@ describe('mado-scratch autocmds', function()
         })
 
         vim.cmd(test_case.cmd .. ' md ' .. test_case.method)
-        local bufnr = vim.fn.bufnr('%')
-        vim.cmd('bdelete! ' .. bufnr)
+        local winid = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_close(winid, true)
 
         -- Wait for scheduled callback to complete
-        local success = vim.wait(1000, function()
+        vim.wait(1000, function()
           return pre_closed_triggered and closed_triggered
         end, 10)
-
-        if not success then
-          vim.cmd('doautocmd User')
-          vim.wait(100, function() return pre_closed_triggered and closed_triggered end, 10)
-        end
 
         assert.is_true(pre_closed_triggered)
         assert.is_true(closed_triggered)

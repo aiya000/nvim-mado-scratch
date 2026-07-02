@@ -464,11 +464,11 @@ function M.open_buffer(options)
     set_buffer_type(options.opening_as_tmp_buffer)
   end
 
-  set_buffer_type(options.opening_as_tmp_buffer)
-  vim.cmd('filetype detect')
-
   -- Register per-window WinClosed handler for window-level close autocmds
   require('mado-scratch.autocmd').register_window_close_autocmd(vim.api.nvim_get_current_win())
+
+  set_buffer_type(options.opening_as_tmp_buffer)
+  vim.cmd('filetype detect')
 
   vim.cmd('doautocmd User MadoScratchBufferOpened')
 
