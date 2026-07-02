@@ -613,7 +613,16 @@ describe('mado-scratch', function()
     end)
 
     it('should display file name in float window border title', function()
-      pending('Skipped: border title check is flaky in headless mode') -- TODO: Implement
+      vim.cmd('MadoScratchOpen md float')
+
+      local title = vim.api.nvim_win_get_config(0).title
+      local expected_title = ' ' .. vim.fn.expand('%:t') .. ' '
+
+      if type(title) == 'string' then
+        assert.equals(expected_title, title)
+      else
+        assert.equals(expected_title, title[1][1])
+      end
     end)
 
     it('should allow writing when opening same file buffer twice in float-aspect', function()
