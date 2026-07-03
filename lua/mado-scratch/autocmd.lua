@@ -23,6 +23,39 @@ function M.trigger_closed_autocmd()
   vim.cmd('doautocmd User MadoScratchBufferClosed')
 end
 
+function M.trigger_window_pre_opened_autocmd()
+  vim.cmd('doautocmd User MadoScratchWindowPreOpened')
+end
+
+function M.trigger_window_opened_autocmd()
+  vim.cmd('doautocmd User MadoScratchWindowOpened')
+end
+
+function M.trigger_window_pre_closed_autocmd()
+  vim.cmd('doautocmd User MadoScratchWindowPreClosed')
+end
+
+function M.trigger_window_closed_autocmd()
+  vim.cmd('doautocmd User MadoScratchWindowClosed')
+end
+
+---Registers a one-shot WinClosed autocmd for the given window ID.
+---Fires MadoScratchWindowPreClosed then MadoScratchWindowClosed when the window closes.
+---@param winid integer
+function M.register_window_close_autocmd(winid)
+  local augroup = vim.api.nvim_create_augroup('MadoScratch', { clear = false })
+  vim.api.nvim_create_autocmd('WinClosed', {
+    group = augroup,
+    pattern = tostring(winid),
+    once = true,
+    nested = true,
+    callback = function()
+      M.trigger_window_pre_closed_autocmd()
+      vim.schedule(M.trigger_window_closed_autocmd)
+    end,
+  })
+end
+
 function M.hide_buffer_if_enabled()
   local config = require('mado-scratch').get_config()
 

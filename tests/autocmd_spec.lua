@@ -47,6 +47,10 @@ describe('mado-scratch autocmds', function()
     pcall(vim.cmd, 'autocmd! User MadoScratchBufferPreOpened')
     pcall(vim.cmd, 'autocmd! User MadoScratchBufferClosed')
     pcall(vim.cmd, 'autocmd! User MadoScratchBufferPreClosed')
+    pcall(vim.cmd, 'autocmd! User MadoScratchWindowOpened')
+    pcall(vim.cmd, 'autocmd! User MadoScratchWindowPreOpened')
+    pcall(vim.cmd, 'autocmd! User MadoScratchWindowClosed')
+    pcall(vim.cmd, 'autocmd! User MadoScratchWindowPreClosed')
     
     -- Collect file paths before cleaning up buffers
     local files_to_delete = {}
@@ -216,6 +220,139 @@ describe('mado-scratch autocmds', function()
           vim.wait(100, function() return pre_closed_triggered and closed_triggered end, 10)
         end
 
+        assert.is_true(pre_closed_triggered)
+        assert.is_true(closed_triggered)
+        assert.is_true(order_correct)
+      end)
+    end
+  end)
+
+  describe('User autocmd MadoScratchWindowOpened', function()
+    for _, test_case in ipairs(test_cases) do
+      it('should trigger for ' .. test_case.desc, function()
+        local triggered = false
+        vim.api.nvim_create_autocmd('User', {
+          pattern = 'MadoScratchWindowOpened',
+          callback = function()
+            triggered = true
+          end,
+          once = true,
+        })
+
+        vim.cmd(test_case.cmd .. ' md ' .. test_case.method)
+        assert.is_true(triggered)
+      end)
+    end
+  end)
+
+  describe('User autocmd MadoScratchWindowPreOpened', function()
+    for _, test_case in ipairs(test_cases) do
+      it('should trigger for ' .. test_case.desc, function()
+        local pre_opened_triggered = false
+        local opened_triggered = false
+        local order_correct = false
+
+        vim.api.nvim_create_autocmd('User', {
+          pattern = 'MadoScratchWindowPreOpened',
+          callback = function()
+            pre_opened_triggered = true
+            if not opened_triggered then
+              order_correct = true
+            end
+          end,
+          once = true,
+        })
+
+        vim.api.nvim_create_autocmd('User', {
+          pattern = 'MadoScratchWindowOpened',
+          callback = function()
+            opened_triggered = true
+          end,
+          once = true,
+        })
+
+        vim.cmd(test_case.cmd .. ' md ' .. test_case.method)
+
+        assert.is_true(pre_opened_triggered)
+        assert.is_true(opened_triggered)
+        assert.is_true(order_correct)
+      end)
+    end
+  end)
+
+  describe('User autocmd MadoScratchWindowClosed', function()
+    for _, test_case in ipairs(test_cases) do
+      it('should trigger for ' .. test_case.desc, function()
+        local triggered = false
+        vim.api.nvim_create_autocmd('User', {
+          pattern = 'MadoScratchWindowClosed',
+          callback = function()
+            triggered = true
+          end,
+          once = true,
+        })
+
+        vim.cmd(test_case.cmd .. ' md ' .. test_case.method)
+        local winid = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_close(winid, true)
+
+        -- Wait for scheduled callback to complete
+        -- Use vim.wait with a condition to ensure the callback has executed
+        local success = vim.wait(1000, function()
+          return triggered
+        end, 10)
+
+        -- If wait timed out, process events one more time
+        if not success then
+          vim.cmd('doautocmd User')
+          vim.wait(100, function() return triggered end, 10)
+        end
+        assert.is_true(triggered)
+      end)
+    end
+  end)
+
+  describe('User autocmd MadoScratchWindowPreClosed', function()
+    for _, test_case in ipairs(test_cases) do
+      it('should trigger for ' .. test_case.desc, function()
+        local pre_closed_triggered = false
+        local closed_triggered = false
+        local order_correct = false
+
+        vim.api.nvim_create_autocmd('User', {
+          pattern = 'MadoScratchWindowPreClosed',
+          callback = function()
+            pre_closed_triggered = true
+            if not closed_triggered then
+              order_correct = true
+            end
+          end,
+          once = true,
+        })
+
+        vim.api.nvim_create_autocmd('User', {
+          pattern = 'MadoScratchWindowClosed',
+          callback = function()
+            closed_triggered = true
+          end,
+          once = true,
+        })
+
+        vim.cmd(test_case.cmd .. ' md ' .. test_case.method)
+        local winid = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_close(winid, true)
+
+        -- Wait for scheduled callback to complete
+        -- Use vim.wait with a condition to ensure both callbacks have executed
+        local success = vim.wait(1000, function()
+          return pre_closed_triggered and closed_triggered
+        end, 10)
+
+        -- If wait timed out, process events one more time
+        if not success then
+          vim.cmd('doautocmd User')
+          vim.wait(100, function() return pre_closed_triggered and closed_triggered end, 10)
+        end
         assert.is_true(pre_closed_triggered)
         assert.is_true(closed_triggered)
         assert.is_true(order_correct)

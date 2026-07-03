@@ -59,14 +59,33 @@ And more features...
 
 The plugin provides User autocmds that you can hook into:
 
+**Buffer-level** (open events fire when a scratch buffer is opened; close events fire only when the buffer is deleted/unloaded):
+
 - **`MadoScratchBufferPreOpened`** - Triggered before a scratch buffer is opened
 - **`MadoScratchBufferOpened`** - Triggered after a scratch buffer is opened
 - **`MadoScratchBufferPreClosed`** - Triggered before a scratch buffer is closed (all closures including manual `:quit`, `:bdelete`, and auto-hide)
 - **`MadoScratchBufferClosed`** - Triggered after a scratch buffer is closed (all closures including manual `:quit`, `:bdelete`, and auto-hide)
 
+**Window-level** (fire on every window open/close, including when the buffer is reused):
+
+- **`MadoScratchWindowPreOpened`** - Triggered before a scratch window is opened (fires before `MadoScratchBufferPreOpened`)
+- **`MadoScratchWindowOpened`** - Triggered after a scratch window is opened; `vim.api.nvim_get_current_win()` returns the new window ID (fires after `MadoScratchBufferOpened`)
+- **`MadoScratchWindowPreClosed`** - Triggered just before `MadoScratchWindowClosed` when a window closes (fires even when the buffer is only hidden, e.g. float windows)
+- **`MadoScratchWindowClosed`** - Triggered after a scratch window is closed (fires even when the buffer is only hidden, e.g. float windows)
+
 You can use these to perform custom actions:
 
 ```lua
+-- Example: Set window-local options when a scratch window opens
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'MadoScratchWindowOpened',
+  callback = function()
+    local winid = vim.api.nvim_get_current_win()
+    vim.wo[winid].winblend = 10
+    print('Scratch window opened, winid: ' .. winid)
+  end,
+})
+
 -- Example: Set buffer-local options when opened
 vim.api.nvim_create_autocmd('User', {
   pattern = 'MadoScratchBufferOpened',
@@ -96,7 +115,7 @@ vim.api.nvim_create_autocmd('User', {
 Or using Vimscript:
 ```vim
 autocmd User MadoScratchBufferOpened setlocal wrap
-autocmd User MadoScratchBufferPreOpened echom "Opening buffer..."
+autocmd User MadoScratchWindowOpened echom "Window opened!"
 ```
 
 ## :gear: Installation
