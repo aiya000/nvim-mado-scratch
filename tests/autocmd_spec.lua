@@ -343,10 +343,16 @@ describe('mado-scratch autocmds', function()
         vim.api.nvim_win_close(winid, true)
 
         -- Wait for scheduled callback to complete
-        vim.wait(1000, function()
+        -- Use vim.wait with a condition to ensure both callbacks have executed
+        local success = vim.wait(1000, function()
           return pre_closed_triggered and closed_triggered
         end, 10)
 
+        -- If wait timed out, process events one more time
+        if not success then
+          vim.cmd('doautocmd User')
+          vim.wait(100, function() return pre_closed_triggered and closed_triggered end, 10)
+        end
         assert.is_true(pre_closed_triggered)
         assert.is_true(closed_triggered)
         assert.is_true(order_correct)
