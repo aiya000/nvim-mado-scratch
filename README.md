@@ -59,7 +59,7 @@ And more features...
 
 The plugin provides User autocmds that you can hook into:
 
-**Buffer-level** (fire on every open/close of the scratch buffer, tied to actual buffer creation/deletion):
+**Buffer-level** (open events fire when a scratch buffer is opened; close events fire only when the buffer is deleted/unloaded):
 
 - **`MadoScratchBufferPreOpened`** - Triggered before a scratch buffer is opened
 - **`MadoScratchBufferOpened`** - Triggered after a scratch buffer is opened
